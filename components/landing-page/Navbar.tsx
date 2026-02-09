@@ -17,7 +17,7 @@ export default function Navbar() {
   }, [])
 
   return (
-    <nav className="fixed top-4 left-4 right-4 z-50 px-8 py-4">
+    <nav className="fixed top-4 left-4 right-4 z-50 px-8 py-4 bg-gray-50/95 backdrop-blur-sm rounded-2xl border border-gray-200/50 shadow-sm">
       <div className="max-w-[1400px] mx-auto flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-2">
@@ -44,7 +44,7 @@ export default function Navbar() {
             <div className="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition-all">
               <ArrowUpRight className="w-3 h-3 text-white" />
             </div>
-            Let's Connect
+            Get Started Free
           </Link>
         </div>
       </div>

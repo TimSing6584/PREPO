@@ -1,11 +1,11 @@
 'use client'
 
-import Navbar from '@/components/Navbar'
-import Hero from '@/components/Hero'
-import Preview from '@/components/Preview'
-import Companies from '@/components/Companies'
-import About from '@/components/About'
-import Footer from '@/components/Footer'
+import Navbar from '@/components/landing-page/Navbar'
+import Hero from '@/components/landing-page/Hero'
+import Preview from '@/components/landing-page/Preview'
+import Companies from '@/components/landing-page/Companies'
+import About from '@/components/landing-page/About'
+import Footer from '@/components/landing-page/Footer'
 
 export default function Home() {
   return (

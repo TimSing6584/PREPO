@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Linkedin, Github, Twitter, Mail, ArrowUpRight } from 'lucide-react'
+import { Linkedin, Github, Twitter, Instagram, Mail, ArrowUpRight } from 'lucide-react'
 
 export default function Footer() {
   return (
@@ -18,27 +18,15 @@ export default function Footer() {
             <p className="text-gray-500 leading-relaxed text-sm">
               Empowering the next generation of software engineers to ace their technical interviews with AI-driven mentorship.
             </p>
-            <div className="flex gap-4">
-              <a href="#" className="p-2 bg-white rounded-xl border border-gray-100 hover:text-primary-500 transition-colors shadow-sm">
-                <Linkedin className="w-5 h-5" />
-              </a>
-              <a href="#" className="p-2 bg-white rounded-xl border border-gray-100 hover:text-primary-500 transition-colors shadow-sm">
-                <Github className="w-5 h-5" />
-              </a>
-              <a href="#" className="p-2 bg-white rounded-xl border border-gray-100 hover:text-primary-500 transition-colors shadow-sm">
-                <Twitter className="w-5 h-5" />
-              </a>
-            </div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 col-span-1 lg:col-span-3 gap-12">
             <div className="space-y-8">
               <h4 className="font-bold text-[#101010] uppercase tracking-widest text-xs">Product</h4>
               <ul className="space-y-4 text-sm text-gray-500">
-                <li><Link href="#preview" className="hover:text-black transition-colors">Features</Link></li>
+                <li><Link href="#preview" className="hover:text-black transition-colors">Preview</Link></li>
                 <li><Link href="#" className="hover:text-black transition-colors">Pricing</Link></li>
                 <li><Link href="#" className="hover:text-black transition-colors">Resources</Link></li>
-                <li><Link href="#" className="hover:text-black transition-colors">Roadmap</Link></li>
               </ul>
             </div>
 
@@ -46,7 +34,6 @@ export default function Footer() {
               <h4 className="font-bold text-[#101010] uppercase tracking-widest text-xs">Company</h4>
               <ul className="space-y-4 text-sm text-gray-500">
                 <li><Link href="#about" className="hover:text-black transition-colors">About Us</Link></li>
-                <li><Link href="#" className="hover:text-black transition-colors">Careers</Link></li>
                 <li><Link href="#" className="hover:text-black transition-colors">Privacy Policy</Link></li>
                 <li><Link href="#" className="hover:text-black transition-colors">Terms of Service</Link></li>
               </ul>
@@ -81,15 +68,17 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Social Media Platform */}
-
-          {/* <div className="flex items-center gap-4">
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Crazy mode:</span>
-            <div className="bg-[#101010] p-1 rounded-full flex gap-1 scale-90">
-              <button className="px-5 py-1.5 rounded-full text-[10px] font-bold text-white bg-white/10 hover:bg-white/20 transition-all">On</button>
-              <button className="px-5 py-1.5 rounded-full text-[10px] font-bold text-white/40 hover:text-white transition-all">Off</button>
-            </div>
-          </div> */}
+          <div className="flex items-center gap-4">
+            <a href="#" className="p-2 bg-white rounded-xl border border-gray-100 hover:text-primary-500 transition-colors shadow-sm">
+              <Linkedin className="w-5 h-5" />
+            </a>
+            <a href="#" className="p-2 bg-white rounded-xl border border-gray-100 hover:text-primary-500 transition-colors shadow-sm">
+              <Instagram className="w-5 h-5" />
+            </a>
+            <a href="#" className="p-2 bg-white rounded-xl border border-gray-100 hover:text-primary-500 transition-colors shadow-sm">
+              <Twitter className="w-5 h-5" />
+            </a>
+          </div>
         </div>
       </div>
     </footer>
