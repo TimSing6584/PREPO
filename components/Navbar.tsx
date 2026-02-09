@@ -32,14 +32,11 @@ export default function Navbar() {
           <Link href="#services" className="px-6 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-50 transition-all">Services</Link>
           <Link href="#preview" className="px-6 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-50 transition-all">Preview</Link>
           <Link href="#about" className="px-6 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-50 transition-all">About</Link>
-          <Link href="#contact" className="px-6 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-50 transition-all">Contact us</Link>
+          <Link href="#landing-page-footer" className="px-6 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-50 transition-all">Contact us</Link>
         </div>
 
         {/* Actions */}
         <div className="flex items-center gap-4">
-          <button className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-black transition-all">
-            English <ChevronDown className="w-4 h-4" />
-          </button>
           <Link 
             href="/get-started" 
             className="flex items-center gap-2 bg-[#101010] text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-black/90 transition-all group"

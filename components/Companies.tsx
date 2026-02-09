@@ -1,17 +1,26 @@
 'use client'
 
+import Image from 'next/image'
+
 const companies = [
-  'Google', 'Meta', 'Amazon', 'Microsoft', 'Apple',
-  'Netflix', 'Tesla', 'Uber', 'Airbnb', 'Spotify',
-  'Twitter', 'LinkedIn', 'Salesforce', 'Adobe', 'Oracle'
+  { name: 'Google', logo: '/logos/google.svg' },
+  { name: 'Meta', logo: '/logos/meta.svg' },
+  { name: 'Amazon', logo: '/logos/amazon.svg' },
+  { name: 'Microsoft', logo: '/logos/microsoft.svg' },
+  { name: 'Apple', logo: '/logos/apple.svg' },
+  { name: 'Netflix', logo: '/logos/netflix.svg' },
+  { name: 'Bytedance', logo: '/logos/bytedance.svg' },
+  { name: 'NVIDIA', logo: '/logos/nvidia.svg' },
+  { name: 'Grab', logo: '/logos/grab.svg' },
 ]
+
 
 export default function Companies() {
   return (
     <section className="py-24 bg-transparent overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
         <p className="text-center text-sm font-bold text-gray-400 uppercase tracking-[0.2em] mb-12">
-          Trusted by engineers from top-tier companies
+          We are here to help you ace interviews at these companies
         </p>
 
         {/* Scrolling logos container */}
@@ -21,22 +30,38 @@ export default function Companies() {
             {companies.map((company, index) => (
               <div
                 key={`first-${index}`}
-                className="flex-shrink-0 bg-white hover:bg-white/80 px-10 py-6 rounded-3xl transition-all border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 group"
               >
-                <span className="text-2xl font-bold text-gray-300 group-hover:text-primary-500 transition-colors whitespace-nowrap">
-                  {company}
-                </span>
+                <div
+                  key={`first-${index}`}
+                  className="flex-shrink-0 hover:bg-white/80 px-10 py-6 rounded-3xl transition-all hover:shadow-md hover:-translate-y-1 group flex items-center justify-center"
+                >
+                  <Image
+                    src={company.logo}
+                    alt={company.name}
+                    width={120}
+                    height={48}
+                    className="h-10 w-auto opacity-60 group-hover:opacity-100 transition-opacity group-hover:grayscale-0"
+                  />
+                </div>
               </div>
             ))}
             {/* Duplicate set for seamless loop */}
             {companies.map((company, index) => (
               <div
                 key={`second-${index}`}
-                className="flex-shrink-0 bg-white hover:bg-white/80 px-10 py-6 rounded-3xl transition-all border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 group"
               >
-                <span className="text-2xl font-bold text-gray-300 group-hover:text-primary-500 transition-colors whitespace-nowrap">
-                  {company}
-                </span>
+                 <div
+                  key={`second-${index}`}
+                  className="flex-shrink-0 hover:bg-white/80 px-10 py-6 rounded-3xl transition-all hover:shadow-md hover:-translate-y-1 group flex items-center justify-center"
+                >
+                  <Image
+                    src={company.logo}
+                    alt={company.name}
+                    width={120}
+                    height={48}
+                    className="h-10 w-auto opacity-60 group-hover:opacity-100 transition-opacity group-hover:grayscale-0"
+                  />
+                </div>
               </div>
             ))}
           </div>

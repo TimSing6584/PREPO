@@ -10,13 +10,13 @@ export default function Hero() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-12">
             <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-100/50 border border-primary-200 text-primary-700 text-sm font-bold animate-fade-in">
+              {/* <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-100/50 border border-primary-200 text-primary-700 text-sm font-bold animate-fade-in">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span>
                 </span>
                 Built by NTU Students
-              </div>
+              </div> */}
               
               <h1 className="text-6xl lg:text-8xl font-bold tracking-tight text-[#101010] leading-[1.1] animate-fade-in-up">
                 Master the <br />
@@ -36,15 +36,12 @@ export default function Hero() {
                   </div>
                   Get Started Free
                 </Link>
-                <button className="flex items-center gap-3 text-lg font-bold group border border-gray-200 px-8 py-4 rounded-full hover:bg-gray-50 transition-all">
-                  Watch Demo
-                </button>
               </div>
               
               <div className="w-full h-px bg-gray-200"></div>
 
               <p className="text-gray-500 text-xl leading-relaxed">
-                The all-in-one platform for CS students to practice coding, system design, and behavioral questions. Your journey to Big Tech starts here.
+                The all-in-one platform for CS students to practice CS fundamentals, coding, and system design. Your journey to Big Tech starts here.
               </p>
             </div>
           </div>

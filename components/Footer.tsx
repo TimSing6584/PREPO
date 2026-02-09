@@ -5,7 +5,7 @@ import { Linkedin, Github, Twitter, Mail, ArrowUpRight } from 'lucide-react'
 
 export default function Footer() {
   return (
-    <footer className="pt-24 pb-12 px-12 mt-12">
+    <footer id = "landing-page-footer"className="pt-24 pb-12 px-12 mt-12">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-16 mb-24">
           <div className="space-y-8 col-span-1 lg:col-span-1">
@@ -81,13 +81,15 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          {/* Social Media Platform */}
+
+          {/* <div className="flex items-center gap-4">
             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Crazy mode:</span>
             <div className="bg-[#101010] p-1 rounded-full flex gap-1 scale-90">
               <button className="px-5 py-1.5 rounded-full text-[10px] font-bold text-white bg-white/10 hover:bg-white/20 transition-all">On</button>
               <button className="px-5 py-1.5 rounded-full text-[10px] font-bold text-white/40 hover:text-white transition-all">Off</button>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </footer>
