@@ -86,7 +86,7 @@ export default function Hero() {
                 <h4 className="text-xl font-bold leading-tight">OOP Masterclass</h4>
                 <div className="flex items-center gap-2 text-sm text-gray-400">
                   <Terminal className="w-4 h-4" />
-                  <span>Architecture</span>
+                  <span>Polymorphism</span>
                 </div>
               </div>
 
