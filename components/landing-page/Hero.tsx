@@ -41,7 +41,7 @@ export default function Hero() {
               <div className="w-full h-px bg-gray-200"></div>
 
               <p className="text-gray-500 text-xl leading-relaxed">
-                The all-in-one platform for CS students to practice CS fundamentals, coding, and system design. Your journey to Big Tech starts here.
+                The all-in-one platform for you to practice CS fundamentals. Your journey to Big Tech starts here.
               </p>
             </div>
           </div>
@@ -58,8 +58,7 @@ export default function Hero() {
                     <Code className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <p className="font-bold text-[#101010]">Algorithms</p>
-                    <p className="text-xs text-gray-400">500+ Questions</p>
+                    <p className="font-bold text-[#101010]">Data Structure & Algorithms</p>
                   </div>
                 </div>
                 <div className="space-y-3">
@@ -79,12 +78,12 @@ export default function Hero() {
                 </div>
               </div>
 
-              {/* Floating Card 2: System Design */}
+              {/* Floating Card 2: OOP */}
               <div className="absolute top-10 right-0 w-64 bg-[#101010] rounded-[2.5rem] shadow-2xl -rotate-6 p-8 text-white space-y-6">
                 <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center">
                   <Cpu className="w-6 h-6 text-primary-400" />
                 </div>
-                <h4 className="text-xl font-bold leading-tight">System Design Masterclass</h4>
+                <h4 className="text-xl font-bold leading-tight">OOP Masterclass</h4>
                 <div className="flex items-center gap-2 text-sm text-gray-400">
                   <Terminal className="w-4 h-4" />
                   <span>Architecture</span>
