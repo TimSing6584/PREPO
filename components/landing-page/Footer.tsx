@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { Linkedin, Github, Twitter, Instagram, Mail, ArrowUpRight } from 'lucide-react'
-
+import Image from 'next/image'
 export default function Footer() {
   return (
     <footer id = "landing-page-footer"className="pt-24 pb-12 px-12 mt-12">
@@ -10,9 +10,15 @@ export default function Footer() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-16 mb-24">
           <div className="space-y-8 col-span-1 lg:col-span-1">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-[#101010] rounded-lg flex items-center justify-center">
+              {/* <div className="w-8 h-8 bg-[#101010] rounded-lg flex items-center justify-center">
                 <div className="w-3 h-3 bg-primary-400 rounded-sm"></div>
-              </div>
+              </div> */}
+              <Image
+                src="/prepo-logo/prepo-icon.svg"
+                alt="Prepo Logo"
+                width={40}
+                height={40}
+              />
               <span className="text-xl font-bold tracking-tight text-[#101010]">PREPO</span>
             </div>
             <p className="text-gray-500 leading-relaxed text-sm">
@@ -43,9 +49,9 @@ export default function Footer() {
               <h4 className="font-bold text-[#101010] uppercase tracking-widest text-xs">Stay Updated</h4>
               <form className="space-y-4">
                 <div className="relative group">
-                  <input 
-                    type="email" 
-                    placeholder="Email address" 
+                  <input
+                    type="email"
+                    placeholder="Email address"
                     className="w-full bg-white border border-gray-100 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all shadow-sm"
                   />
                   <button type="submit" className="absolute right-2 top-2 p-1.5 bg-[#101010] text-white rounded-xl hover:bg-black transition-all">
