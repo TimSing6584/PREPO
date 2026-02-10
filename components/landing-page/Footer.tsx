@@ -22,7 +22,7 @@ export default function Footer() {
               <span className="text-xl font-bold tracking-tight text-[#101010]">PREPO</span>
             </div>
             <p className="text-gray-500 leading-relaxed text-sm">
-              Empowering the next generation of software engineers to ace their technical interviews with AI-driven mentorship.
+              Prepo is your ultimate interview preparation platform, designed to help you ace your interviews with confidence and ease.
             </p>
           </div>
 
@@ -58,7 +58,7 @@ export default function Footer() {
                     <ArrowUpRight className="w-4 h-4" />
                   </button>
                 </div>
-                <p className="text-[10px] text-gray-400">Join 2,000+ students getting interview tips weekly.</p>
+                {/* <p className="text-[10px] text-gray-400">Join 2,000+ students getting interview tips weekly.</p> */}
               </form>
             </div>
           </div>
