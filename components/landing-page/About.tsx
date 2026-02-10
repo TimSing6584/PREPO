@@ -1,25 +1,26 @@
 'use client'
 
 import { User as UserIcon, Linkedin, Github, Mail } from 'lucide-react'
+import Image from 'next/image'
 
 const founders = [
   {
-    name: 'Alex Chen',
-    role: 'Co-Founder & CEO',
+    name: 'Claude Pham',
+    image: '/avatar/claude-pham.jpeg',
     education: 'Computer Science, NTU',
-    bio: 'Passionate about helping students ace technical interviews. Previously interned at Google and Microsoft.',
-    linkedin: '#',
-    github: '#',
-    email: 'alex@prepo.com'
+    bio: 'Meta? Google? Gotta Catch \'Em All!',
+    linkedin: 'https://www.linkedin.com/in/pham-tran-minh-tuan/',
+    github: 'https://github.com/minhtuan-ne',
+    email: 'phamtranminhtuan2006@gmail.com'
   },
   {
-    name: 'Sarah Williams',
-    role: 'Co-Founder & CTO',
+    name: 'Andrich Hoang',
+    image: '/avatar/andrich-hoang.jpeg',
     education: 'Computer Science, NTU',
     bio: 'Full-stack developer with experience at Amazon. Dedicated to building tools that empower the next generation of engineers.',
-    linkedin: '#',
-    github: '#',
-    email: 'sarah@prepo.com'
+    linkedin: 'https://www.linkedin.com/in/thinhhoang268/',
+    github: 'https://github.com/TimSing6584',
+    email: 'andrich916@gmail.com'
   }
 ]
 
@@ -48,15 +49,17 @@ export default function About() {
             >
               {/* Avatar */}
               <div className="flex justify-center mb-8">
-                <div className="w-32 h-32 bg-gradient-to-br from-primary-400 to-primary-600 rounded-[2rem] flex items-center justify-center rotate-3 group-hover:rotate-0 transition-transform">
-                  <UserIcon className="w-16 h-16 text-white" />
-                </div>
+                <Image 
+                  src={founder.image} 
+                  alt={founder.name} 
+                  width={128}
+                  height={128}
+                  className="rounded-[2rem] rotate-3 group-hover:rotate-0 transition-transform"
+                />
               </div>
-
               {/* Info */}
               <div className="text-center mb-8">
                 <h3 className="text-3xl font-bold text-white mb-2">{founder.name}</h3>
-                <p className="text-primary-400 font-semibold mb-2">{founder.role}</p>
                 <p className="text-gray-500 text-sm mb-6">{founder.education}</p>
                 <p className="text-gray-400 leading-relaxed italic">"{founder.bio}"</p>
               </div>
@@ -65,6 +68,8 @@ export default function About() {
               <div className="flex justify-center gap-4 pt-8 border-t border-white/10">
                 <a
                   href={founder.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="p-3 bg-white/5 hover:bg-primary-500 rounded-2xl transition-all"
                   aria-label="LinkedIn"
                 >
@@ -72,6 +77,8 @@ export default function About() {
                 </a>
                 <a
                   href={founder.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="p-3 bg-white/5 hover:bg-primary-500 rounded-2xl transition-all"
                   aria-label="GitHub"
                 >
@@ -79,6 +86,8 @@ export default function About() {
                 </a>
                 <a
                   href={`mailto:${founder.email}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="p-3 bg-white/5 hover:bg-primary-500 rounded-2xl transition-all"
                   aria-label="Email"
                 >
