@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ChevronDown, ArrowUpRight, Menu, X } from 'lucide-react'
+import Image from 'next/image'
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -39,12 +40,12 @@ export default function Navbar() {
     <nav className="fixed top-4 left-4 right-4 z-50 px-6 sm:px-8 py-4 bg-gray-50/95 backdrop-blur-sm rounded-2xl border border-gray-200/50 shadow-sm transition-all duration-300">
       <div className="max-w-[1400px] mx-auto flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#101010] rounded-lg flex items-center justify-center">
-            <div className="w-3 h-3 bg-primary-400 rounded-sm"></div>
-          </div>
-          <span className="text-xl font-bold tracking-tight text-[#101010]">PREPO</span>
-        </div>
+        <Image
+          src="/prepo-logo/prepo-logo.svg"
+          alt="Prepo Logo"
+          width={120}
+          height={40}
+        />
 
         {/* Navigation Pills (Desktop) */}
         <div className="hidden lg:flex items-center gap-1 bg-white border border-gray-200 rounded-full p-1 shadow-sm">
