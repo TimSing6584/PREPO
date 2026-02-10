@@ -17,7 +17,7 @@ const founders = [
     name: 'Andrich Hoang',
     image: '/avatar/andrich-hoang.jpeg',
     education: 'Computer Science, NTU',
-    bio: 'Full-stack developer with experience at Amazon. Dedicated to building tools that empower the next generation of engineers.',
+    bio: 'Most problems aren’t hard - the fundamentals are just weak',
     linkedin: 'https://www.linkedin.com/in/thinhhoang268/',
     github: 'https://github.com/TimSing6584',
     email: 'andrich916@gmail.com'
