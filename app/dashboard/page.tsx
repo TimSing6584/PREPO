@@ -1,7 +1,8 @@
 'use client'
 
+import Link from 'next/link'
 import Image from 'next/image'
-import Navbar from '@/components/dashboard/Navbar'
+import Navbar from '@/components/main/Navbar'
 import { 
   Zap, 
   FileText, 
@@ -181,7 +182,7 @@ const TopicIllustration = ({ id }: { id: string }) => {
 
 export default function DashboardPage() {
   return (
-    <div className="main-frame p-6 md:p-12 relative overflow-hidden flex flex-col gap-8 md:gap-12 font-geist-sans">
+    <div className="main-frame px-6 md:px-12 pb-6 md:pb-12 pt-4 md:pt-6 relative overflow-hidden flex flex-col gap-8 md:gap-12 font-geist-sans">
         {/* Header */}
         <Navbar />
 
@@ -214,14 +215,14 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Written Question Card */}
+              {/* Written Quiz Card */}
               <div className="group relative bg-white p-6 md:p-8 rounded-[2rem] border border-neutral-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden">
                 <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-500">
                   <FileText className="w-32 h-32" />
                 </div>
                 <div className="relative z-10 flex flex-col h-full justify-between gap-6">
                   <div className="space-y-3">
-                    <h2 className="text-2xl font-bold text-[#101010]">Written Question</h2>
+                    <h2 className="text-2xl font-bold text-[#101010]">Written Quiz</h2>
                     <p className="text-neutral-500 text-base leading-relaxed max-w-xs">
                       Best for practice memory
                     </p>
@@ -239,7 +240,8 @@ export default function DashboardPage() {
             <h3 className="text-xl font-medium text-neutral-400 uppercase tracking-wider pl-2">Topics</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
               {topics.map((topic) => (
-                <div 
+                <Link 
+                  href={`/cs-fundamentals/${topic.id}`}
                   key={topic.name} 
                   className="group bg-white rounded-3xl border border-neutral-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col"
                 >
@@ -258,7 +260,7 @@ export default function DashboardPage() {
                       Start now <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
