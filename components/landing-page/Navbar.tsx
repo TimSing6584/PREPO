@@ -63,7 +63,7 @@ export default function Navbar() {
         {/* Actions */}
         <div className="flex items-center gap-2 sm:gap-4">
           <Link 
-            href="/get-started" 
+            href="/dashboard" 
             className="hidden sm:flex items-center gap-2 bg-[#101010] text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-black/90 transition-all group"
           >
             <div className="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition-all">
@@ -101,7 +101,7 @@ export default function Navbar() {
           ))}
           <div className="h-px bg-gray-200/50 my-2" />
           <Link 
-            href="/get-started" 
+            href="/dashboard"
             onClick={() => setIsMenuOpen(false)}
             className="flex items-center justify-between bg-[#101010] text-white px-6 py-4 rounded-xl text-base font-medium hover:bg-black transition-all group"
           >
