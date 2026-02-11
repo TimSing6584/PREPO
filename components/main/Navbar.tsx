@@ -6,7 +6,7 @@ import Link from 'next/link'
 
 export default function Navbar() {
   return (
-    <header className="max-w-[1400px] mx-auto w-full flex justify-between items-center z-10">
+    <header className="w-full flex justify-between items-center z-10">
       <Link href="/dashboard" className="transition-transform hover:scale-105 active:scale-95">
         <Image 
           src="/prepo-logo/prepo-logo.svg" 
