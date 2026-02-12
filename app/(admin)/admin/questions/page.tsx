@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { Search, ChevronDown, X } from 'lucide-react';
 
 const topics = ['OOP', 'DB', 'OS', 'Network'];
@@ -65,6 +66,7 @@ const sampleQuestions = [
 ];
 
 export default function QuestionsPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [appliedTopics, setAppliedTopics] = useState<string[]>([]);
@@ -231,7 +233,10 @@ export default function QuestionsPage() {
             </div>
 
             {/* Create Button */}
-            <button className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            <button 
+              onClick={() => router.push('/admin/questions/create')}
+              className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               + Create
             </button>
           </div>
