@@ -6,13 +6,11 @@ import { useRouter } from 'next/navigation';
 export default function CreateTopicPage() {
   const router = useRouter();
   const [topicName, setTopicName] = useState('');
-  const [description, setDescription] = useState('');
 
   const handleSubmit = () => {
     // Handle form submission
     console.log({
       topicName,
-      description,
     });
     router.push('/admin/topics');
   };
@@ -34,20 +32,6 @@ export default function CreateTopicPage() {
             onChange={(e) => setTopicName(e.target.value)}
             placeholder="Enter topic name..."
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          />
-        </div>
-
-        {/* Description */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Description <span className="text-gray-400">(Optional)</span>
-          </label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Enter topic description..."
-            rows={4}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
           />
         </div>
       </div>

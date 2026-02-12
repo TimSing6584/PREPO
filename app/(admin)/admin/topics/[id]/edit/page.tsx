@@ -7,7 +7,6 @@ import { useRouter, useParams } from 'next/navigation';
 interface TopicData {
   id: number;
   topic: string;
-  description: string;
   questionsCount: number;
   dateCreated: string;
   author: string;
@@ -18,7 +17,6 @@ const mockTopics: Record<string, TopicData> = {
   '1': {
     id: 1,
     topic: 'OOP',
-    description: 'Object-Oriented Programming concepts and principles',
     questionsCount: 10,
     dateCreated: '1/1/2027',
     author: 'Andrich',
@@ -26,7 +24,6 @@ const mockTopics: Record<string, TopicData> = {
   '2': {
     id: 2,
     topic: 'DB',
-    description: 'Database design, SQL, and database management systems',
     questionsCount: 7,
     dateCreated: '1/5/2027',
     author: 'Sarah',
@@ -34,7 +31,6 @@ const mockTopics: Record<string, TopicData> = {
   '3': {
     id: 3,
     topic: 'OS',
-    description: 'Operating Systems fundamentals and concepts',
     questionsCount: 5,
     dateCreated: '1/8/2027',
     author: 'Michael',
@@ -42,7 +38,6 @@ const mockTopics: Record<string, TopicData> = {
   '4': {
     id: 4,
     topic: 'Network',
-    description: 'Computer networking and network protocols',
     questionsCount: 8,
     dateCreated: '1/12/2027',
     author: 'Jessica',
@@ -58,14 +53,12 @@ export default function EditTopicPage() {
   const existingTopic = mockTopics[topicId] || null;
 
   const [topicName, setTopicName] = useState(existingTopic?.topic || '');
-  const [description, setDescription] = useState(existingTopic?.description || '');
 
   const handleSubmit = () => {
     // Handle form submission
     console.log({
       id: topicId,
       topicName,
-      description,
     });
     router.push('/admin/topics');
   };
@@ -87,20 +80,6 @@ export default function EditTopicPage() {
             onChange={(e) => setTopicName(e.target.value)}
             placeholder="Existing Topic Name"
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          />
-        </div>
-
-        {/* Description */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Description <span className="text-gray-400">(Optional)</span>
-          </label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Existing Description"
-            rows={4}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
           />
         </div>
 
