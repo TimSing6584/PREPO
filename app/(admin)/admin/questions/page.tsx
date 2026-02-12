@@ -72,7 +72,7 @@ export default function QuestionsPage() {
   const [appliedTopics, setAppliedTopics] = useState<string[]>([]);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
-  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest' | null>(null);
 
   const filterRef = useRef<HTMLDivElement>(null);
   const sortRef = useRef<HTMLDivElement>(null);
@@ -199,12 +199,22 @@ export default function QuestionsPage() {
                   onClick={() => setShowSortDropdown(!showSortDropdown)}
                   className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 text-sm"
                 >
-                  -- Sort by --
+                  {sortOrder === 'newest' 
+                    ? 'Newest → Oldest' 
+                    : sortOrder === 'oldest' 
+                    ? 'Oldest → Newest' 
+                    : '-- Sort by --'}
                   <ChevronDown className="w-4 h-4" />
                 </button>
 
                 {showSortDropdown && (
                   <div className="absolute left-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                    <button
+                      disabled
+                      className="w-full text-left px-4 py-2 text-sm text-gray-400 cursor-not-allowed"
+                    >
+                      -- Sort by --
+                    </button>
                     <button
                       onClick={() => {
                         setSortOrder('newest');
