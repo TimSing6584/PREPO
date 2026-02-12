@@ -274,7 +274,10 @@ export default function QuestionsPage() {
                   <td className="py-4 px-4 text-sm text-gray-900">{q.question}</td>
                   <td className="py-4 px-4">
                     <div className="flex items-center gap-2">
-                      <button className="px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded text-sm hover:bg-blue-100 transition-colors">
+                      <button 
+                        onClick={() => router.push(`/admin/questions/${q.id}/edit`)}
+                        className="px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded text-sm hover:bg-blue-100 transition-colors"
+                      >
                         Modify
                       </button>
                       <button className="px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-sm hover:bg-red-100 transition-colors">
