@@ -5,6 +5,7 @@ export type Question = {
     options?: string[]
     correctAnswer?: string | number // Index for MCQ, string for written
     explanation?: string
+    imageUrl?: string // Optional image associated with the question
 }
 
 export const mockQuestions: Question[] = [
@@ -19,7 +20,8 @@ export const mockQuestions: Question[] = [
             'User Involvement'
         ],
         correctAnswer: 1,
-        explanation: 'UI stands for User Interface, which is the point of human-computer interaction and communication in a device.'
+        explanation: 'UI stands for User Interface, which is the point of human-computer interaction and communication in a device.',
+        imageUrl: '/logos/apple.svg',
     },
     {
         id: '2',

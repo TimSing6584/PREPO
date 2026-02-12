@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { MoreHorizontal, Star } from 'lucide-react'
 import { Question } from '@/data/mockData'
 import MCQView from './MCQView'
@@ -83,6 +84,19 @@ export default function QuestionCard({
             <h1 className="text-2xl md:text-3xl font-bold text-[#101010] leading-tight">
                {question.text}
             </h1>
+
+            {question.imageUrl && (
+              <div className="mt-6">
+                <div className="relative w-full max-w-md aspect-video rounded-2xl overflow-hidden border border-neutral-100 bg-neutral-50">
+                  <Image
+                    src={question.imageUrl}
+                    alt={question.text}
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+              </div>
+            )}
          </div>
       </div>
 
