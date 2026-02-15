@@ -28,7 +28,7 @@ export default function Hero() {
             <div className="space-y-8 max-w-xl animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               <div className="flex flex-wrap gap-4">
                 <Link 
-                  href="/get-started" 
+                  href="/dashboard" 
                   className="flex items-center gap-3 text-lg font-bold group bg-[#101010] text-white px-8 py-4 rounded-full hover:bg-black/90 transition-all"
                 >
                   <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-[#101010] group-hover:rotate-45 transition-transform">
