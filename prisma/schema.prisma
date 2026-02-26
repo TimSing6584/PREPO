@@ -49,10 +49,10 @@ model Question {
 
   // MCQ
   options        String[]
-  correctOption  Int
+  correctOption  Int?
 
   // Written
-  correctWritten String
+  correctWritten String?
 
   deleted        Boolean     @default(false)
 
