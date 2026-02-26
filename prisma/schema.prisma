@@ -13,8 +13,66 @@ datasource db {
   provider = "postgresql"
 }
 
-model Question{
-  id String @id @default(uuid())
-  statement String
-  createdAt DateTime @default(now())
+model User {
+  id        String            @id @default(uuid())
+  email     String            @unique
+  name      String?
+  createdAt DateTime          @default(now())
+
+  createdQuestions  Question[] @relation("UserQuestions") 
+  stars     StarredQuestion[]
+}
+
+model Topic {
+  id         String     @id @default(uuid())
+  name       String
+  imageUrl   String
+  createdAt  DateTime   @default(now())
+  deleted    Boolean    @default(false)
+  questions  Question[]
+}
+
+enum QuestionType {
+  MCQ
+  WRITTEN
+}
+
+model Question {
+  id             String      @id @default(uuid())
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  statement      String
+  imageUrl       String?
+
+  type           QuestionType
+
+  // MCQ
+  options        String[]
+  correctOption  Int
+
+  // Written
+  correctWritten String
+
+  deleted        Boolean     @default(false)
+
+  // Relations
+  topicId        String
+  topic          Topic       @relation(fields: [topicId], references: [id])
+
+  createdById String?   // make it optional
+  createdBy   User?     @relation("UserQuestions", fields: [createdById], references: [id])
+
+  starredBy      StarredQuestion[]
+}
+
+model StarredQuestion {
+  id         String   @id @default(uuid())
+  questionId String
+  userId     String
+
+  question   Question @relation(fields: [questionId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@unique([questionId, userId])
 }
