@@ -1,5 +1,3 @@
-'use client'
-
 import Navbar from '@/components/landing-page/Navbar'
 import Hero from '@/components/landing-page/Hero'
 import Preview from '@/components/landing-page/Preview'
