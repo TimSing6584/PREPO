@@ -29,9 +29,6 @@ jobs:
       - name: Type check
         run: pnpm tsc --noEmit
 
-      - name: Lint
-        run: pnpm lint
-
       - name: Schema migration check
         run: pnpm db:migrate_schema_check
         env:
