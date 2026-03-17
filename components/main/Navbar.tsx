@@ -12,6 +12,7 @@ export default function Navbar() {
     user?.family_name ||
     user?.email ||
     'Account'
+  const avatarSrc = user?.picture || '/avatar/default-avatar.png'
 
   return (
     <header className="w-full flex justify-between items-center z-10">
@@ -26,9 +27,23 @@ export default function Navbar() {
       </Link>
       <div className="flex items-center gap-3">
         {!isLoading && user && (
-          <span className="hidden sm:inline text-sm font-semibold text-neutral-700">
-            {displayName}
-          </span>
+          <div className="flex items-center gap-3">
+            <div className="relative w-9 h-9 rounded-full overflow-hidden border border-neutral-200 bg-neutral-100 shadow-sm">
+              <Image
+                src={avatarSrc}
+                alt={typeof displayName === 'string' ? displayName : 'User avatar'}
+                fill
+                sizes="36px"
+                className="object-cover"
+                unoptimized
+              />
+            </div>
+
+            {/* Display name */}
+            {/* <span className="hidden sm:inline text-sm font-semibold text-neutral-700">
+              {displayName}
+            </span> */}
+          </div>
         )}
 
         {user ? (
