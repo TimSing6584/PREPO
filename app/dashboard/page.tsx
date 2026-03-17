@@ -1,8 +1,10 @@
 'use client'
 
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import Navbar from '@/components/main/Navbar'
+import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs'
 import { 
   Zap, 
   FileText, 
@@ -181,6 +183,75 @@ const TopicIllustration = ({ id }: { id: string }) => {
 }
 
 export default function DashboardPage() {
+  const { user } = useKindeBrowserClient()
+
+  const name =
+    user?.given_name ||
+    user?.family_name ||
+    (user?.email ? user.email.split('@')[0] : null)
+
+  const greetingBase = useMemo(() => {
+    const hour = new Date().getHours()
+    const timeOfDay =
+      hour < 5
+        ? 'night'
+        : hour < 12
+          ? 'morning'
+          : hour < 17
+            ? 'afternoon'
+            : hour < 22
+              ? 'evening'
+              : 'night'
+
+    const timeGreeting =
+      timeOfDay === 'morning'
+        ? 'Good morning'
+        : timeOfDay === 'afternoon'
+          ? 'Good afternoon'
+          : timeOfDay === 'evening'
+            ? 'Good evening'
+            : 'Good night'
+
+    const templates = [
+      `${timeGreeting}`,
+      `Welcome back`,
+      `${timeGreeting} — ready to level up?`,
+      `Let’s make progress today`,
+      `Back at it — love to see it`,
+      `Small steps, big wins`,
+    ]
+
+    // Stable-ish random pick per (user, day, time bucket)
+    const dayKey = new Date().toDateString()
+    const seedStr = `${user?.id ?? 'anon'}|${dayKey}|${timeOfDay}`
+    let hash = 0
+    for (let i = 0; i < seedStr.length; i++) hash = (hash * 31 + seedStr.charCodeAt(i)) >>> 0
+    const idx = templates.length ? hash % templates.length : 0
+    return templates[idx] ?? 'Welcome back'
+  }, [user?.id])
+
+  const greetingText = useMemo(() => {
+    if (!name) return `${greetingBase}.`
+    return `${greetingBase}, ${name}.`
+  }, [greetingBase, name])
+
+  const [typedCount, setTypedCount] = useState(0)
+
+  useEffect(() => {
+    setTypedCount(0)
+    const speedMs = 28
+    const id = window.setInterval(() => {
+      setTypedCount(prev => {
+        if (prev >= greetingText.length) {
+          window.clearInterval(id)
+          return prev
+        }
+        return prev + 1
+      })
+    }, speedMs)
+    return () => window.clearInterval(id)
+  }, [greetingText])
+
   return (
     <div className="main-frame px-6 md:px-12 pb-6 md:pb-12 pt-4 md:pt-6 relative overflow-hidden flex flex-col gap-8 md:gap-12 font-geist-sans">
         {/* Header */}
@@ -191,9 +262,38 @@ export default function DashboardPage() {
           
           {/* Hero Banner */}
           <div className="space-y-6">
-            <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-[#101010] tracking-tight text-center mx-auto">
-              Hello, what do you want to master ?
-            </h1>
+            <div className="text-center mx-auto space-y-3">
+              <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-[#101010] tracking-tight">
+                {(() => {
+                  const typed = greetingText.slice(0, typedCount)
+                  if (!name) return typed
+
+                  const nameStart = greetingText.indexOf(`, ${name}.`)
+                  const nameTokenStart = nameStart >= 0 ? nameStart + 2 : -1 // start of name, skipping ", "
+                  const nameTokenEnd = nameTokenStart >= 0 ? nameTokenStart + name.length : -1
+
+                  if (nameTokenStart < 0) return typed
+
+                  const beforeName = typed.slice(0, nameTokenStart)
+                  const typedName = typed.slice(nameTokenStart, nameTokenEnd)
+                  const afterName = typed.slice(nameTokenEnd)
+
+                  return (
+                    <>
+                      {beforeName}
+                      {typedName ? <span className="text-primary-500">{typedName}</span> : null}
+                      {afterName}
+                    </>
+                  )
+                })()}
+                {typedCount < greetingText.length ? (
+                  <span className="inline-block w-[0.6ch] align-baseline animate-pulse">|</span>
+                ) : null}
+              </h1>
+              <p className="text-lg md:text-2xl text-neutral-500 font-semibold">
+                What do you want to master?
+              </p>
+            </div>
            
             {/* Practice Modes */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
