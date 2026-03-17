@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "db:studio": "dotenv -e .env.local -- prisma studio"
+    "db:studio": "dotenv -e .env.local -- prisma studio",
+    "db:migrate_dev": "dotenv -e .env.local -- prisma migrate dev",
+    "db:migrate_deploy": "dotenv -e .env.local -- prisma migrate deploy",
+    "db:reset": "dotenv -e .env.local -- prisma migrate reset",
+    "db:migrate_schema_check": "dotenv -e .env.local -- prisma migrate diff --from-migrations prisma/migrations --to-schema prisma/schema.prisma --exit-code"
   },
   "dependencies": {
     "@kinde-oss/kinde-auth-nextjs": "^2.11.0",
