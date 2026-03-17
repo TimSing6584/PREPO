@@ -32,7 +32,9 @@ jobs:
       - name: Schema migration check
         run: pnpm prisma migrate diff --from-migrations prisma/migrations --to-schema prisma/schema.prisma --exit-code
         env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
+          SHADOW_DATABASE_URL: ${{ secrets.SHADOW_DATABASE_URL }}
           SHADOW_DATABASE_URL_UNPOOLED: ${{ secrets.SHADOW_DATABASE_URL_UNPOOLED }}
 
       - name: Build
