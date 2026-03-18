@@ -5,6 +5,7 @@ import Navbar from '@/components/main/Navbar'
 import { LoginLink } from '@kinde-oss/kinde-auth-nextjs'
 import { ArrowLeft } from 'lucide-react'
 
+// Goodbye
 export default function ByePage() {
   return (
     <div className="main-frame px-6 md:px-12 pb-6 md:pb-12 pt-4 md:pt-6 relative overflow-hidden flex flex-col gap-8 md:gap-12 font-geist-sans">
