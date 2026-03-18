@@ -1,0 +1,48 @@
+# .github/workflows/ci.yml
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm prisma generate
+
+      - name: Type check
+        run: pnpm tsc --noEmit
+
+      - name: Schema migration check
+        run: pnpm prisma migrate diff --from-migrations prisma/migrations --to-schema prisma/schema.prisma --exit-code
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
+          SHADOW_DATABASE_URL: ${{ secrets.SHADOW_DATABASE_URL }}
+          SHADOW_DATABASE_URL_UNPOOLED: ${{ secrets.SHADOW_DATABASE_URL_UNPOOLED }}
+
+      - name: Build
+        run: pnpm build
+        env:
+          KINDE_CLIENT_ID: ${{ secrets.KINDE_CLIENT_ID }}
+          KINDE_CLIENT_SECRET: ${{ secrets.KINDE_CLIENT_SECRET }}
+          KINDE_ISSUER_URL: ${{ secrets.KINDE_ISSUER_URL }}
+          KINDE_SITE_URL: ${{ secrets.KINDE_SITE_URL }}
+          KINDE_POST_LOGOUT_REDIRECT_URL: ${{ secrets.KINDE_POST_LOGOUT_REDIRECT_URL }}
+          KINDE_POST_LOGIN_REDIRECT_URL: ${{ secrets.KINDE_POST_LOGIN_REDIRECT_URL }}
