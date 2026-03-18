@@ -62,6 +62,7 @@ export default function PracticePage({ params }: { params: Promise<{ topicId: st
                           {q.text}
                         </span>
                         <span className="text-xs text-neutral-400">
+                          {/* Will change to Question.type later (have both MCQ+Written) */}
                           {q.type === 'mcq' ? 'Multiple choice' : 'Written'}
                         </span>
                       </div>

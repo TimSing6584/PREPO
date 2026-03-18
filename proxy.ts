@@ -1,6 +1,8 @@
 import { withAuth } from "@kinde-oss/kinde-auth-nextjs/middleware";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+
 export default withAuth(
     async function proxy(req: NextRequest) {
         // Allow CORS preflight and other non-navigation requests to pass through.
