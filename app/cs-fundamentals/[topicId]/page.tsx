@@ -1,72 +1,81 @@
 'use client'
 
-import { useState, use } from 'react'
+import { use } from 'react'
 import Navbar from '@/components/main/Navbar'
-import QuestionSidebar from '@/components/cs-fundamentals/practice/QuestionSidebar'
-import QuestionCard from '@/components/cs-fundamentals/practice/QuestionCard'
 import { mockQuestions } from '@/data/mockData'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
 export default function PracticePage({ params }: { params: Promise<{ topicId: string }> }) {
   const { topicId } = use(params)
-  const [currentQuestionId, setCurrentQuestionId] = useState(mockQuestions[0].id)
-  const [completedIds, setCompletedIds] = useState<string[]>([])
-  const [starredIds, setStarredIds] = useState<string[]>([])
-
-  const currentQuestion = mockQuestions.find(q => q.id === currentQuestionId) || mockQuestions[0]
-
-  const toggleStar = (id: string) => {
-    setStarredIds(prev => 
-      prev.includes(id) 
-        ? prev.filter(sid => sid !== id) 
-        : [...prev, id]
-    )
-  }
-
-  const markCompleted = (id: string) => {
-    setCompletedIds(prev => prev.includes(id) ? prev : [...prev, id])
-  }
 
   return (
     <div className="main-frame px-6 md:px-12 pb-6 md:pb-12 pt-4 md:pt-6 relative overflow-hidden flex flex-col gap-4 md:gap-6 font-geist-sans">
       <Navbar />
 
-      <div className="flex-1 flex min-h-0 -mx-6 md:-mx-12 -mb-6 md:-mb-12">
-        {/* Sidebar */}
-        <div className="hidden md:block w-80 h-full flex-shrink-0 border-r border-neutral-100 bg-white/50">
-            <QuestionSidebar 
-                questions={mockQuestions}
-                currentQuestionId={currentQuestionId}
-                onSelectQuestion={setCurrentQuestionId}
-                completedIds={completedIds}
-            />
-        </div>
+      <div className="flex-1 -mx-6 md:-mx-12 -mb-6 md:-mb-12">
+        <div className="h-full overflow-y-auto p-4 md:p-6 bg-neutral-50/30">
+          <div className="max-w-4xl mx-auto space-y-8 pb-20">
+            {/* Header info */}
+            <div className="flex items-center justify-between px-2">
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-2 text-xs font-semibold text-neutral-400 hover:text-neutral-900 transition-colors group"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
+                Back to Dashboard
+              </Link>
 
-        {/* Main Content */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-neutral-50/30">
-            <div className="max-w-4xl mx-auto space-y-6 pb-20">
-                
-                {/* Header info */}
-                <div className="flex items-center justify-between px-2">
-                    <Link href="/dashboard" className="inline-flex items-center gap-2 text-xs font-semibold text-neutral-400 hover:text-neutral-900 transition-colors group">
-                        <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
-                        Back to Dashboard
-                    </Link>
-                    
-                    <div className="text-xs font-medium text-neutral-400 flex items-center gap-2">
-                        Topic: <span className="text-neutral-900 uppercase tracking-wider font-bold">{topicId}</span>
-                    </div>
+              <div className="text-xs font-medium text-neutral-400 flex items-center gap-2">
+                Topic:{' '}
+                <span className="text-neutral-900 uppercase tracking-wider font-bold">{topicId}</span>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-[2rem] border border-neutral-100 shadow-sm p-6 md:p-10">
+              <div className="flex items-end justify-between gap-4 mb-6">
+                <div className="space-y-2">
+                  <h1 className="text-2xl md:text-3xl font-bold text-[#101010]">Choose a question</h1>
+                  <p className="text-sm text-neutral-500">
+                    Pick one to open the question card.
+                  </p>
                 </div>
 
-                <QuestionCard 
-                    key={currentQuestion.id} // Force re-render on question change
-                    question={currentQuestion}
-                    starred={starredIds.includes(currentQuestion.id)}
-                    onToggleStar={() => toggleStar(currentQuestion.id)}
-                    onCorrectAnswer={() => markCompleted(currentQuestion.id)}
-                />
+                <div className="text-xs font-semibold text-neutral-400">
+                  {mockQuestions.length} questions
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {mockQuestions.map((q, index) => (
+                  <Link
+                    key={q.id}
+                    href={`/cs-fundamentals/${topicId}/practice?q=${encodeURIComponent(q.id)}`}
+                    className="w-full text-left px-4 py-4 rounded-2xl transition-all duration-200 flex items-center justify-between group border bg-white border-neutral-100 hover:border-neutral-200 hover:bg-neutral-50 min-h-[72px]"
+                  >
+                    <div className="flex items-center gap-4 flex-1 overflow-hidden">
+                      <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl text-sm font-bold bg-neutral-100 text-neutral-600 group-hover:bg-neutral-200 transition-colors">
+                        {index + 1}
+                      </div>
+                      <div className="flex flex-col overflow-hidden">
+                        <span className="text-sm md:text-base font-semibold truncate text-neutral-900">
+                          {q.text}
+                        </span>
+                        <span className="text-xs text-neutral-400">
+                          {/* Will change to Question.type later (have both MCQ+Written) */}
+                          {q.type === 'mcq' ? 'Multiple choice' : 'Written'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="text-xs font-semibold text-neutral-400 group-hover:text-neutral-700 transition-colors">
+                      Open
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
+          </div>
         </div>
       </div>
     </div>
