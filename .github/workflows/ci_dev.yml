@@ -1,0 +1,62 @@
+# .github/workflows/ci.yml
+name: CI
+
+on:
+  workflow_dispatch:  # Manual trigger for testing
+  pull_request:
+    branches: [main]
+
+permissions:
+  id-token: write  # Required for OIDC authentication
+  contents: read   # Required for checking out code
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Fetch secrets from Infisical using OIDC authentication
+      - name: Fetch secrets from Infisical
+        uses: Infisical/secrets-action@v1.0.9
+        with:
+          method: "oidc"
+          identity-id: "2f94acb9-1ce8-49c4-806f-c20d0b2edb94"  # From Step 4
+          project-slug: "prepo-az-jg"      # Your Infisical project slug
+          env-slug: "dev"                        # Your environment slug
+
+      - name: Generate Prisma client
+        run: pnpm prisma generate
+
+      - name: Type check
+        run: pnpm tsc --noEmit
+
+      - name: Schema migration check
+        run: pnpm prisma migrate diff --from-migrations prisma/migrations --to-schema prisma/schema.prisma --exit-code
+        # env:
+        #   DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        #   DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
+        #   SHADOW_DATABASE_URL: ${{ secrets.SHADOW_DATABASE_URL }}
+        #   SHADOW_DATABASE_URL_UNPOOLED: ${{ secrets.SHADOW_DATABASE_URL_UNPOOLED }}
+
+      - name: Build
+        run: pnpm build
+        # env:
+        #   KINDE_CLIENT_ID: ${{ secrets.KINDE_CLIENT_ID }}
+        #   KINDE_CLIENT_SECRET: ${{ secrets.KINDE_CLIENT_SECRET }}
+        #   KINDE_ISSUER_URL: ${{ secrets.KINDE_ISSUER_URL }}
+        #   KINDE_SITE_URL: ${{ secrets.KINDE_SITE_URL }}
+        #   KINDE_POST_LOGOUT_REDIRECT_URL: ${{ secrets.KINDE_POST_LOGOUT_REDIRECT_URL }}
+        #   KINDE_POST_LOGIN_REDIRECT_URL: ${{ secrets.KINDE_POST_LOGIN_REDIRECT_URL }}
