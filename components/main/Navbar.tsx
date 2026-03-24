@@ -1,18 +1,25 @@
 'use client'
 
-import React from 'react'
+import React, { useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { LogoutLink, useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs'
 
 export default function Navbar() {
   const { user, isLoading } = useKindeBrowserClient()
+  const fallbackAvatar = '/avatar/default-avatar.jpg'
   const displayName =
     user?.given_name ||
     user?.family_name ||
     user?.email ||
     'Account'
-  const avatarSrc = user?.picture || '/avatar/default-avatar.png'
+  const [avatarFailed, setAvatarFailed] = useState(false)
+  const avatarSrc = !avatarFailed && user?.picture ? user.picture : fallbackAvatar
+  const initials = useMemo(() => {
+    const text = typeof displayName === 'string' ? displayName.trim() : ''
+    if (!text) return 'U'
+    return text[0]?.toUpperCase() || 'U'
+  }, [displayName])
 
   return (
     <header className="w-full flex justify-between items-center z-10">
@@ -36,7 +43,13 @@ export default function Navbar() {
                 sizes="36px"
                 className="object-cover"
                 unoptimized
+                onError={() => setAvatarFailed(true)}
               />
+              {avatarFailed && (
+                <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-neutral-500 bg-neutral-100">
+                  {initials}
+                </span>
+              )}
             </div>
 
             {/* Display name */}
