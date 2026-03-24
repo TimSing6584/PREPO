@@ -1,5 +1,5 @@
 # .github/workflows/ci.yml
-name: CI Pipeline for Dev Environment
+name: CI/CD Pipeline
 
 on:
   workflow_dispatch:  # Manual trigger for testing
@@ -45,18 +45,6 @@ jobs:
 
       - name: Schema migration check
         run: pnpm prisma migrate diff --from-migrations prisma/migrations --to-schema prisma/schema.prisma --exit-code
-        # env:
-        #   DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        #   DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
-        #   SHADOW_DATABASE_URL: ${{ secrets.SHADOW_DATABASE_URL }}
-        #   SHADOW_DATABASE_URL_UNPOOLED: ${{ secrets.SHADOW_DATABASE_URL_UNPOOLED }}
 
       - name: Build
         run: pnpm build
-        # env:
-        #   KINDE_CLIENT_ID: ${{ secrets.KINDE_CLIENT_ID }}
-        #   KINDE_CLIENT_SECRET: ${{ secrets.KINDE_CLIENT_SECRET }}
-        #   KINDE_ISSUER_URL: ${{ secrets.KINDE_ISSUER_URL }}
-        #   KINDE_SITE_URL: ${{ secrets.KINDE_SITE_URL }}
-        #   KINDE_POST_LOGOUT_REDIRECT_URL: ${{ secrets.KINDE_POST_LOGOUT_REDIRECT_URL }}
-        #   KINDE_POST_LOGIN_REDIRECT_URL: ${{ secrets.KINDE_POST_LOGIN_REDIRECT_URL }}
