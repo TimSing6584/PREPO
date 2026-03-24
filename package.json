@@ -3,15 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "infisical run --env=dev -- cmd /c \"infisical export --env=dev > .env.local && next dev\"",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "db:studio": "dotenv -e .env.local -- prisma studio",
-    "db:migrate_dev": "dotenv -e .env.local -- prisma migrate dev",
-    "db:migrate_deploy": "dotenv -e .env.local -- prisma migrate deploy",
-    "db:reset": "dotenv -e .env.local -- prisma migrate reset",
-    "db:migrate_schema_check": "dotenv -e .env.local -- prisma migrate diff --from-migrations prisma/migrations --to-schema prisma/schema.prisma --exit-code"
+    "db:studio": "infisical run --env=dev -- prisma studio",
+    "db:migrate_dev": "infisical run --env=dev -- prisma migrate dev",
+    "db:migrate_deploy": "infisical run --env=dev -- prisma migrate deploy",
+    "db:reset": "infisical run --env=dev -- prisma migrate reset",
+    "db:migrate_schema_check": "infisical run --env=dev -- prisma migrate diff --from-migrations prisma/migrations --to-schema prisma/schema.prisma --exit-code"
   },
   "dependencies": {
     "@kinde-oss/kinde-auth-nextjs": "^2.11.0",
