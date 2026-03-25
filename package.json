@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "infisical run --env=dev -- cmd /c \"infisical export --env=dev > .env.local && next dev\"",
+    "dev": "node ./scripts/dev-with-infisical.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
