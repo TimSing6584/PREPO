@@ -17,7 +17,7 @@ try {
 const pnpmBin = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm'
 const child = spawn(pnpmBin, ['exec', 'next', 'dev'], {
   stdio: 'inherit',
-  shell: false,
+  shell: true,
 })
 
 child.on('exit', (code) => {
