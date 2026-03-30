@@ -15,7 +15,8 @@ datasource db {
 
 model User {
   id        String            @id @default(uuid())
-  email     String            @unique
+  kindeId  String            @unique
+  email     String          @unique
   name      String?
   createdAt DateTime          @default(now())
 

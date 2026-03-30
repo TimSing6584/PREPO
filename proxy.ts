@@ -17,7 +17,6 @@ export default withAuth(
         publicPaths: ["/", "/bye", "/api/auth/:path*"], // e.g. ["/api/public", "/blog", "/about"],
         isAuthorized: ({ token , req  }: { token: KindeAccessToken; req: NextRequest }) => {
             if (req.nextUrl.pathname.startsWith("/admin")) {
-                console.log(token)
                 const roles = token?.roles as { key: string }[] | undefined;
                 return roles?.some(r => r.key === "admin") ?? false;
             }
