@@ -37,11 +37,11 @@ export default function ByePage() {
 
           <div className="pt-2">
             <Link
-              href="/dashboard"
+              href="/"
               className="inline-flex items-center gap-2 text-xs font-semibold text-neutral-400 hover:text-neutral-900 transition-colors group"
             >
               <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
-              Back to Dashboard
+              Back to Landing Page
             </Link>
           </div>
         </div>
