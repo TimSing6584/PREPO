@@ -73,6 +73,15 @@ pnpm run db:studio
 
 ---
 
+### `pnpm prisma generate`
+Runs to generate the prisma client
+
+```bash
+pnpm prisma generate
+```
+
+---
+
 ### `pnpm run db:migrate_dev`
 
 Runs pending migrations against the **development database** and generates the Prisma client.
