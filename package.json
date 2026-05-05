@@ -14,6 +14,7 @@
     "db:migrate_schema_check": "infisical run --env=dev -- prisma migrate diff --from-migrations prisma/migrations --to-schema prisma/schema.prisma --exit-code"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1041.0",
     "@kinde-oss/kinde-auth-nextjs": "^2.11.0",
     "@prisma/adapter-pg": "^7.4.0",
     "@prisma/client": "^7.4.0",
