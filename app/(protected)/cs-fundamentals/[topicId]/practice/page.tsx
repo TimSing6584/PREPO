@@ -8,6 +8,7 @@ import QuestionCard from '@/components/cs-fundamentals/practice/QuestionCard'
 import { mockQuestions } from '@/data/mockData'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { fetchTopics } from '@/app/utils/api/topics'
 
 export default function PracticePage({
   params
@@ -17,6 +18,7 @@ export default function PracticePage({
   const { topicId } = use(params)
   const searchParams = useSearchParams()
   const qParam = searchParams.get('q')
+  const [topicName, setTopicName] = useState(topicId)
 
   const initialQuestionId = useMemo(() => {
     if (qParam && mockQuestions.some(mq => mq.id === qParam)) return qParam
@@ -30,6 +32,27 @@ export default function PracticePage({
   useEffect(() => {
     setCurrentQuestionId(initialQuestionId)
   }, [initialQuestionId])
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    const loadTopicName = async () => {
+      try {
+        const topics = await fetchTopics(controller.signal)
+        const matchedTopic = topics.find((topic) => topic.id === topicId)
+        if (matchedTopic?.name) {
+          setTopicName(matchedTopic.name)
+        } else {
+          setTopicName(topicId)
+        }
+      } catch {
+        setTopicName(topicId)
+      }
+    }
+
+    loadTopicName()
+    return () => controller.abort()
+  }, [topicId])
 
   const currentQuestion =
     mockQuestions.find(q => q.id === currentQuestionId) || mockQuestions[0]
@@ -75,7 +98,7 @@ export default function PracticePage({
               <div className="text-xs font-medium text-neutral-400 flex items-center gap-2">
                 Topic:{' '}
                 <span className="text-neutral-900 uppercase tracking-wider font-bold">
-                  {topicId}
+                  {topicName}
                 </span>
               </div>
             </div>

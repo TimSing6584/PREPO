@@ -1,13 +1,36 @@
 'use client'
 
-import { use } from 'react'
+import { use, useEffect, useState } from 'react'
 import Navbar from '@/components/main/Navbar'
 import { mockQuestions } from '@/data/mockData'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { fetchTopics } from '@/app/utils/api/topics'
 
 export default function PracticePage({ params }: { params: Promise<{ topicId: string }> }) {
   const { topicId } = use(params)
+  const [topicName, setTopicName] = useState(topicId)
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    const loadTopicName = async () => {
+      try {
+        const topics = await fetchTopics(controller.signal)
+        const matchedTopic = topics.find((topic) => topic.id === topicId)
+        if (matchedTopic?.name) {
+          setTopicName(matchedTopic.name)
+        } else {
+          setTopicName(topicId)
+        }
+      } catch {
+        setTopicName(topicId)
+      }
+    }
+
+    loadTopicName()
+    return () => controller.abort()
+  }, [topicId])
 
   return (
     <div className="main-frame px-6 md:px-12 pb-6 md:pb-12 pt-4 md:pt-6 relative overflow-hidden flex flex-col gap-4 md:gap-6 font-geist-sans">
@@ -28,7 +51,7 @@ export default function PracticePage({ params }: { params: Promise<{ topicId: st
 
               <div className="text-xs font-medium text-neutral-400 flex items-center gap-2">
                 Topic:{' '}
-                <span className="text-neutral-900 uppercase tracking-wider font-bold">{topicId}</span>
+                <span className="text-neutral-900 uppercase tracking-wider font-bold">{topicName}</span>
               </div>
             </div>
 
