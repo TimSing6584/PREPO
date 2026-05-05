@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Image from 'next/image';
 
 export default function EditTopicPage() {
   const router = useRouter();
@@ -170,10 +171,13 @@ export default function EditTopicPage() {
           >
             {imagePreview ? (
               <div className="flex flex-col items-center gap-3">
-                <img
+                <Image
                   src={imagePreview}
                   alt="Topic preview"
                   className="h-64 w-64 object-cover rounded-lg"
+                  width={256}
+                  height={256}
+                  unoptimized
                 />
                 <p className="text-xs text-primary-600 underline">Click to change</p>
               </div>
