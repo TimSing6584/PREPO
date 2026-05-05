@@ -1,6 +1,39 @@
 import { prisma } from "@/app/utils/db";
 import { NextRequest, NextResponse } from "next/server";
 import { roleChecker } from "@/app/utils/auth";
+
+export async function GET() {
+    try {
+        const topics = await prisma.topic.findMany({
+            where: {
+                deleted: false,
+            },
+            select: {
+                id: true,
+                name: true,
+                imageUrl: true,
+                createdAt: true,
+                _count: {
+                    select: {
+                        questions: true,
+                    },
+                },
+            },
+            orderBy: {
+                createdAt: "desc",
+            },
+        });
+
+        return NextResponse.json({
+            success: true,
+            data: topics,
+        });
+    } catch (error) {
+        const message = error instanceof Error ? error.message : "Unknown error";
+        return NextResponse.json({ error: message }, { status: 500 });
+    }
+}
+
 export async function POST(request: NextRequest){
     try {
         // Check if user has admin role

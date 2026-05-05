@@ -1,47 +1,62 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, ChevronDown } from 'lucide-react';
-
-const sampleTopics = [
-  {
-    id: 1,
-    topic: 'OOP',
-    questionsCount: 10,
-    dateCreated: '1/1/2027',
-    author: 'Andrich',
-  },
-  {
-    id: 2,
-    topic: 'DB',
-    questionsCount: 7,
-    dateCreated: '1/5/2027',
-    author: 'Sarah',
-  },
-  {
-    id: 3,
-    topic: 'OS',
-    questionsCount: 5,
-    dateCreated: '1/8/2027',
-    author: 'Michael',
-  },
-  {
-    id: 4,
-    topic: 'Network',
-    questionsCount: 8,
-    dateCreated: '1/12/2027',
-    author: 'Jessica',
-  },
-];
+import { fetchTopics, type Topic } from '@/app/utils/api/topics';
 
 export default function TopicsPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest' | null>(null);
+  const [topics, setTopics] = useState<Topic[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const sortRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadTopics = async () => {
+      try {
+        const fetchedTopics = await fetchTopics(controller.signal);
+        setTopics(fetchedTopics);
+      } catch (error) {
+        if (error instanceof Error && error.name !== 'AbortError') {
+          console.error('Unable to fetch topics', error);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadTopics();
+    return () => controller.abort();
+  }, []);
+
+  const filteredTopics = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+    let next = topics;
+
+    if (normalizedQuery) {
+      next = next.filter((topic) => topic.name.toLowerCase().includes(normalizedQuery));
+    }
+
+    if (sortOrder === 'newest') {
+      next = [...next].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+    }
+
+    if (sortOrder === 'oldest') {
+      next = [...next].sort(
+        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+    }
+
+    return next;
+  }, [searchQuery, sortOrder, topics]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -158,10 +173,10 @@ export default function TopicsPage() {
               </tr>
             </thead>
             <tbody>
-              {sampleTopics.map((topic) => (
+              {filteredTopics.map((topic, index) => (
                 <tr key={topic.id} className="border-b border-gray-100">
-                  <td className="py-4 px-4 text-sm text-gray-900">{topic.id}</td>
-                  <td className="py-4 px-4 text-sm text-gray-900">{topic.topic}</td>
+                  <td className="py-4 px-4 text-sm text-gray-900">{index + 1}</td>
+                  <td className="py-4 px-4 text-sm text-gray-900">{topic.name}</td>
                   <td className="py-4 px-4">
                     <div className="flex items-center gap-2">
                       <button 
@@ -175,11 +190,27 @@ export default function TopicsPage() {
                       </button>
                     </div>
                   </td>
-                  <td className="py-4 px-4 text-sm text-gray-900">{topic.questionsCount}</td>
-                  <td className="py-4 px-4 text-sm text-gray-900">{topic.dateCreated}</td>
-                  <td className="py-4 px-4 text-sm text-gray-900">{topic.author}</td>
+                  <td className="py-4 px-4 text-sm text-gray-900">{topic._count?.questions ?? 0}</td>
+                  <td className="py-4 px-4 text-sm text-gray-900">
+                    {new Date(topic.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="py-4 px-4 text-sm text-gray-900">-</td>
                 </tr>
               ))}
+              {!isLoading && filteredTopics.length === 0 ? (
+                <tr>
+                  <td className="py-6 px-4 text-sm text-gray-500 text-center" colSpan={6}>
+                    No topics found.
+                  </td>
+                </tr>
+              ) : null}
+              {isLoading ? (
+                <tr>
+                  <td className="py-6 px-4 text-sm text-gray-500 text-center" colSpan={6}>
+                    Loading topics...
+                  </td>
+                </tr>
+              ) : null}
             </tbody>
           </table>
         </div>
