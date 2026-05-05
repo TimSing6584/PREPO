@@ -26,11 +26,13 @@ model User {
 
 model Topic {
   id         String     @id @default(uuid())
-  name       String     @unique
+  name       String
   imageUrl   String
   createdAt  DateTime   @default(now())
   deleted    Boolean    @default(false)
   questions  Question[]
+
+  @@index([name]) 
 }
 
 

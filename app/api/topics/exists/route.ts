@@ -6,7 +6,12 @@ export async function GET(request: NextRequest) {
     if(!name){
         return NextResponse.json({ error: 'Name is required' }, { status: 400 })
     }
-    const existing = await prisma.topic.findFirst({ where: { name } })
+    const existing = await prisma.topic.findFirst({
+        where: {
+            name,
+            deleted: false,
+        }
+    })
     if (existing) {
         return NextResponse.json({ exists: true })
     }
