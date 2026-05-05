@@ -194,9 +194,9 @@ export default function TopicsPage() {
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
                   Date Created
                 </th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
+                {/* <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
                   Author
-                </th>
+                </th> */}
               </tr>
             </thead>
             <tbody>
@@ -225,7 +225,7 @@ export default function TopicsPage() {
                   <td className="py-4 px-4 text-sm text-gray-900">
                     {new Date(topic.createdAt).toLocaleDateString()}
                   </td>
-                  <td className="py-4 px-4 text-sm text-gray-900">Admin</td>
+                  {/* <td className="py-4 px-4 text-sm text-gray-900">Admin</td> */}
                 </tr>
               ))}
               {!isLoading && filteredTopics.length === 0 ? (
