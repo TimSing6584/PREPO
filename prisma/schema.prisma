@@ -33,10 +33,6 @@ model Topic {
   questions  Question[]
 }
 
-enum QuestionType {
-  MCQ
-  WRITTEN
-}
 
 model Question {
   id             String      @id @default(uuid())
@@ -46,14 +42,12 @@ model Question {
   statement      String
   imageUrl       String?
 
-  type           QuestionType
-
   // MCQ
-  options        String[]
-  correctOption  Int?
+  options        String[] // must have >= 2 elements (enforce in API)
+  correctOption  Int
 
   // Written
-  correctWritten String?
+  correctWritten String
 
   deleted        Boolean     @default(false)
 
