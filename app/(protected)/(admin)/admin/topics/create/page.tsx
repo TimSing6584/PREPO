@@ -10,7 +10,7 @@ export default function CreateTopicPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [errors, setErrors] = useState<{ topicName?: string; image?: string }>({});
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -29,37 +29,47 @@ export default function CreateTopicPage() {
   };
 
   const handleSubmit = async () => {
-    // Step 1: Validate inputs to ensure topic name is not empty and an image file is selected
-    if (!validate()) return;
-    // Step 2: Check if the topic name already exists by making an API call to your backend
-    const topicExists = await fetch(`/api/topics/exists?name=${encodeURIComponent(topicName)}`);
-    const {exists} = await topicExists.json();
-    if(exists){
-        setErrors({ topicName: 'Topic name already exists. Please choose a different name.' });
-        return;
-    }
-    // Step 3: Upload imageFile to S3, get back URL
-    const s3Response = await fetch('/api/s3-upload', {
+
+    if (isSubmitting) return; // prevent double submissions ,aka race conditions
+    setIsSubmitting(true);
+
+    try{
+      // Step 1: Validate inputs to ensure topic name is not empty and an image file is selected
+      if (!validate()) return;
+      // Step 2: Check if the topic name already exists by making an API call to your backend
+      const topicExists = await fetch(`/api/topics/exists?name=${encodeURIComponent(topicName)}`);
+      const {exists} = await topicExists.json();
+      if(exists){
+          setErrors({ topicName: 'Topic name already exists. Please choose a different name.' });
+          return;
+      }
+      // Step 3: Upload imageFile to S3, get back URL
+      const s3Response = await fetch('/api/s3-upload', {
+          method: 'POST',
+          body: (() => {
+              const formData = new FormData();
+              formData.append("file", imageFile!);
+              formData.append("folder_name", "topics"); //specify a folder in S3
+              return formData;
+          })()
+      });
+      const { url } = await s3Response.json();
+      // Step 4: Create new topic + image in database
+      await fetch('/api/topics', {
         method: 'POST',
-        body: (() => {
-            const formData = new FormData();
-            formData.append("file", imageFile!);
-            formData.append("folder_name", "topics"); //specify a folder in S3
-            return formData;
-        })()
-    });
-    const { url } = await s3Response.json();
-    // Step 4: Create new topic + image in database
-    await fetch('/api/topics', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: topicName,
-        imageUrl: url
-      })
-    });
-    // Step 5: Redirect to all topics page
-    router.push('/admin/topics');
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: topicName,
+          imageUrl: url
+        })
+      });
+      // Step 5: Redirect to all topics page
+      router.push('/admin/topics');
+    } catch (error) {
+        setErrors({ topicName: "Something went wrong. Please try again." }); // show UI error
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
