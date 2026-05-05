@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import Navbar from '@/components/main/Navbar'
 import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs'
 import {
@@ -247,7 +248,14 @@ export default function DashboardClient({ topics }: { topics: Topic[] }) {
               >
                 <div className="relative h-48 w-full overflow-hidden">
                   {topic.imageUrl ? (
-                    <img src={topic.imageUrl} alt={topic.name} className="h-full w-full object-cover" />
+                    <Image
+                      src={topic.imageUrl}
+                      alt={topic.name}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="object-cover"
+                      unoptimized
+                    />
                   ) : (
                     <TopicIllustration id={topic.id} />
                   )}
