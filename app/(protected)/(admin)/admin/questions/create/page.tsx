@@ -1,20 +1,42 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Upload, Plus, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-
-const topics = ['OOP', 'DB', 'OS', 'Network'];
+import TipTapEditor from '@/components/TipTap/TipTapEditor';
+import { fetchTopics, type Topic } from '@/app/utils/api/topics';
 
 export default function CreateQuestionPage() {
   const router = useRouter();
   const [jsonFile, setJsonFile] = useState<File | null>(null);
   const [selectedTopic, setSelectedTopic] = useState('');
+  const [topics, setTopics] = useState<Topic[]>([]);
+  const [isLoadingTopics, setIsLoadingTopics] = useState(true);
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
   const [image, setImage] = useState<File | null>(null);
   const [options, setOptions] = useState<string[]>(['', '']);
   const [correctOption, setCorrectOption] = useState<number | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadTopics = async () => {
+      try {
+        const fetchedTopics = await fetchTopics(controller.signal);
+        setTopics(fetchedTopics);
+      } catch (error) {
+        if (error instanceof Error && error.name !== 'AbortError') {
+          console.error('Unable to fetch topics', error);
+        }
+      } finally {
+        setIsLoadingTopics(false);
+      }
+    };
+
+    loadTopics();
+    return () => controller.abort();
+  }, []);
 
   const handleJsonUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -51,16 +73,7 @@ export default function CreateQuestionPage() {
   };
 
   const handleSubmit = () => {
-    // Handle form submission
-    console.log({
-      jsonFile,
-      selectedTopic,
-      question,
-      answer,
-      image,
-      options,
-      correctOption,
-    });
+    
     router.push('/admin/questions');
   };
 
@@ -90,7 +103,7 @@ export default function CreateQuestionPage() {
       {/* Add a New Question Section */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Add a New Question</h2>
-        
+
         {/* Topic Selection */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -99,12 +112,15 @@ export default function CreateQuestionPage() {
           <select
             value={selectedTopic}
             onChange={(e) => setSelectedTopic(e.target.value)}
+            disabled={isLoadingTopics}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
-            <option value="">Select a topic...</option>
+            <option value="">
+              {isLoadingTopics ? 'Loading topics...' : 'Select a topic...'}
+            </option>
             {topics.map((topic) => (
-              <option key={topic} value={topic}>
-                {topic}
+              <option key={topic.id} value={topic.id}>
+                {topic.name}
               </option>
             ))}
           </select>
@@ -113,7 +129,7 @@ export default function CreateQuestionPage() {
         {/* Question Info */}
         <div className="border border-gray-200 rounded-lg p-6 mb-6">
           <h3 className="text-base font-medium text-gray-900 mb-4">Question Info</h3>
-          
+
           {/* Question */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -133,13 +149,13 @@ export default function CreateQuestionPage() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Answer <span className="text-red-500">*</span>
             </label>
-            <textarea
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              placeholder="Enter the answer ..."
-              rows={4}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+            <TipTapEditor
+              initialContent="<p></p>"
+              onChange={(content) => setAnswer(JSON.stringify(content))}
+              containerClassName="w-full rounded-lg border border-gray-300 bg-white"
+              editorClassName="min-h-[150px] bg-white p-3 text-zinc-900 sm:min-h-[180px] sm:p-4"
             />
+            <p className="mt-2 text-xs text-gray-500">Answer is stored as a JSON string.</p>
           </div>
 
           {/* Image Upload (Optional) */}
@@ -168,10 +184,10 @@ export default function CreateQuestionPage() {
         {/* MCQ Type Section */}
         <div className="border border-gray-200 rounded-lg p-6">
           <h3 className="text-base font-medium text-gray-900 mb-2">
-            MCQ type
+            MCQ type <span className="text-red-500">*</span>
           </h3>
           <p className="text-sm text-gray-600 mb-4">
-            You need at least two options. Click the correct answer{' '}
+            You need at least two options. Click the correct answer{' '} <span className="text-red-500">*</span>
           </p>
 
           {/* Options */}
