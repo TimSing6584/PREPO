@@ -12,6 +12,7 @@ export default function TopicsPage() {
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest' | null>(null);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [deletingTopicId, setDeletingTopicId] = useState<string | null>(null);
 
   const sortRef = useRef<HTMLDivElement>(null);
 
@@ -34,6 +35,32 @@ export default function TopicsPage() {
     loadTopics();
     return () => controller.abort();
   }, []);
+
+  const handleDeleteTopic = async (topicId: string) => {
+    const confirmed = window.confirm('Delete this topic?');
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingTopicId(topicId);
+    try {
+      const response = await fetch(`/api/topics/${topicId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const result = await response.json().catch(() => ({}));
+        throw new Error(result?.error ?? 'Failed to delete topic');
+      }
+
+      setTopics((prev) => prev.filter((topic) => topic.id !== topicId));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to delete topic';
+      window.alert(message);
+    } finally {
+      setDeletingTopicId(null);
+    }
+  };
 
   const filteredTopics = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
@@ -185,8 +212,12 @@ export default function TopicsPage() {
                       >
                         Modify
                       </button>
-                      <button className="px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-sm hover:bg-red-100 transition-colors">
-                        Delete
+                      <button
+                        onClick={() => handleDeleteTopic(topic.id)}
+                        disabled={deletingTopicId === topic.id}
+                        className="px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-sm hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {deletingTopicId === topic.id ? 'Deleting...' : 'Delete'}
                       </button>
                     </div>
                   </td>
