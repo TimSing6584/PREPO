@@ -3,73 +3,20 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, ChevronDown, X } from 'lucide-react';
+import Image from 'next/image';
+import { fetchQuestions, type QuestionRow } from '@/app/utils/api/questions';
 
-const topics = ['OOP', 'DB', 'OS', 'Network'];
-
-const sampleQuestions = [
-  {
-    id: 1,
-    question: 'What is inheritance?',
-    topic: 'OOP',
-    dateCreated: '1/1/2027',
-    author: 'Andrich',
-  },
-  {
-    id: 2,
-    question: 'What is normalization in databases?',
-    topic: 'DB',
-    dateCreated: '1/5/2027',
-    author: 'Sarah',
-  },
-  {
-    id: 3,
-    question: 'Explain the difference between process and thread',
-    topic: 'OS',
-    dateCreated: '1/8/2027',
-    author: 'Michael',
-  },
-  {
-    id: 4,
-    question: 'What is polymorphism?',
-    topic: 'OOP',
-    dateCreated: '1/10/2027',
-    author: 'Andrich',
-  },
-  {
-    id: 5,
-    question: 'What are TCP and UDP protocols?',
-    topic: 'Network',
-    dateCreated: '1/12/2027',
-    author: 'Jessica',
-  },
-  {
-    id: 6,
-    question: 'What is deadlock in operating systems?',
-    topic: 'OS',
-    dateCreated: '1/15/2027',
-    author: 'Michael',
-  },
-  {
-    id: 7,
-    question: 'Explain ACID properties in databases',
-    topic: 'DB',
-    dateCreated: '1/18/2027',
-    author: 'Sarah',
-  },
-  {
-    id: 8,
-    question: 'What is the OSI model?',
-    topic: 'Network',
-    dateCreated: '1/20/2027',
-    author: 'Jessica',
-  },
-];
+type QuestionType = 'DEFAULT' | 'PERSONALIZED';
 
 export default function QuestionsPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+  const [questions, setQuestions] = useState<QuestionRow[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [appliedTopics, setAppliedTopics] = useState<string[]>([]);
+  const [selectedTypes, setSelectedTypes] = useState<QuestionType[]>([]);
+  const [appliedTypes, setAppliedTypes] = useState<QuestionType[]>([]);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest' | null>(null);
@@ -92,6 +39,25 @@ export default function QuestionsPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadQuestions = async () => {
+      try {
+        setLoading(true);
+        const fetchedQuestions = await fetchQuestions(controller.signal);
+        setQuestions(fetchedQuestions);
+      } catch {
+        setQuestions([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadQuestions();
+    return () => controller.abort();
+  }, []);
+
   const toggleTopic = (topic: string) => {
     setSelectedTopics((prev) =>
       prev.includes(topic) ? prev.filter((t) => t !== topic) : [...prev, topic]
@@ -106,7 +72,61 @@ export default function QuestionsPage() {
 
   const applyFilters = () => {
     setAppliedTopics(selectedTopics);
+    setAppliedTypes(selectedTypes);
     setShowFilterDropdown(false);
+  };
+
+  const toggleType = (type: QuestionType) => {
+    setSelectedTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+    );
+  };
+
+  const removeType = (type: QuestionType) => {
+    const updated = selectedTypes.filter((t) => t !== type);
+    setSelectedTypes(updated);
+    setAppliedTypes(updated);
+  };
+
+  const topics = Array.from(new Set(questions.map((q) => q.topic.name))).sort((a, b) =>
+    a.localeCompare(b)
+  );
+
+  const filteredQuestions = questions.filter((question) => {
+    const matchesSearch = question.statement
+      .toLowerCase()
+      .includes(searchQuery.trim().toLowerCase());
+    const matchesTopic =
+      appliedTopics.length === 0 || appliedTopics.includes(question.topic.name);
+    const matchesType = appliedTypes.length === 0 || appliedTypes.includes(question.type);
+
+    return matchesSearch && matchesTopic && matchesType;
+  });
+
+  const sortedQuestions = [...filteredQuestions].sort((a, b) => {
+    if (sortOrder === 'oldest') {
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    }
+
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+
+  const formatType = (type: QuestionType) =>
+    type === 'DEFAULT' ? 'Default' : 'Personalised';
+
+  const handleDelete = async (id: string) => {
+    const confirmed = window.confirm('Delete this question?');
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(`/api/questions/${id}`, { method: 'DELETE' });
+      if (!response.ok) {
+        throw new Error('Delete failed');
+      }
+      setQuestions((prev) => prev.filter((question) => question.id !== id));
+    } catch (error) {
+      console.error('Unable to delete question', error);
+    }
   };
 
   const hasUnsavedChanges = JSON.stringify(selectedTopics.sort()) !== JSON.stringify(appliedTopics.sort());
@@ -128,8 +148,8 @@ export default function QuestionsPage() {
             />
           </div>
 
-          {/* Selected Topic Chips */}
-          {selectedTopics.length > 0 && (
+          {/* Selected Filter Chips */}
+          {(selectedTopics.length > 0 || selectedTypes.length > 0) && (
             <div className="flex items-center gap-2 flex-wrap">
               {selectedTopics.map((topic) => (
                 <div
@@ -145,11 +165,25 @@ export default function QuestionsPage() {
                   </button>
                 </div>
               ))}
+              {selectedTypes.map((type) => (
+                <div
+                  key={type}
+                  className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full border border-gray-300"
+                >
+                  <span className="text-sm">{formatType(type)}</span>
+                  <button
+                    onClick={() => removeType(type)}
+                    className="hover:bg-gray-200 rounded-full p-0.5"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
             </div>
           )}
 
-          {/* Apply Now Button - appears when there are selected topics */}
-          {selectedTopics.length > 0 && (
+          {/* Apply Now Button - appears when there are selected filters */}
+          {(selectedTopics.length > 0 || selectedTypes.length > 0) && (
             <button
               onClick={applyFilters}
               className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
@@ -174,6 +208,7 @@ export default function QuestionsPage() {
                 {showFilterDropdown && (
                   <div className="absolute left-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
                     <div className="p-2">
+                      <p className="px-3 py-1 text-xs font-medium text-gray-500 uppercase">Topic</p>
                       {topics.map((topic) => (
                         <label
                           key={topic}
@@ -186,6 +221,22 @@ export default function QuestionsPage() {
                             className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
                           />
                           <span className="text-sm text-gray-700">{topic}</span>
+                        </label>
+                      ))}
+                      <div className="my-2 border-t border-gray-100" />
+                      <p className="px-3 py-1 text-xs font-medium text-gray-500 uppercase">Type</p>
+                      {(['DEFAULT', 'PERSONALIZED'] as QuestionType[]).map((type) => (
+                        <label
+                          key={type}
+                          className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedTypes.includes(type)}
+                            onChange={() => toggleType(type)}
+                            className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
+                          />
+                          <span className="text-sm text-gray-700">{formatType(type)}</span>
                         </label>
                       ))}
                     </div>
@@ -264,10 +315,16 @@ export default function QuestionsPage() {
                   Question
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
+                  Image
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
                   Action
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
                   Topic
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
+                  Type
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
                   Date Created
@@ -278,28 +335,64 @@ export default function QuestionsPage() {
               </tr>
             </thead>
             <tbody>
-              {sampleQuestions.map((q) => (
-                <tr key={q.id} className="border-b border-gray-100">
-                  <td className="py-4 px-4 text-sm text-gray-900">{q.id}</td>
-                  <td className="py-4 px-4 text-sm text-gray-900">{q.question}</td>
-                  <td className="py-4 px-4">
-                    <div className="flex items-center gap-2">
-                      <button 
-                        onClick={() => router.push(`/admin/questions/${q.id}/edit`)}
-                        className="px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded text-sm hover:bg-blue-100 transition-colors"
-                      >
-                        Modify
-                      </button>
-                      <button className="px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-sm hover:bg-red-100 transition-colors">
-                        Delete
-                      </button>
-                    </div>
+              {loading ? (
+                <tr>
+                  <td colSpan={8} className="py-8 px-4 text-sm text-gray-500 text-center">
+                    Loading topics...
                   </td>
-                  <td className="py-4 px-4 text-sm text-gray-900">{q.topic}</td>
-                  <td className="py-4 px-4 text-sm text-gray-900">{q.dateCreated}</td>
-                  <td className="py-4 px-4 text-sm text-gray-900">{q.author}</td>
                 </tr>
-              ))}
+              ) : sortedQuestions.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="py-8 px-4 text-sm text-gray-500 text-center">
+                    No topics found
+                  </td>
+                </tr>
+              ) : (
+                sortedQuestions.map((q, index) => (
+                  <tr key={q.id} className="border-b border-gray-100">
+                    <td className="py-4 px-4 text-sm text-gray-900">{index + 1}</td>
+                    <td className="py-4 px-4 text-sm text-gray-900">{q.statement}</td>
+                    <td className="py-4 px-4 text-sm text-gray-900">
+                      {q.imageUrl ? (
+                        <Image
+                          src={q.imageUrl}
+                          alt="Question image"
+                          width={48}
+                          height={48}
+                          className="h-12 w-12 rounded-md border border-gray-200 object-cover"
+                          unoptimized
+                        />
+                      ) : (
+                        <span className="text-gray-400">Nil</span>
+                      )}
+                    </td>
+                    <td className="py-4 px-4">
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => router.push(`/admin/questions/${q.id}/edit`)}
+                          className="px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded text-sm hover:bg-blue-100 transition-colors"
+                        >
+                          Modify
+                        </button>
+                        <button
+                          onClick={() => handleDelete(q.id)}
+                          className="px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-sm hover:bg-red-100 transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                    <td className="py-4 px-4 text-sm text-gray-900">{q.topic.name}</td>
+                    <td className="py-4 px-4 text-sm text-gray-900">{formatType(q.type)}</td>
+                    <td className="py-4 px-4 text-sm text-gray-900">
+                      {new Date(q.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="py-4 px-4 text-sm text-gray-900">
+                      {q.createdBy.name || q.createdBy.email}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
