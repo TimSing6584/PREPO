@@ -8,6 +8,13 @@ import { fetchTopics, type Topic } from '@/app/utils/api/topics';
 
 export default function CreateQuestionPage() {
   const router = useRouter();
+  const [errors, setErrors] = useState<{
+    selectedTopic?: string;
+    question?: string;
+    answer?: string;
+    options?: string;
+    correctOption?: string;
+  }>({});
   const [jsonFile, setJsonFile] = useState<File | null>(null);
   const [selectedTopic, setSelectedTopic] = useState('');
   const [topics, setTopics] = useState<Topic[]>([]);
@@ -17,6 +24,7 @@ export default function CreateQuestionPage() {
   const [image, setImage] = useState<File | null>(null);
   const [options, setOptions] = useState<string[]>(['', '']);
   const [correctOption, setCorrectOption] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -72,9 +80,113 @@ export default function CreateQuestionPage() {
     setOptions(newOptions);
   };
 
-  const handleSubmit = () => {
-    
-    router.push('/admin/questions');
+  const hasNonEmptyText = (value: unknown): boolean => {
+    if (!value || typeof value !== 'object') return false;
+    const node = value as { text?: unknown; content?: unknown[] };
+    if (typeof node.text === 'string' && node.text.trim().length > 0) return true;
+    if (!Array.isArray(node.content)) return false;
+    return node.content.some((child) => hasNonEmptyText(child));
+  };
+
+  const validate = () => {
+    const newErrors: {
+      selectedTopic?: string;
+      question?: string;
+      answer?: string;
+      options?: string;
+      correctOption?: string;
+    } = {};
+
+    if (!selectedTopic.trim()) {
+      newErrors.selectedTopic = 'Topic is required.';
+    }
+
+    if (!question.trim()) {
+      newErrors.question = 'Question is required.';
+    }
+
+    const trimmedOptions = options.map((option) => option.trim());
+    if (trimmedOptions.length < 2 || trimmedOptions.some((option) => option.length === 0)) {
+      newErrors.options = 'At least 2 options are required and none can be empty.';
+    }
+
+    if (correctOption === null) {
+      newErrors.correctOption = 'Please select the correct option.';
+    } else if (correctOption < 0 || correctOption >= options.length) {
+      newErrors.correctOption = 'Correct option is out of range.';
+    } else if (!trimmedOptions[correctOption]) {
+      newErrors.correctOption = 'Correct option must point to a non-empty answer.';
+    }
+
+    let parsedAnswer: unknown = null;
+    try {
+      parsedAnswer = answer ? JSON.parse(answer) : null;
+    } catch {
+      newErrors.answer = 'Answer format is invalid.';
+    }
+
+    if (!newErrors.answer && !hasNonEmptyText(parsedAnswer)) {
+      newErrors.answer = 'Answer is required.';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+
+  const handleSubmit = async () => {
+    if (isSubmitting) return; // prevent double submissions ,aka race conditions
+    setIsSubmitting(true);
+    try{
+      // Validate at the client side to check for empty inputs.
+      if (!validate()) {
+        return;
+      }
+      // If there is an image, upload it to S3 and get the URL
+      let uploadedImageUrl: string | null = null;
+      if(image){
+        const s3Response = await fetch('/api/s3-upload', {
+            method: 'POST',
+            body: (() => {
+                const formData = new FormData();
+                formData.append("file", image!);
+                formData.append("folder_name", "questions"); //specify a folder in S3
+                return formData;
+            })()
+        });
+        if (!s3Response.ok) {
+          const uploadError = await s3Response.json().catch(() => ({} as { error?: string }));
+          throw new Error(uploadError.error ?? 'Image upload failed.');
+        }
+        const { url } = await s3Response.json();
+        uploadedImageUrl = url;
+      }
+
+      // Call API to create question in the backend
+      const createResponse = await fetch('/api/questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          statement: question,
+          topicId: selectedTopic,
+          correctWritten: answer,
+          options: options,
+          correctOption: correctOption,
+          imageUrl: uploadedImageUrl,
+        })
+      });
+      if (!createResponse.ok) {
+        const createError = await createResponse.json().catch(() => ({} as { error?: string }));
+        throw new Error(createError.error ?? 'Failed to create question.');
+      }
+      // Redirect to questions list page
+      router.push('/admin/questions');
+    } catch (error) {
+        const message = error instanceof Error ? error.message : "Something went wrong. Please try again.";
+        setErrors({ question: message }); // show UI error
+    } finally{
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -111,11 +223,18 @@ export default function CreateQuestionPage() {
           </label>
           <select
             value={selectedTopic}
-            onChange={(e) => setSelectedTopic(e.target.value)}
+            onChange={(e) => {
+              setSelectedTopic(e.target.value);
+              if (errors.selectedTopic) {
+                setErrors((prev) => ({ ...prev, selectedTopic: undefined }));
+              }
+            }}
             disabled={isLoadingTopics}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
+              errors.selectedTopic ? 'border-red-400' : 'border-gray-300'
+            }`}
           >
-            <option value="">
+            <option value="" disabled>
               {isLoadingTopics ? 'Loading topics...' : 'Select a topic...'}
             </option>
             {topics.map((topic) => (
@@ -124,6 +243,9 @@ export default function CreateQuestionPage() {
               </option>
             ))}
           </select>
+          {errors.selectedTopic ? (
+            <p className="mt-2 text-xs text-red-500">{errors.selectedTopic}</p>
+          ) : null}
         </div>
 
         {/* Question Info */}
@@ -138,10 +260,18 @@ export default function CreateQuestionPage() {
             <input
               type="text"
               value={question}
-              onChange={(e) => setQuestion(e.target.value)}
+              onChange={(e) => {
+                setQuestion(e.target.value);
+                if (errors.question) {
+                  setErrors((prev) => ({ ...prev, question: undefined }));
+                }
+              }}
               placeholder="Enter new question ..."
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
+                errors.question ? 'border-red-400' : 'border-gray-300'
+              }`}
             />
+            {errors.question ? <p className="mt-2 text-xs text-red-500">{errors.question}</p> : null}
           </div>
 
           {/* Answer */}
@@ -151,11 +281,22 @@ export default function CreateQuestionPage() {
             </label>
             <TipTapEditor
               initialContent="<p></p>"
-              onChange={(content) => setAnswer(JSON.stringify(content))}
-              containerClassName="w-full rounded-lg border border-gray-300 bg-white"
+              onChange={(content) => {
+                setAnswer(JSON.stringify(content));
+                if (errors.answer) {
+                  setErrors((prev) => ({ ...prev, answer: undefined }));
+                }
+              }}
+              containerClassName={`w-full rounded-lg border bg-white ${
+                errors.answer ? 'border-red-400' : 'border-gray-300'
+              }`}
               editorClassName="min-h-[150px] bg-white p-3 text-zinc-900 sm:min-h-[180px] sm:p-4"
             />
-            <p className="mt-2 text-xs text-gray-500">Answer is stored as a JSON string.</p>
+            {errors.answer ? (
+              <p className="mt-2 text-xs text-red-500">{errors.answer}</p>
+            ) : (
+              <p className="mt-2 text-xs text-gray-500">Answer is stored as a JSON string.</p>
+            )}
           </div>
 
           {/* Image Upload (Optional) */}
@@ -198,18 +339,28 @@ export default function CreateQuestionPage() {
                   type="radio"
                   name="correctOption"
                   checked={correctOption === index}
-                  onChange={() => setCorrectOption(index)}
+                  onChange={() => {
+                    setCorrectOption(index);
+                    if (errors.correctOption) {
+                      setErrors((prev) => ({ ...prev, correctOption: undefined }));
+                    }
+                  }}
                   className="w-5 h-5 text-green-600 focus:ring-green-500"
                 />
                 <div className="flex-1 flex items-center gap-2">
                   <span className="text-sm font-medium text-gray-700 w-6">{index + 1}</span>
-                  <input
-                    type="text"
-                    value={option}
-                    onChange={(e) => updateOption(index, e.target.value)}
-                    placeholder="Enter your option"
-                    className={`flex-1 px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
-                      correctOption === index
+                    <input
+                      type="text"
+                      value={option}
+                      onChange={(e) => {
+                        updateOption(index, e.target.value);
+                        if (errors.options || errors.correctOption) {
+                          setErrors((prev) => ({ ...prev, options: undefined, correctOption: undefined }));
+                        }
+                      }}
+                      placeholder="Enter your option"
+                      className={`flex-1 px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
+                        correctOption === index
                         ? 'border-green-500 bg-green-50'
                         : 'border-gray-300'
                     }`}
@@ -226,6 +377,8 @@ export default function CreateQuestionPage() {
               </div>
             ))}
           </div>
+          {errors.options ? <p className="mt-2 text-xs text-red-500">{errors.options}</p> : null}
+          {errors.correctOption ? <p className="mt-1 text-xs text-red-500">{errors.correctOption}</p> : null}
 
           {/* Add More Options Button */}
           <button
