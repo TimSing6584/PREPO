@@ -114,6 +114,21 @@ export default function QuestionsPage() {
   const formatType = (type: QuestionType) =>
     type === 'DEFAULT' ? 'Default' : 'Personalised';
 
+  const handleDelete = async (id: string) => {
+    const confirmed = window.confirm('Delete this question?');
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(`/api/questions/${id}`, { method: 'DELETE' });
+      if (!response.ok) {
+        throw new Error('Delete failed');
+      }
+      setQuestions((prev) => prev.filter((question) => question.id !== id));
+    } catch (error) {
+      console.error('Unable to delete question', error);
+    }
+  };
+
   const hasUnsavedChanges = JSON.stringify(selectedTopics.sort()) !== JSON.stringify(appliedTopics.sort());
 
   return (
@@ -311,7 +326,10 @@ export default function QuestionsPage() {
                         >
                           Modify
                         </button>
-                        <button className="px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-sm hover:bg-red-100 transition-colors">
+                        <button
+                          onClick={() => handleDelete(q.id)}
+                          className="px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-sm hover:bg-red-100 transition-colors"
+                        >
                           Delete
                         </button>
                       </div>
