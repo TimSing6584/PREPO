@@ -24,6 +24,7 @@ interface TiptapEditorProps {
   placeholder?: string
   onChange?: (content: TiptapJSON) => void
   showToolbar?: boolean
+  editable?: boolean
   editorClassName?: string
   containerClassName?: string
 }
@@ -182,12 +183,14 @@ export default function TipTapEditor({
   initialContent = '<p>Start typing...</p>',
   onChange,
   showToolbar = true,
+  editable = true,
   editorClassName = 'min-h-[220px] bg-white p-3 text-zinc-900 sm:min-h-[280px] sm:p-4 lg:min-h-[320px] lg:p-5',
   containerClassName = 'w-full rounded-xl border border-zinc-300 bg-zinc-50',
 }: TiptapEditorProps) {
   const editor = useEditor({
     extensions: [StarterKit],
     content: initialContent,
+    editable,
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
       onChange?.(editor.getJSON())
@@ -196,7 +199,7 @@ export default function TipTapEditor({
 
   return (
     <div className={`tiptap-editor ${containerClassName}`}>
-      {showToolbar && <EditorToolbar editor={editor} />}
+      {showToolbar && editable && <EditorToolbar editor={editor} />}
       <EditorContent editor={editor} className={editorClassName} />
 
       <style jsx global>{`
