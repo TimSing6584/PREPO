@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Upload, Plus, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import TipTapEditor from '@/components/TipTap/TipTapEditor';
@@ -22,9 +22,18 @@ export default function CreateQuestionPage() {
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
   const [image, setImage] = useState<File | null>(null);
+  const imagePreviewUrl = useMemo(() => (image ? URL.createObjectURL(image) : null), [image]);
   const [options, setOptions] = useState<string[]>(['', '']);
   const [correctOption, setCorrectOption] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (imagePreviewUrl) {
+        URL.revokeObjectURL(imagePreviewUrl);
+      }
+    };
+  }, [imagePreviewUrl]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -304,6 +313,15 @@ export default function CreateQuestionPage() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Image <span className="text-gray-400">(Optional)</span>
             </label>
+            {imagePreviewUrl ? (
+              <div className="mb-3">
+                <img
+                  src={imagePreviewUrl}
+                  alt="Selected question image preview"
+                  className="max-h-48 rounded-lg border border-gray-200 object-contain"
+                />
+              </div>
+            ) : null}
             <div className="border border-gray-300 rounded-lg p-4 text-center">
               <input
                 type="file"
