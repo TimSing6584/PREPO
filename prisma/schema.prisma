@@ -20,7 +20,7 @@ model User {
   name      String?
   createdAt DateTime          @default(now())
 
-  createdQuestions  Question[] @relation("UserQuestions") 
+  createdQuestions  Question[] @relation("UserQuestions")
   stars     StarredQuestion[]
 }
 
@@ -33,6 +33,10 @@ model Topic {
   questions  Question[]
 }
 
+enum QuestionType {
+  DEFAULT
+  PERSONALIZED
+}
 
 model Question {
   id             String      @id @default(uuid())
@@ -41,7 +45,7 @@ model Question {
 
   statement      String
   imageUrl       String?
-
+  type           QuestionType
   // MCQ
   options        String[] // must have >= 2 elements (enforce in API)
   correctOption  Int
@@ -55,8 +59,8 @@ model Question {
   topicId        String
   topic          Topic       @relation(fields: [topicId], references: [id])
 
-  createdById String?   // make it optional
-  createdBy   User?     @relation("UserQuestions", fields: [createdById], references: [id])
+  createdById String   // determined by user's Kinde ID
+  createdBy   User     @relation("UserQuestions", fields: [createdById], references: [kindeId])
 
   starredBy      StarredQuestion[]
 }
@@ -64,10 +68,10 @@ model Question {
 model StarredQuestion {
   id         String   @id @default(uuid())
   questionId String
-  userId     String
+  userKindeId     String
 
   question   Question @relation(fields: [questionId], references: [id])
-  user       User     @relation(fields: [userId], references: [id])
+  user       User     @relation(fields: [userKindeId], references: [kindeId])
 
-  @@unique([questionId, userId])
+  @@unique([questionId, userKindeId])
 }
