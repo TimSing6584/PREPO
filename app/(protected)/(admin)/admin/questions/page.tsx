@@ -3,23 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, ChevronDown, X } from 'lucide-react';
+import Image from 'next/image';
+import { fetchQuestions, type QuestionRow } from '@/app/utils/api/questions';
 
 type QuestionType = 'DEFAULT' | 'PERSONALIZED';
-
-type QuestionRow = {
-  id: string;
-  createdAt: string;
-  statement: string;
-  type: QuestionType;
-  topic: {
-    id: string;
-    name: string;
-  };
-  createdBy: {
-    name: string | null;
-    email: string;
-  };
-};
 
 export default function QuestionsPage() {
   const router = useRouter();
@@ -28,6 +15,8 @@ export default function QuestionsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [appliedTopics, setAppliedTopics] = useState<string[]>([]);
+  const [selectedTypes, setSelectedTypes] = useState<QuestionType[]>([]);
+  const [appliedTypes, setAppliedTypes] = useState<QuestionType[]>([]);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest' | null>(null);
@@ -51,17 +40,13 @@ export default function QuestionsPage() {
   }, []);
 
   useEffect(() => {
-    const fetchQuestions = async () => {
+    const controller = new AbortController();
+
+    const loadQuestions = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/questions', { cache: 'no-store' });
-        const json = await response.json();
-
-        if (response.ok && Array.isArray(json.data)) {
-          setQuestions(json.data);
-        } else {
-          setQuestions([]);
-        }
+        const fetchedQuestions = await fetchQuestions(controller.signal);
+        setQuestions(fetchedQuestions);
       } catch {
         setQuestions([]);
       } finally {
@@ -69,7 +54,8 @@ export default function QuestionsPage() {
       }
     };
 
-    fetchQuestions();
+    loadQuestions();
+    return () => controller.abort();
   }, []);
 
   const toggleTopic = (topic: string) => {
@@ -86,7 +72,20 @@ export default function QuestionsPage() {
 
   const applyFilters = () => {
     setAppliedTopics(selectedTopics);
+    setAppliedTypes(selectedTypes);
     setShowFilterDropdown(false);
+  };
+
+  const toggleType = (type: QuestionType) => {
+    setSelectedTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+    );
+  };
+
+  const removeType = (type: QuestionType) => {
+    const updated = selectedTypes.filter((t) => t !== type);
+    setSelectedTypes(updated);
+    setAppliedTypes(updated);
   };
 
   const topics = Array.from(new Set(questions.map((q) => q.topic.name))).sort((a, b) =>
@@ -99,8 +98,9 @@ export default function QuestionsPage() {
       .includes(searchQuery.trim().toLowerCase());
     const matchesTopic =
       appliedTopics.length === 0 || appliedTopics.includes(question.topic.name);
+    const matchesType = appliedTypes.length === 0 || appliedTypes.includes(question.type);
 
-    return matchesSearch && matchesTopic;
+    return matchesSearch && matchesTopic && matchesType;
   });
 
   const sortedQuestions = [...filteredQuestions].sort((a, b) => {
@@ -148,8 +148,8 @@ export default function QuestionsPage() {
             />
           </div>
 
-          {/* Selected Topic Chips */}
-          {selectedTopics.length > 0 && (
+          {/* Selected Filter Chips */}
+          {(selectedTopics.length > 0 || selectedTypes.length > 0) && (
             <div className="flex items-center gap-2 flex-wrap">
               {selectedTopics.map((topic) => (
                 <div
@@ -165,11 +165,25 @@ export default function QuestionsPage() {
                   </button>
                 </div>
               ))}
+              {selectedTypes.map((type) => (
+                <div
+                  key={type}
+                  className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full border border-gray-300"
+                >
+                  <span className="text-sm">{formatType(type)}</span>
+                  <button
+                    onClick={() => removeType(type)}
+                    className="hover:bg-gray-200 rounded-full p-0.5"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
             </div>
           )}
 
-          {/* Apply Now Button - appears when there are selected topics */}
-          {selectedTopics.length > 0 && (
+          {/* Apply Now Button - appears when there are selected filters */}
+          {(selectedTopics.length > 0 || selectedTypes.length > 0) && (
             <button
               onClick={applyFilters}
               className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
@@ -194,6 +208,7 @@ export default function QuestionsPage() {
                 {showFilterDropdown && (
                   <div className="absolute left-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
                     <div className="p-2">
+                      <p className="px-3 py-1 text-xs font-medium text-gray-500 uppercase">Topic</p>
                       {topics.map((topic) => (
                         <label
                           key={topic}
@@ -206,6 +221,22 @@ export default function QuestionsPage() {
                             className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
                           />
                           <span className="text-sm text-gray-700">{topic}</span>
+                        </label>
+                      ))}
+                      <div className="my-2 border-t border-gray-100" />
+                      <p className="px-3 py-1 text-xs font-medium text-gray-500 uppercase">Type</p>
+                      {(['DEFAULT', 'PERSONALIZED'] as QuestionType[]).map((type) => (
+                        <label
+                          key={type}
+                          className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedTypes.includes(type)}
+                            onChange={() => toggleType(type)}
+                            className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
+                          />
+                          <span className="text-sm text-gray-700">{formatType(type)}</span>
                         </label>
                       ))}
                     </div>
@@ -284,6 +315,9 @@ export default function QuestionsPage() {
                   Question
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
+                  Image
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
                   Action
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
@@ -303,13 +337,13 @@ export default function QuestionsPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="py-8 px-4 text-sm text-gray-500 text-center">
+                  <td colSpan={8} className="py-8 px-4 text-sm text-gray-500 text-center">
                     Loading topics...
                   </td>
                 </tr>
               ) : sortedQuestions.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-8 px-4 text-sm text-gray-500 text-center">
+                  <td colSpan={8} className="py-8 px-4 text-sm text-gray-500 text-center">
                     No topics found
                   </td>
                 </tr>
@@ -318,6 +352,20 @@ export default function QuestionsPage() {
                   <tr key={q.id} className="border-b border-gray-100">
                     <td className="py-4 px-4 text-sm text-gray-900">{index + 1}</td>
                     <td className="py-4 px-4 text-sm text-gray-900">{q.statement}</td>
+                    <td className="py-4 px-4 text-sm text-gray-900">
+                      {q.imageUrl ? (
+                        <Image
+                          src={q.imageUrl}
+                          alt="Question image"
+                          width={48}
+                          height={48}
+                          className="h-12 w-12 rounded-md border border-gray-200 object-cover"
+                          unoptimized
+                        />
+                      ) : (
+                        <span className="text-gray-400">Nil</span>
+                      )}
+                    </td>
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-2">
                         <button 
