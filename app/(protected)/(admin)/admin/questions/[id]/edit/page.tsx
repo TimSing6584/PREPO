@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import type { ComponentProps } from 'react';
 import { Upload, Plus, X } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
 import TipTapEditor from '@/components/TipTap/TipTapEditor';
@@ -15,6 +16,8 @@ type QuestionData = {
   options: string[];
   correctOption: number;
 };
+
+type EditorInitialContent = NonNullable<ComponentProps<typeof TipTapEditor>['initialContent']>;
 
 export default function EditQuestionPage() {
   const router = useRouter();
@@ -36,7 +39,7 @@ export default function EditQuestionPage() {
 
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
-  const [editorInitialContent, setEditorInitialContent] = useState<string | object>('<p></p>');
+  const [editorInitialContent, setEditorInitialContent] = useState<EditorInitialContent>('<p></p>');
   const [editorKey, setEditorKey] = useState(0);
 
   const [image, setImage] = useState<File | null>(null);
@@ -98,7 +101,9 @@ export default function EditQuestionPage() {
         setAnswer(data.correctWritten);
 
         try {
-          setEditorInitialContent(data.correctWritten ? JSON.parse(data.correctWritten) : '<p></p>');
+          setEditorInitialContent(
+            data.correctWritten ? (JSON.parse(data.correctWritten) as EditorInitialContent) : '<p></p>'
+          );
         } catch {
           setEditorInitialContent('<p></p>');
         }
