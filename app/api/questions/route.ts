@@ -4,6 +4,32 @@ import {getKindeServerSession} from "@kinde-oss/kinde-auth-nextjs/server";
 import { roleChecker } from "@/app/utils/auth";
 import { QuestionType } from "@/lib/generated/prisma/client";
 
+export async function GET() {
+    try {
+        const questions = await prisma.question.findMany({
+            where: {
+                deleted: false,
+                topic: {
+                    deleted: false,
+                },
+            },
+            include: {
+                topic: true,
+                createdBy: true,
+                starredBy: true,
+            },
+            orderBy: {
+                createdAt: "desc",
+            },
+        });
+
+        return NextResponse.json({ success: true, data: questions });
+    } catch (error) {
+        const message = error instanceof Error ? error.message : "Unknown error";
+        return NextResponse.json({ error: message }, { status: 500 });
+    }
+}
+
 export async function POST(request: NextRequest){
     try {
         // Get user from Kinde Server Session
