@@ -4,70 +4,28 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, ChevronDown, X } from 'lucide-react';
 
-const topics = ['OOP', 'DB', 'OS', 'Network'];
+type QuestionType = 'DEFAULT' | 'PERSONALIZED';
 
-const sampleQuestions = [
-  {
-    id: 1,
-    question: 'What is inheritance?',
-    topic: 'OOP',
-    dateCreated: '1/1/2027',
-    author: 'Andrich',
-  },
-  {
-    id: 2,
-    question: 'What is normalization in databases?',
-    topic: 'DB',
-    dateCreated: '1/5/2027',
-    author: 'Sarah',
-  },
-  {
-    id: 3,
-    question: 'Explain the difference between process and thread',
-    topic: 'OS',
-    dateCreated: '1/8/2027',
-    author: 'Michael',
-  },
-  {
-    id: 4,
-    question: 'What is polymorphism?',
-    topic: 'OOP',
-    dateCreated: '1/10/2027',
-    author: 'Andrich',
-  },
-  {
-    id: 5,
-    question: 'What are TCP and UDP protocols?',
-    topic: 'Network',
-    dateCreated: '1/12/2027',
-    author: 'Jessica',
-  },
-  {
-    id: 6,
-    question: 'What is deadlock in operating systems?',
-    topic: 'OS',
-    dateCreated: '1/15/2027',
-    author: 'Michael',
-  },
-  {
-    id: 7,
-    question: 'Explain ACID properties in databases',
-    topic: 'DB',
-    dateCreated: '1/18/2027',
-    author: 'Sarah',
-  },
-  {
-    id: 8,
-    question: 'What is the OSI model?',
-    topic: 'Network',
-    dateCreated: '1/20/2027',
-    author: 'Jessica',
-  },
-];
+type QuestionRow = {
+  id: string;
+  createdAt: string;
+  statement: string;
+  type: QuestionType;
+  topic: {
+    id: string;
+    name: string;
+  };
+  createdBy: {
+    name: string | null;
+    email: string;
+  };
+};
 
 export default function QuestionsPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+  const [questions, setQuestions] = useState<QuestionRow[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [appliedTopics, setAppliedTopics] = useState<string[]>([]);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
@@ -92,6 +50,28 @@ export default function QuestionsPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/questions', { cache: 'no-store' });
+        const json = await response.json();
+
+        if (response.ok && Array.isArray(json.data)) {
+          setQuestions(json.data);
+        } else {
+          setQuestions([]);
+        }
+      } catch {
+        setQuestions([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchQuestions();
+  }, []);
+
   const toggleTopic = (topic: string) => {
     setSelectedTopics((prev) =>
       prev.includes(topic) ? prev.filter((t) => t !== topic) : [...prev, topic]
@@ -108,6 +88,31 @@ export default function QuestionsPage() {
     setAppliedTopics(selectedTopics);
     setShowFilterDropdown(false);
   };
+
+  const topics = Array.from(new Set(questions.map((q) => q.topic.name))).sort((a, b) =>
+    a.localeCompare(b)
+  );
+
+  const filteredQuestions = questions.filter((question) => {
+    const matchesSearch = question.statement
+      .toLowerCase()
+      .includes(searchQuery.trim().toLowerCase());
+    const matchesTopic =
+      appliedTopics.length === 0 || appliedTopics.includes(question.topic.name);
+
+    return matchesSearch && matchesTopic;
+  });
+
+  const sortedQuestions = [...filteredQuestions].sort((a, b) => {
+    if (sortOrder === 'oldest') {
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    }
+
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+
+  const formatType = (type: QuestionType) =>
+    type === 'DEFAULT' ? 'Default' : 'Personalised';
 
   const hasUnsavedChanges = JSON.stringify(selectedTopics.sort()) !== JSON.stringify(appliedTopics.sort());
 
@@ -270,6 +275,9 @@ export default function QuestionsPage() {
                   Topic
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
+                  Type
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
                   Date Created
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
@@ -278,28 +286,47 @@ export default function QuestionsPage() {
               </tr>
             </thead>
             <tbody>
-              {sampleQuestions.map((q) => (
-                <tr key={q.id} className="border-b border-gray-100">
-                  <td className="py-4 px-4 text-sm text-gray-900">{q.id}</td>
-                  <td className="py-4 px-4 text-sm text-gray-900">{q.question}</td>
-                  <td className="py-4 px-4">
-                    <div className="flex items-center gap-2">
-                      <button 
-                        onClick={() => router.push(`/admin/questions/${q.id}/edit`)}
-                        className="px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded text-sm hover:bg-blue-100 transition-colors"
-                      >
-                        Modify
-                      </button>
-                      <button className="px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-sm hover:bg-red-100 transition-colors">
-                        Delete
-                      </button>
-                    </div>
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="py-8 px-4 text-sm text-gray-500 text-center">
+                    Loading topics...
                   </td>
-                  <td className="py-4 px-4 text-sm text-gray-900">{q.topic}</td>
-                  <td className="py-4 px-4 text-sm text-gray-900">{q.dateCreated}</td>
-                  <td className="py-4 px-4 text-sm text-gray-900">{q.author}</td>
                 </tr>
-              ))}
+              ) : sortedQuestions.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-8 px-4 text-sm text-gray-500 text-center">
+                    No topics found
+                  </td>
+                </tr>
+              ) : (
+                sortedQuestions.map((q, index) => (
+                  <tr key={q.id} className="border-b border-gray-100">
+                    <td className="py-4 px-4 text-sm text-gray-900">{index + 1}</td>
+                    <td className="py-4 px-4 text-sm text-gray-900">{q.statement}</td>
+                    <td className="py-4 px-4">
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => router.push(`/admin/questions/${q.id}/edit`)}
+                          className="px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded text-sm hover:bg-blue-100 transition-colors"
+                        >
+                          Modify
+                        </button>
+                        <button className="px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-sm hover:bg-red-100 transition-colors">
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                    <td className="py-4 px-4 text-sm text-gray-900">{q.topic.name}</td>
+                    <td className="py-4 px-4 text-sm text-gray-900">{formatType(q.type)}</td>
+                    <td className="py-4 px-4 text-sm text-gray-900">
+                      {new Date(q.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="py-4 px-4 text-sm text-gray-900">
+                      {q.createdBy.name || q.createdBy.email}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
