@@ -7,6 +7,8 @@
 generator client {
   provider = "prisma-client"
   output   = "../lib/generated/prisma"
+  previewFeatures = ["partialIndexes"]
+
 }
 
 datasource db {
@@ -26,11 +28,13 @@ model User {
 
 model Topic {
   id         String     @id @default(uuid())
-  name       String     @unique
+  name       String     
   imageUrl   String
   createdAt  DateTime   @default(now())
   deleted    Boolean    @default(false)
   questions  Question[]
+
+  @@unique([name], where: raw("deleted = false"))
 }
 
 enum QuestionType {
