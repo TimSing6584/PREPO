@@ -358,7 +358,7 @@ export default function EditQuestionPage() {
               Image <span className="text-gray-400">(Optional)</span>
             </label>
             {selectedImagePreviewUrl ? (
-              <div className="mb-3">
+              <div className="mb-3 flex justify-center">
                 <img
                   src={selectedImagePreviewUrl}
                   alt="Selected question image preview"
@@ -366,7 +366,7 @@ export default function EditQuestionPage() {
                 />
               </div>
             ) : existingImageUrl ? (
-              <div className="mb-3">
+              <div className="mb-3 flex justify-center">
                 <img
                   src={existingImageUrl}
                   alt="Current question image"

@@ -314,7 +314,7 @@ export default function CreateQuestionPage() {
               Image <span className="text-gray-400">(Optional)</span>
             </label>
             {imagePreviewUrl ? (
-              <div className="mb-3">
+              <div className="mb-3 flex justify-center">
                 <img
                   src={imagePreviewUrl}
                   alt="Selected question image preview"
