@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
-import { Star } from 'lucide-react'
+import { ChevronLeft, ChevronRight, RotateCcw, Star } from 'lucide-react'
 import MCQView from './MCQView'
 import WrittenView from './WrittenView'
 import { cn } from '@/lib/utils'
@@ -12,18 +12,54 @@ interface QuestionCardProps {
   question: PracticeQuestion
   starred: boolean
   onToggleStar: () => void
-  onCorrectAnswer: () => void
+  onPreviousQuestion?: () => void
+  onNextQuestion?: () => void
+  canGoPrevious?: boolean
+  canGoNext?: boolean
+  onRedo?: () => void
+  progress?: {
+    mode?: 'mcq' | 'written'
+    mcq?: {
+      selectedOption: number | null
+      isSubmitted: boolean
+      isCorrect: boolean | null
+    }
+    written?: {
+      draft: string
+    }
+  }
+  onProgressChange?: (progress: {
+    mode?: 'mcq' | 'written'
+    mcq?: {
+      selectedOption: number | null
+      isSubmitted: boolean
+      isCorrect: boolean | null
+    }
+    written?: {
+      draft: string
+    }
+  }) => void
 }
 
 export default function QuestionCard({
   question,
   starred,
   onToggleStar,
-  onCorrectAnswer
+  onPreviousQuestion,
+  onNextQuestion,
+  canGoPrevious = false,
+  canGoNext = false,
+  onRedo,
+  progress,
+  onProgressChange,
 }: QuestionCardProps) {
-  const [mode, setMode] = useState<'mcq' | 'written'>('mcq')
+  const [mode, setMode] = useState<'mcq' | 'written'>(progress?.mode ?? 'mcq')
 
   const [showStarReminder, setShowStarReminder] = useState(false)
+
+  useEffect(() => {
+    setMode(progress?.mode ?? 'mcq')
+  }, [progress?.mode, question.id])
 
   return (
     <div className="bg-white rounded-[2rem] border border-neutral-100 shadow-sm p-8 md:p-12 h-fit min-h-[600px] flex flex-col relative overflow-hidden">
@@ -35,7 +71,10 @@ export default function QuestionCard({
                {/* Mode Switcher */}
                <div className="bg-neutral-100 rounded-lg p-1 flex items-center gap-1">
                   <button 
-                    onClick={() => setMode('mcq')}
+                    onClick={() => {
+                      setMode('mcq')
+                      onProgressChange?.({ ...progress, mode: 'mcq' })
+                    }}
                     className={cn(
                       "px-3 py-1.5 rounded-md text-sm font-semibold transition-all",
                       mode === 'mcq' ? "bg-white text-black shadow-sm" : "text-neutral-500 hover:text-neutral-900"
@@ -44,7 +83,10 @@ export default function QuestionCard({
                     Multiple choice
                   </button>
                   <button 
-                    onClick={() => setMode('written')}
+                    onClick={() => {
+                      setMode('written')
+                      onProgressChange?.({ ...progress, mode: 'written' })
+                    }}
                     className={cn(
                       "px-3 py-1.5 rounded-md text-sm font-semibold transition-all",
                       mode === 'written' ? "bg-white text-black shadow-sm" : "text-neutral-500 hover:text-neutral-900"
@@ -79,6 +121,14 @@ export default function QuestionCard({
                    </div>
                  )}
                </div>
+
+               <button
+                 onClick={onRedo}
+                 className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 transition-colors"
+               >
+                 <RotateCcw className="h-3.5 w-3.5" />
+                 Redo
+               </button>
             </div>
 
             <h1 className="text-2xl md:text-3xl font-bold text-[#101010] leading-tight">
@@ -106,18 +156,52 @@ export default function QuestionCard({
           <MCQView 
             options={question.options} 
             correctAnswer={question.correctOption}
+            initialSelectedOption={progress?.mcq?.selectedOption ?? null}
+            initialIsSubmitted={progress?.mcq?.isSubmitted ?? false}
+            onProgressChange={(mcqProgress) =>
+              onProgressChange?.({
+                ...progress,
+                mcq: mcqProgress,
+              })
+            }
             onComplete={(isCorrect) => {
                if (!isCorrect) {
                  setShowStarReminder(true)
                  setTimeout(() => setShowStarReminder(false), 5000)
-               } else {
-                 onCorrectAnswer()
                }
             }}
           />
         ) : (
-          <WrittenView correctAnswer={question.correctWritten} />
+          <WrittenView
+            correctAnswer={question.correctWritten}
+            initialDraft={progress?.written?.draft ?? ''}
+            onDraftChange={(draft) =>
+              onProgressChange?.({
+                ...progress,
+                written: { draft },
+              })
+            }
+          />
         )}
+      </div>
+
+      <div className="mt-6 flex items-center justify-between gap-3 border-t border-neutral-100 pt-4">
+        <button
+          onClick={onPreviousQuestion}
+          disabled={!canGoPrevious}
+          className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Back
+        </button>
+        <button
+          onClick={onNextQuestion}
+          disabled={!canGoNext}
+          className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Next
+          <ChevronRight className="h-4 w-4" />
+        </button>
       </div>
 
     </div>

@@ -121,6 +121,20 @@ const TopicIllustration = ({ id }: { id: string }) => {
 export default function DashboardClient({ topics }: { topics: Topic[] }) {
   const { user } = useKindeBrowserClient()
 
+  useEffect(() => {
+    const prefix = 'practiceProgress:v1:'
+    const keysToRemove: string[] = []
+
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key?.startsWith(prefix)) {
+        keysToRemove.push(key)
+      }
+    }
+
+    keysToRemove.forEach((key) => localStorage.removeItem(key))
+  }, [])
+
   const name =
     user?.given_name ||
     user?.family_name ||

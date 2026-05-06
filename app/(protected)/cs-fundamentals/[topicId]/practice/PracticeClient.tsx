@@ -9,35 +9,84 @@ import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
 type PracticeClientProps = {
+  userId: string
   topicId: string
   topicName: string
   questions: PracticeQuestion[]
   initialQuestionId: string
 }
 
+type StoredQuestionProgress = {
+  mode?: 'mcq' | 'written'
+  mcq?: {
+    selectedOption: number | null
+    isSubmitted: boolean
+    isCorrect: boolean | null
+  }
+  written?: {
+    draft: string
+  }
+}
+
+type PracticeProgressStore = {
+  questions: Record<string, StoredQuestionProgress>
+}
+
+const storageKeyForTopic = (userId: string, topicId: string) => `practiceProgress:v1:${userId}:${topicId}`
+
 export default function PracticeClient({
+  userId,
   topicId,
   topicName,
   questions,
   initialQuestionId,
 }: PracticeClientProps) {
   const [currentQuestionId, setCurrentQuestionId] = useState(initialQuestionId)
-  const [completedIds, setCompletedIds] = useState<string[]>([])
+  const [progressByQuestion, setProgressByQuestion] = useState<Record<string, StoredQuestionProgress>>({})
   const [starredIds, setStarredIds] = useState<string[]>([])
+  const [hasHydratedProgress, setHasHydratedProgress] = useState(false)
 
   useEffect(() => {
     setCurrentQuestionId(initialQuestionId)
   }, [initialQuestionId])
 
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(storageKeyForTopic(userId, topicId))
+      if (stored) {
+        const parsed = JSON.parse(stored) as PracticeProgressStore
+        setProgressByQuestion(parsed.questions ?? {})
+      }
+    } catch {
+      setProgressByQuestion({})
+    } finally {
+      setHasHydratedProgress(true)
+    }
+  }, [topicId, userId])
+
+  useEffect(() => {
+    if (!hasHydratedProgress) return
+    const payload: PracticeProgressStore = { questions: progressByQuestion }
+    localStorage.setItem(storageKeyForTopic(userId, topicId), JSON.stringify(payload))
+  }, [hasHydratedProgress, progressByQuestion, topicId, userId])
+
   const currentQuestion =
     questions.find((question) => question.id === currentQuestionId) || questions[0]
+  const currentQuestionIndex = currentQuestion
+    ? questions.findIndex((question) => question.id === currentQuestion.id)
+    : -1
+
+  const completedIds = questions
+    .filter((question) => {
+      const progress = progressByQuestion[question.id]
+      const hasSubmittedMcq = progress?.mcq?.isSubmitted === true
+      const hasWrittenDraft = (progress?.written?.draft ?? '').trim().length > 0
+      return hasSubmittedMcq || hasWrittenDraft
+    })
+    .map((question) => question.id)
 
   const toggleStar = (id: string) => {
     setStarredIds((prev) => (prev.includes(id) ? prev.filter((starredId) => starredId !== id) : [...prev, id]))
-  }
-
-  const markCompleted = (id: string) => {
-    setCompletedIds((prev) => (prev.includes(id) ? prev : [...prev, id]))
   }
 
   return (
@@ -51,6 +100,7 @@ export default function PracticeClient({
             currentQuestionId={currentQuestionId}
             onSelectQuestion={setCurrentQuestionId}
             completedIds={completedIds}
+            onRedoAll={() => setProgressByQuestion({})}
           />
         </div>
 
@@ -79,7 +129,30 @@ export default function PracticeClient({
                 question={currentQuestion}
                 starred={starredIds.includes(currentQuestion.id)}
                 onToggleStar={() => toggleStar(currentQuestion.id)}
-                onCorrectAnswer={() => markCompleted(currentQuestion.id)}
+                onPreviousQuestion={() => {
+                  if (currentQuestionIndex <= 0) return
+                  setCurrentQuestionId(questions[currentQuestionIndex - 1].id)
+                }}
+                onNextQuestion={() => {
+                  if (currentQuestionIndex < 0 || currentQuestionIndex >= questions.length - 1) return
+                  setCurrentQuestionId(questions[currentQuestionIndex + 1].id)
+                }}
+                canGoPrevious={currentQuestionIndex > 0}
+                canGoNext={currentQuestionIndex >= 0 && currentQuestionIndex < questions.length - 1}
+                onRedo={() =>
+                  setProgressByQuestion((prev) => {
+                    const next = { ...prev }
+                    delete next[currentQuestion.id]
+                    return next
+                  })
+                }
+                progress={progressByQuestion[currentQuestion.id]}
+                onProgressChange={(nextProgress) =>
+                  setProgressByQuestion((prev) => ({
+                    ...prev,
+                    [currentQuestion.id]: nextProgress,
+                  }))
+                }
               />
             ) : (
               <div className="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 px-4 py-10 text-center text-sm text-neutral-500">

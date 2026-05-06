@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { ComponentProps, ReactNode } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import TipTapEditor from '@/components/TipTap/TipTapEditor'
 
 interface WrittenViewProps {
   correctAnswer: string
+  initialDraft?: string
+  onDraftChange?: (draft: string) => void
 }
 
 type EditorContent = NonNullable<ComponentProps<typeof TipTapEditor>['initialContent']>
@@ -92,17 +94,27 @@ const renderFormattedAnswer = (answer: string): ReactNode => {
 }
 
 export default function WrittenView({
-  correctAnswer
+  correctAnswer,
+  initialDraft = '',
+  onDraftChange,
 }: WrittenViewProps) {
-  const [answer, setAnswer] = useState('')
+  const [answer, setAnswer] = useState(initialDraft)
   const [showAnswer, setShowAnswer] = useState(false)
   const formattedAnswer = renderFormattedAnswer(correctAnswer)
+
+  useEffect(() => {
+    setAnswer(initialDraft)
+  }, [initialDraft])
 
   return (
     <div className="space-y-6">
       <textarea
         value={answer}
-        onChange={(e) => setAnswer(e.target.value)}
+        onChange={(e) => {
+          const value = e.target.value
+          setAnswer(value)
+          onDraftChange?.(value)
+        }}
         placeholder="Type your answer here..."
         className="w-full h-40 p-4 rounded-xl border-2 border-neutral-200 focus:border-blue-500 focus:ring-0 resize-none transition-all placeholder:text-neutral-400"
       />

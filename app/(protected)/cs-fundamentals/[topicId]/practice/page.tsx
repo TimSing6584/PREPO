@@ -1,4 +1,5 @@
 import { getTopicPracticeData } from '@/app/utils/server/csFundamentals'
+import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import PracticeClient from './PracticeClient'
 
 type PageProps = {
@@ -9,6 +10,8 @@ type PageProps = {
 export default async function PracticePage({ params, searchParams }: PageProps) {
   const { topicId } = await params
   const { q } = await searchParams
+  const { getUser } = getKindeServerSession()
+  const user = await getUser()
   const { topicName, questions } = await getTopicPracticeData(topicId)
 
   const initialQuestionId =
@@ -16,6 +19,7 @@ export default async function PracticePage({ params, searchParams }: PageProps) 
 
   return (
     <PracticeClient
+      userId={user?.id ?? 'anon'}
       topicId={topicId}
       topicName={topicName}
       questions={questions}
