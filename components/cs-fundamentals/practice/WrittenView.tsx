@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import type { ComponentProps, ReactNode } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { EditorContent, useEditor, type JSONContent } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
 import { Eye, EyeOff } from 'lucide-react'
-import TipTapEditor from '@/components/TipTap/TipTapEditor'
 
 interface WrittenViewProps {
   correctAnswer: string
@@ -11,86 +11,10 @@ interface WrittenViewProps {
   onDraftChange?: (draft: string) => void
 }
 
-type EditorContent = NonNullable<ComponentProps<typeof TipTapEditor>['initialContent']>
-type RichNode = {
-  type?: string
-  text?: string
-  marks?: Array<{ type?: string }>
-  content?: RichNode[]
-  attrs?: { level?: number }
-}
-
-const hasRichTextShape = (value: unknown): value is Exclude<EditorContent, string> => {
+const hasRichTextShape = (value: unknown): value is JSONContent => {
   if (!value || typeof value !== 'object') return false
   const candidate = value as { type?: unknown }
   return candidate.type === 'doc'
-}
-
-const renderNodes = (nodes: RichNode[] = [], keyPrefix = 'node'): ReactNode[] =>
-  nodes.map((node, index) => renderNode(node, `${keyPrefix}-${index}`))
-
-const applyMarks = (content: ReactNode, marks?: Array<{ type?: string }>, key = 'mark') => {
-  if (!marks?.length) return content
-
-  return marks.reduce<ReactNode>((acc, mark, index) => {
-    const markKey = `${key}-${index}`
-    switch (mark.type) {
-      case 'bold':
-        return <strong key={markKey}>{acc}</strong>
-      case 'italic':
-        return <em key={markKey}>{acc}</em>
-      case 'strike':
-        return <s key={markKey}>{acc}</s>
-      case 'code':
-        return <code key={markKey}>{acc}</code>
-      default:
-        return acc
-    }
-  }, content)
-}
-
-const renderNode = (node: RichNode, key: string): ReactNode => {
-  if (node.type === 'text') {
-    return <span key={key}>{applyMarks(node.text ?? '', node.marks, key)}</span>
-  }
-
-  const children = renderNodes(node.content, key)
-
-  switch (node.type) {
-    case 'paragraph':
-      return <p key={key} className="mb-2 last:mb-0">{children}</p>
-    case 'heading': {
-      const level = node.attrs?.level ?? 3
-      if (level === 1) return <h1 key={key} className="mb-2 text-xl font-bold">{children}</h1>
-      if (level === 2) return <h2 key={key} className="mb-2 text-lg font-bold">{children}</h2>
-      return <h3 key={key} className="mb-2 text-base font-semibold">{children}</h3>
-    }
-    case 'bulletList':
-      return <ul key={key} className="mb-2 list-disc pl-5">{children}</ul>
-    case 'orderedList':
-      return <ol key={key} className="mb-2 list-decimal pl-5">{children}</ol>
-    case 'listItem':
-      return <li key={key} className="mb-1">{children}</li>
-    case 'blockquote':
-      return <blockquote key={key} className="mb-2 border-l-2 border-emerald-300 pl-3 italic">{children}</blockquote>
-    case 'hardBreak':
-      return <br key={key} />
-    default:
-      return <span key={key}>{children}</span>
-  }
-}
-
-const renderFormattedAnswer = (answer: string): ReactNode => {
-  try {
-    const parsed = JSON.parse(answer) as unknown
-    if (hasRichTextShape(parsed)) {
-      return <div>{renderNode(parsed as RichNode, 'doc-root')}</div>
-    }
-  } catch {
-    // fallback below
-  }
-
-  return <p className="whitespace-pre-wrap">{answer}</p>
 }
 
 export default function WrittenView({
@@ -100,7 +24,32 @@ export default function WrittenView({
 }: WrittenViewProps) {
   const [answer, setAnswer] = useState(initialDraft)
   const [showAnswer, setShowAnswer] = useState(false)
-  const formattedAnswer = renderFormattedAnswer(correctAnswer)
+
+  const parsedCorrectAnswer = useMemo(() => {
+    try {
+      const parsed = JSON.parse(correctAnswer) as unknown
+      return hasRichTextShape(parsed) ? parsed : null
+    } catch {
+      return null
+    }
+  }, [correctAnswer])
+
+  const answerEditor = useEditor({
+    extensions: [StarterKit],
+    content: parsedCorrectAnswer ?? '<p></p>',
+    editable: false,
+    immediatelyRender: false,
+  })
+
+  useEffect(() => {
+    if (!answerEditor) return
+
+    if (parsedCorrectAnswer) {
+      answerEditor.commands.setContent(parsedCorrectAnswer)
+    } else {
+      answerEditor.commands.setContent('<p></p>')
+    }
+  }, [answerEditor, parsedCorrectAnswer])
 
   useEffect(() => {
     setAnswer(initialDraft)
@@ -130,10 +79,80 @@ export default function WrittenView({
 
         {showAnswer && (
           <div className="p-6 bg-emerald-50 border border-emerald-100 rounded-xl animate-in fade-in slide-in-from-top-2 duration-300">
-            <div className="prose prose-sm max-w-none text-emerald-900">{formattedAnswer}</div>
+            {parsedCorrectAnswer ? (
+              <div className="tiptap-answer prose prose-sm max-w-none text-emerald-900">
+                <EditorContent editor={answerEditor} />
+              </div>
+            ) : (
+              <p className="whitespace-pre-wrap text-emerald-900">{correctAnswer}</p>
+            )}
           </div>
         )}
       </div>
+
+      <style jsx global>{`
+        .tiptap-answer .ProseMirror {
+          outline: none;
+          min-height: auto;
+          background: transparent;
+          padding: 0;
+          word-break: break-word;
+        }
+
+        .tiptap-answer .ProseMirror p {
+          margin: 0.5rem 0;
+        }
+
+        .tiptap-answer .ProseMirror h1,
+        .tiptap-answer .ProseMirror h2,
+        .tiptap-answer .ProseMirror h3 {
+          margin: 1rem 0 0.5rem;
+          line-height: 1.2;
+        }
+
+        .tiptap-answer .ProseMirror h1 {
+          font-size: 1.25rem;
+          font-weight: 700;
+        }
+
+        .tiptap-answer .ProseMirror h2 {
+          font-size: 1.125rem;
+          font-weight: 700;
+        }
+
+        .tiptap-answer .ProseMirror h3 {
+          font-size: 1rem;
+          font-weight: 600;
+        }
+
+        .tiptap-answer .ProseMirror ul,
+        .tiptap-answer .ProseMirror ol {
+          margin: 0.75rem 0;
+          padding-left: 1.5rem;
+        }
+
+        .tiptap-answer .ProseMirror ul {
+          list-style-type: disc;
+        }
+
+        .tiptap-answer .ProseMirror ol {
+          list-style-type: decimal;
+        }
+
+        .tiptap-answer .ProseMirror blockquote {
+          border-left: 3px solid #6ee7b7;
+          margin: 0.75rem 0;
+          padding-left: 1rem;
+          color: #065f46;
+          font-style: italic;
+        }
+
+        .tiptap-answer .ProseMirror code {
+          background-color: #d1fae5;
+          border-radius: 0.25rem;
+          padding: 0.125rem 0.25rem;
+        }
+      `}</style>
     </div>
   )
 }
