@@ -2,14 +2,14 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { MoreHorizontal, Star } from 'lucide-react'
-import { Question } from '@/data/mockData'
+import { Star } from 'lucide-react'
 import MCQView from './MCQView'
 import WrittenView from './WrittenView'
 import { cn } from '@/lib/utils'
+import type { PracticeQuestion } from './types'
 
 interface QuestionCardProps {
-  question: Question
+  question: PracticeQuestion
   starred: boolean
   onToggleStar: () => void
   onCorrectAnswer: () => void
@@ -21,7 +21,7 @@ export default function QuestionCard({
   onToggleStar,
   onCorrectAnswer
 }: QuestionCardProps) {
-  const [mode, setMode] = useState<'mcq' | 'written'>(question.type)
+  const [mode, setMode] = useState<'mcq' | 'written'>('mcq')
 
   const [showStarReminder, setShowStarReminder] = useState(false)
 
@@ -105,7 +105,7 @@ export default function QuestionCard({
         {mode === 'mcq' && question.options ? (
           <MCQView 
             options={question.options} 
-            correctAnswer={question.correctAnswer as number}
+            correctAnswer={question.correctOption}
             onComplete={(isCorrect) => {
                if (!isCorrect) {
                  setShowStarReminder(true)
@@ -116,7 +116,7 @@ export default function QuestionCard({
             }}
           />
         ) : (
-          <WrittenView correctAnswer={question.explanation || String(question.correctAnswer)} />
+          <WrittenView correctAnswer={question.correctWritten} />
         )}
       </div>
 

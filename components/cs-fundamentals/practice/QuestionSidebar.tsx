@@ -1,11 +1,11 @@
 'use client'
 
-import { CheckCircle2, Circle, Menu } from 'lucide-react'
-import { Question } from '@/data/mockData'
+import { CheckCircle2, Menu } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import type { PracticeQuestion } from './types'
 
 interface QuestionSidebarProps {
-  questions: Question[]
+  questions: PracticeQuestion[]
   currentQuestionId: string
   onSelectQuestion: (id: string) => void
   completedIds: string[]
