@@ -38,6 +38,9 @@ export default function CreateQuestionPage() {
   const [options, setOptions] = useState<string[]>(['', '']);
   const [correctOption, setCorrectOption] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isJsonParsing, setIsJsonParsing] = useState(false);
+  // lock input sections while loading topics, parsing JSON, or submitting
+  const isLocked = isLoadingTopics || isJsonParsing || isSubmitting;
 
   useEffect(() => {
     return () => {
@@ -69,7 +72,9 @@ export default function CreateQuestionPage() {
 
   const handleJsonUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
+      setIsJsonParsing(true);
       setJsonFile(e.target.files[0]);
+      setIsJsonParsing(false);
     }
   };
 
@@ -328,7 +333,7 @@ export default function CreateQuestionPage() {
                 setErrors((prev) => ({ ...prev, selectedTopic: undefined }));
               }
             }}
-            disabled={isLoadingTopics}
+            disabled={isLocked}
             className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
               errors.selectedTopic ? 'border-red-400' : 'border-gray-300'
             }`}
@@ -357,6 +362,7 @@ export default function CreateQuestionPage() {
               Question <span className="text-red-500">*</span>
             </label>
             <input
+              disabled={isLocked}
               type="text"
               value={question}
               onChange={(e) => {
@@ -378,19 +384,21 @@ export default function CreateQuestionPage() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Answer <span className="text-red-500">*</span>
             </label>
-            <TipTapEditor
-              initialContent="<p></p>"
-              onChange={(content) => {
-                setAnswer(JSON.stringify(content));
-                if (errors.answer) {
-                  setErrors((prev) => ({ ...prev, answer: undefined }));
-                }
-              }}
-              containerClassName={`w-full rounded-lg border bg-white ${
-                errors.answer ? 'border-red-400' : 'border-gray-300'
-              }`}
-              editorClassName="min-h-[150px] bg-white p-3 text-zinc-900 sm:min-h-[180px] sm:p-4"
-            />
+            <div className={isLocked ? 'opacity-50 pointer-events-none' : ''}>
+              <TipTapEditor
+                initialContent="<p></p>"
+                onChange={(content) => {
+                  setAnswer(JSON.stringify(content));
+                  if (errors.answer) {
+                    setErrors((prev) => ({ ...prev, answer: undefined }));
+                  }
+                }}
+                containerClassName={`w-full rounded-lg border bg-white ${
+                  errors.answer ? 'border-red-400' : 'border-gray-300'
+                }`}
+                editorClassName="min-h-[150px] bg-white p-3 text-zinc-900 sm:min-h-[180px] sm:p-4"
+              />
+            </div>
             {errors.answer ? (
               <p className="mt-2 text-xs text-red-500">{errors.answer}</p>
             ) : (
@@ -420,7 +428,7 @@ export default function CreateQuestionPage() {
                 className="hidden"
                 id="image-upload"
               />
-              <label htmlFor="image-upload" className="cursor-pointer">
+              <label htmlFor="image-upload" className={isLocked ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}>
                 <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
                 <p className="text-sm text-gray-600">
                   {image ? image.name : 'Upload your image'}
@@ -444,6 +452,7 @@ export default function CreateQuestionPage() {
             {options.map((option, index) => (
               <div key={index} className="flex items-center gap-3">
                 <input
+                  disabled={isLocked}
                   type="radio"
                   name="correctOption"
                   checked={correctOption === index}
@@ -476,6 +485,7 @@ export default function CreateQuestionPage() {
                 </div>
                 {options.length > 2 && (
                   <button
+                    disabled={isLocked}
                     onClick={() => removeOption(index)}
                     className="p-2 text-gray-400 hover:text-red-500 transition-colors"
                   >
@@ -490,6 +500,7 @@ export default function CreateQuestionPage() {
 
           {/* Add More Options Button */}
           <button
+            disabled={isLocked}
             onClick={addOption}
             className="mt-4 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
           >
@@ -508,10 +519,15 @@ export default function CreateQuestionPage() {
           Cancel
         </button>
         <button
+          disabled={isLocked}
           onClick={handleSubmit}
-          className="px-6 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+          className={`px-6 py-2.5 rounded-lg text-white transition-colors ${
+            isLocked
+              ? 'bg-primary-300 cursor-not-allowed'
+              : 'bg-primary-600 hover:bg-primary-700'
+          }`}
         >
-          Submit
+          {isSubmitting ? 'Submitting...' : 'Submit'}
         </button>
       </div>
     </div>
