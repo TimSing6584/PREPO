@@ -1,36 +1,11 @@
-'use client'
-
-import { use, useEffect, useState } from 'react'
 import Navbar from '@/components/main/Navbar'
-import { mockQuestions } from '@/data/mockData'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import { fetchTopics } from '@/app/utils/api/topics'
+import { getTopicPracticeData } from '@/app/utils/server/csFundamentals'
 
-export default function PracticePage({ params }: { params: Promise<{ topicId: string }> }) {
-  const { topicId } = use(params)
-  const [topicName, setTopicName] = useState(topicId)
-
-  useEffect(() => {
-    const controller = new AbortController()
-
-    const loadTopicName = async () => {
-      try {
-        const topics = await fetchTopics(controller.signal)
-        const matchedTopic = topics.find((topic) => topic.id === topicId)
-        if (matchedTopic?.name) {
-          setTopicName(matchedTopic.name)
-        } else {
-          setTopicName(topicId)
-        }
-      } catch {
-        setTopicName(topicId)
-      }
-    }
-
-    loadTopicName()
-    return () => controller.abort()
-  }, [topicId])
+export default async function PracticePage({ params }: { params: Promise<{ topicId: string }> }) {
+  const { topicId } = await params
+  const { topicName, questions } = await getTopicPracticeData(topicId)
 
   return (
     <div className="main-frame px-6 md:px-12 pb-6 md:pb-12 pt-4 md:pt-6 relative overflow-hidden flex flex-col gap-4 md:gap-6 font-geist-sans">
@@ -65,38 +40,43 @@ export default function PracticePage({ params }: { params: Promise<{ topicId: st
                 </div>
 
                 <div className="text-xs font-semibold text-neutral-400">
-                  {mockQuestions.length} questions
+                  {questions.length} questions
                 </div>
               </div>
 
-              <div className="space-y-3">
-                {mockQuestions.map((q, index) => (
-                  <Link
-                    key={q.id}
-                    href={`/cs-fundamentals/${topicId}/practice?q=${encodeURIComponent(q.id)}`}
-                    className="w-full text-left px-4 py-4 rounded-2xl transition-all duration-200 flex items-center justify-between group border bg-white border-neutral-100 hover:border-neutral-200 hover:bg-neutral-50 min-h-[72px]"
-                  >
-                    <div className="flex items-center gap-4 flex-1 overflow-hidden">
-                      <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl text-sm font-bold bg-neutral-100 text-neutral-600 group-hover:bg-neutral-200 transition-colors">
-                        {index + 1}
+              {questions.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 px-4 py-8 text-center text-sm text-neutral-500">
+                  No questions found for this topic.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {questions.map((q, index) => (
+                    <Link
+                      key={q.id}
+                      href={`/cs-fundamentals/${topicId}/practice?q=${encodeURIComponent(q.id)}`}
+                      className="w-full text-left px-4 py-4 rounded-2xl transition-all duration-200 flex items-center justify-between group border bg-white border-neutral-100 hover:border-neutral-200 hover:bg-neutral-50 min-h-[72px]"
+                    >
+                      <div className="flex items-center gap-4 flex-1 overflow-hidden">
+                        <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl text-sm font-bold bg-neutral-100 text-neutral-600 group-hover:bg-neutral-200 transition-colors">
+                          {index + 1}
+                        </div>
+                        <div className="flex flex-col overflow-hidden">
+                          <span className="text-sm md:text-base font-semibold truncate text-neutral-900">
+                            {q.text}
+                          </span>
+                          <span className="text-xs text-neutral-400">
+                            Multiple choice + Written
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex flex-col overflow-hidden">
-                        <span className="text-sm md:text-base font-semibold truncate text-neutral-900">
-                          {q.text}
-                        </span>
-                        <span className="text-xs text-neutral-400">
-                          {/* Will change to Question.type later (have both MCQ+Written) */}
-                          {q.type === 'mcq' ? 'Multiple choice' : 'Written'}
-                        </span>
-                      </div>
-                    </div>
 
-                    <div className="text-xs font-semibold text-neutral-400 group-hover:text-neutral-700 transition-colors">
-                      Open
-                    </div>
-                  </Link>
-                ))}
-              </div>
+                      <div className="text-xs font-semibold text-neutral-400 group-hover:text-neutral-700 transition-colors">
+                        Open
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

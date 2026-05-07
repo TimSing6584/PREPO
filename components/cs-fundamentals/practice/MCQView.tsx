@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { CheckCircle2, XCircle } from 'lucide-react'
 
@@ -8,20 +8,44 @@ interface MCQViewProps {
   options: string[]
   correctAnswer: number
   onComplete: (isCorrect: boolean) => void
+  initialSelectedOption?: number | null
+  initialIsSubmitted?: boolean
+  onProgressChange?: (progress: { selectedOption: number | null; isSubmitted: boolean; isCorrect: boolean | null }) => void
 }
 
 export default function MCQView({
   options,
   correctAnswer,
-  onComplete
+  onComplete,
+  initialSelectedOption = null,
+  initialIsSubmitted = false,
+  onProgressChange,
 }: MCQViewProps) {
-  const [selectedOption, setSelectedOption] = useState<number | null>(null)
-  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [selectedOption, setSelectedOption] = useState<number | null>(initialSelectedOption)
+  const [isSubmitted, setIsSubmitted] = useState(initialIsSubmitted)
+
+  useEffect(() => {
+    setSelectedOption(initialSelectedOption)
+  }, [initialSelectedOption])
+
+  useEffect(() => {
+    setIsSubmitted(initialIsSubmitted)
+  }, [initialIsSubmitted])
+
+  const saveProgress = (nextSelectedOption: number | null, nextIsSubmitted: boolean) => {
+    onProgressChange?.({
+      selectedOption: nextSelectedOption,
+      isSubmitted: nextIsSubmitted,
+      isCorrect: nextIsSubmitted && nextSelectedOption !== null ? nextSelectedOption === correctAnswer : null,
+    })
+  }
 
   const handleSubmit = () => {
     if (selectedOption === null) return
+    const isCorrect = selectedOption === correctAnswer
     setIsSubmitted(true)
-    onComplete(selectedOption === correctAnswer)
+    saveProgress(selectedOption, true)
+    onComplete(isCorrect)
   }
 
   return (
@@ -52,7 +76,10 @@ export default function MCQView({
             <button
               key={index}
               disabled={isSubmitted}
-              onClick={() => setSelectedOption(index)}
+              onClick={() => {
+                setSelectedOption(index)
+                saveProgress(index, false)
+              }}
               className={cn(
                 "w-full text-left p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-between group",
                 borderClass,

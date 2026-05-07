@@ -1,26 +1,36 @@
 'use client'
 
-import { CheckCircle2, Circle, Menu } from 'lucide-react'
-import { Question } from '@/data/mockData'
+import { CheckCircle2, Menu } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import type { PracticeQuestion } from './types'
 
 interface QuestionSidebarProps {
-  questions: Question[]
+  questions: PracticeQuestion[]
   currentQuestionId: string
   onSelectQuestion: (id: string) => void
   completedIds: string[]
+  onRedoAll?: () => void
 }
 
 export default function QuestionSidebar({
   questions,
   currentQuestionId,
   onSelectQuestion,
-  completedIds
+  completedIds,
+  onRedoAll,
 }: QuestionSidebarProps) {
   return (
     <div className="w-full h-full flex flex-col bg-transparent">
       <div className="px-6 py-4 border-b border-neutral-100 flex items-center justify-between">
-        <h2 className="text-lg font-bold text-[#101010]">Questions ({questions.length})</h2>
+        <div className="flex flex-col">
+          <h2 className="text-lg font-bold text-[#101010]">Questions ({questions.length})</h2>
+          <button
+            onClick={onRedoAll}
+            className="mt-1 text-xs font-semibold text-neutral-500 hover:text-neutral-900 transition-colors text-left"
+          >
+            Redo all
+          </button>
+        </div>
         <Menu className="w-5 h-5 text-neutral-400 md:hidden" />
       </div>
       
