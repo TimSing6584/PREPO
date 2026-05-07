@@ -1,11 +1,12 @@
 import Navbar from '@/components/main/Navbar'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Star } from 'lucide-react'
 import Link from 'next/link'
 import { getTopicPracticeData } from '@/app/utils/server/csFundamentals'
 
 export default async function PracticePage({ params }: { params: Promise<{ topicId: string }> }) {
   const { topicId } = await params
   const { topicName, questions } = await getTopicPracticeData(topicId)
+  const starredCount = questions.filter((question) => question.isStarred).length
 
   return (
     <div className="main-frame px-6 md:px-12 pb-6 md:pb-12 pt-4 md:pt-6 relative overflow-hidden flex flex-col gap-4 md:gap-6 font-geist-sans">
@@ -40,7 +41,7 @@ export default async function PracticePage({ params }: { params: Promise<{ topic
                 </div>
 
                 <div className="text-xs font-semibold text-neutral-400">
-                  {questions.length} questions
+                  {questions.length} questions{starredCount > 0 ? ` • ${starredCount} starred` : ''}
                 </div>
               </div>
 
@@ -70,8 +71,13 @@ export default async function PracticePage({ params }: { params: Promise<{ topic
                         </div>
                       </div>
 
-                      <div className="text-xs font-semibold text-neutral-400 group-hover:text-neutral-700 transition-colors">
-                        Open
+                      <div className="flex items-center gap-3">
+                        {q.isStarred ? (
+                          <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                        ) : null}
+                        <div className="text-xs font-semibold text-neutral-400 group-hover:text-neutral-700 transition-colors">
+                          Open
+                        </div>
                       </div>
                     </Link>
                   ))}

@@ -5,5 +5,6 @@ export type PracticeQuestion = {
   options: string[];
   correctOption: number;
   correctWritten: string;
+  isStarred?: boolean;
 };
 
