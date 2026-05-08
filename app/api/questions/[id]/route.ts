@@ -8,7 +8,7 @@ type RouteContext = {
   params: Promise<{ id: string }>;
 };
 
-async function ensureQuestionAccess(questionId: string) {
+async function ensureQuestionWriteAccess(questionId: string) {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
 
@@ -18,7 +18,7 @@ async function ensureQuestionAccess(questionId: string) {
 
   const question = await prisma.question.findUnique({
     where: { id: questionId },
-    select: { id: true, createdById: true, deleted: true },
+    select: { id: true, createdById: true, type: true, deleted: true },
   });
 
   if (!question || question.deleted) {
@@ -28,7 +28,7 @@ async function ensureQuestionAccess(questionId: string) {
   const isAdmin = await roleChecker("admin");
   const isOwner = question.createdById === user.id;
 
-  if (!isAdmin && !isOwner) {
+  if (!isAdmin && !(question.type === QuestionType.PERSONALIZED && isOwner)) {
     return { error: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
   }
 
@@ -88,7 +88,7 @@ export async function GET(_: NextRequest, context: RouteContext) {
 export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
     const { id } = await context.params;
-    const access = await ensureQuestionAccess(id);
+    const access = await ensureQuestionWriteAccess(id);
 
     if ("error" in access) {
       return access.error;
@@ -127,7 +127,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 export async function DELETE(_: NextRequest, context: RouteContext) {
   try {
     const { id } = await context.params;
-    const access = await ensureQuestionAccess(id);
+    const access = await ensureQuestionWriteAccess(id);
 
     if ("error" in access) {
       return access.error;
