@@ -202,6 +202,14 @@ export default function DashboardClient({ topics }: { topics: Topic[] }) {
               {typedCount < greetingText.length ? <span className="inline-block w-[0.6ch] align-baseline animate-pulse">|</span> : null}
             </h1>
             <p className="text-lg md:text-2xl text-neutral-500 font-semibold">What do you want to master?</p>
+            <div className="pt-2">
+              <Link
+                href="/questions/create"
+                className="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-4 py-2 text-sm font-semibold text-primary-700 transition-colors hover:bg-primary-100"
+              >
+                + Create your own personalized question
+              </Link>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">

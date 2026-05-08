@@ -40,8 +40,16 @@ export default async function PracticePage({ params }: { params: Promise<{ topic
                   </p>
                 </div>
 
-                <div className="text-xs font-semibold text-neutral-400">
-                  {questions.length} questions{starredCount > 0 ? ` • ${starredCount} starred` : ''}
+                <div className="flex items-center gap-3">
+                  <Link
+                    href={`/questions/create?topicId=${encodeURIComponent(topicId)}`}
+                    className="inline-flex items-center rounded-full border border-primary-200 bg-primary-50 px-3 py-1.5 text-xs font-semibold text-primary-700 hover:bg-primary-100 transition-colors"
+                  >
+                    + Create my question
+                  </Link>
+                  <div className="text-xs font-semibold text-neutral-400">
+                    {questions.length} questions{starredCount > 0 ? ` • ${starredCount} starred` : ''}
+                  </div>
                 </div>
               </div>
 
