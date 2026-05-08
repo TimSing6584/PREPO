@@ -1,5 +1,7 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { NextRequest, NextResponse } from "next/server";
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { roleChecker } from "@/app/utils/auth";
 
 const s3Client = new S3Client({
     region: process.env.AWS_REGION,
@@ -25,6 +27,13 @@ async function uploadFileToS3(file: Buffer, fileName: string, contentType: strin
 
 export async function POST(request: NextRequest) {
     try {
+        const { getUser } = getKindeServerSession();
+        const user = await getUser();
+        if (!user) {
+            return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+        }
+
+        const isAdmin = await roleChecker("admin");
         const formData = await request.formData();
         const file = formData.get("file");
         const folder_name = formData.get("folder_name") as string || "default";
@@ -32,7 +41,9 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "File is required." }, { status: 400 });
         }
 
-        const allowedTypes = ["image/png", "image/jpeg", "image/webp", "image/svg+xml", "image/jpg"];
+        const allowedTypes = isAdmin
+            ? ["image/png", "image/jpeg", "image/webp", "image/svg+xml", "image/jpg"]
+            : ["image/png", "image/jpeg", "image/webp", "image/jpg"];
 
         if (!allowedTypes.includes(file.type)) {
             return NextResponse.json({ error: "Unsupported image type." }, { status: 400 });
