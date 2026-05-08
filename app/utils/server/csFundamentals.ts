@@ -41,6 +41,14 @@ export async function getTopicPracticeData(topicId: string): Promise<TopicPracti
       correctOption: true,
       correctWritten: true,
       createdAt: true,
+      starredBy: {
+        where: {
+          userKindeId,
+        },
+        select: {
+          id: true,
+        },
+      },
     },
     orderBy: { createdAt: "asc" },
   });
@@ -54,6 +62,7 @@ export async function getTopicPracticeData(topicId: string): Promise<TopicPracti
       options: question.options,
       correctOption: question.correctOption,
       correctWritten: question.correctWritten,
+      isStarred: question.starredBy.length > 0,
     })),
   };
 }

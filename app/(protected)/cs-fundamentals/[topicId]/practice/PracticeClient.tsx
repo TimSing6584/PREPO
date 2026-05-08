@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Navbar from '@/components/main/Navbar'
 import QuestionSidebar from '@/components/cs-fundamentals/practice/QuestionSidebar'
 import QuestionCard from '@/components/cs-fundamentals/practice/QuestionCard'
@@ -45,9 +45,14 @@ export default function PracticeClient({
   questions,
   initialQuestionId,
 }: PracticeClientProps) {
+  const initialStarredIds = useMemo(
+    () => questions.filter((question) => question.isStarred).map((question) => question.id),
+    [questions],
+  )
   const [currentQuestionId, setCurrentQuestionId] = useState(initialQuestionId)
   const [progressByQuestion, setProgressByQuestion] = useState<Record<string, StoredQuestionProgress>>({})
-  const [starredIds, setStarredIds] = useState<string[]>([])
+  const [starredIds, setStarredIds] = useState<string[]>(initialStarredIds)
+  const [questionFilter, setQuestionFilter] = useState<'all' | 'starred'>('all')
   const [hasHydratedProgress, setHasHydratedProgress] = useState(false)
   const [showTtlNotice, setShowTtlNotice] = useState(true)
 
@@ -97,11 +102,9 @@ export default function PracticeClient({
     localStorage.setItem(storageKeyForTopic(userId, topicId), JSON.stringify(payload))
   }, [hasHydratedProgress, progressByQuestion, topicId, userId])
 
-  const currentQuestion =
-    questions.find((question) => question.id === currentQuestionId) || questions[0]
-  const currentQuestionIndex = currentQuestion
-    ? questions.findIndex((question) => question.id === currentQuestion.id)
-    : -1
+  useEffect(() => {
+    setStarredIds(initialStarredIds)
+  }, [initialStarredIds, topicId])
 
   const completedIds = questions
     .filter((question) => {
@@ -112,9 +115,47 @@ export default function PracticeClient({
     })
     .map((question) => question.id)
 
-  const toggleStar = (id: string) => {
-    setStarredIds((prev) => (prev.includes(id) ? prev.filter((starredId) => starredId !== id) : [...prev, id]))
+  const filteredQuestions =
+    questionFilter === 'starred'
+      ? questions.filter((question) => starredIds.includes(question.id))
+      : questions
+
+  const toggleStar = async (id: string) => {
+    const willStar = !starredIds.includes(id)
+    setStarredIds((prev) => (willStar ? [...prev, id] : prev.filter((starredId) => starredId !== id)))
+
+    try {
+      const response = await fetch('/api/starred-questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          questionId: id,
+          starred: willStar,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update starred question')
+      }
+    } catch {
+      // Revert optimistic update on request failure.
+      setStarredIds((prev) => (willStar ? prev.filter((starredId) => starredId !== id) : [...prev, id]))
+    }
   }
+
+  useEffect(() => {
+    if (questionFilter !== 'starred') return
+    if (!filteredQuestions.length) return
+    if (!filteredQuestions.some((question) => question.id === currentQuestionId)) {
+      setCurrentQuestionId(filteredQuestions[0].id)
+    }
+  }, [currentQuestionId, filteredQuestions, questionFilter])
+
+  const currentQuestion =
+    filteredQuestions.find((question) => question.id === currentQuestionId) || filteredQuestions[0]
+  const currentQuestionIndex = currentQuestion
+    ? filteredQuestions.findIndex((question) => question.id === currentQuestion.id)
+    : -1
 
   return (
     <div className="main-frame px-6 md:px-12 pb-6 md:pb-12 pt-4 md:pt-6 relative overflow-hidden flex flex-col gap-4 md:gap-6 font-geist-sans">
@@ -123,10 +164,13 @@ export default function PracticeClient({
       <div className="flex-1 flex min-h-0 -mx-6 md:-mx-12 -mb-6 md:-mb-12">
         <div className="hidden md:block w-80 h-full flex-shrink-0 border-r border-neutral-100 bg-white/50">
           <QuestionSidebar
-            questions={questions}
+            questions={filteredQuestions}
             currentQuestionId={currentQuestionId}
             onSelectQuestion={setCurrentQuestionId}
             completedIds={completedIds}
+            starredIds={starredIds}
+            filter={questionFilter}
+            onFilterChange={setQuestionFilter}
             onRedoAll={() => setProgressByQuestion({})}
           />
         </div>
@@ -166,7 +210,11 @@ export default function PracticeClient({
               </div>
             ) : null}
 
-            {currentQuestion ? (
+            {questionFilter === 'starred' && starredIds.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-amber-200 bg-amber-50 px-4 py-10 text-center text-sm text-amber-800">
+                You have no starred questions yet. Click the star icon on any question to save it for later review.
+              </div>
+            ) : currentQuestion ? (
               <QuestionCard
                 key={currentQuestion.id}
                 question={currentQuestion}
@@ -174,14 +222,14 @@ export default function PracticeClient({
                 onToggleStar={() => toggleStar(currentQuestion.id)}
                 onPreviousQuestion={() => {
                   if (currentQuestionIndex <= 0) return
-                  setCurrentQuestionId(questions[currentQuestionIndex - 1].id)
+                  setCurrentQuestionId(filteredQuestions[currentQuestionIndex - 1].id)
                 }}
                 onNextQuestion={() => {
-                  if (currentQuestionIndex < 0 || currentQuestionIndex >= questions.length - 1) return
-                  setCurrentQuestionId(questions[currentQuestionIndex + 1].id)
+                  if (currentQuestionIndex < 0 || currentQuestionIndex >= filteredQuestions.length - 1) return
+                  setCurrentQuestionId(filteredQuestions[currentQuestionIndex + 1].id)
                 }}
                 canGoPrevious={currentQuestionIndex > 0}
-                canGoNext={currentQuestionIndex >= 0 && currentQuestionIndex < questions.length - 1}
+                canGoNext={currentQuestionIndex >= 0 && currentQuestionIndex < filteredQuestions.length - 1}
                 onRedo={() =>
                   setProgressByQuestion((prev) => {
                     const next = { ...prev }
