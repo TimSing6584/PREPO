@@ -44,28 +44,41 @@ export async function POST(request: NextRequest){
         // Check if user has admin role
         const isAdmin = await roleChecker("admin");
 
-        const { statement, topicId, correctWritten, options, correctOption, imageUrl } = await request.json();
-        // Be careful!!! correctOption can be 0 (int), therefore !correctOption can reject it
-        if(!statement || !topicId || !correctWritten || correctOption === undefined || correctOption === null){
-            return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
+        const { questions } = await request.json();
+        if (!Array.isArray(questions) || questions.length === 0) {
+            return NextResponse.json({ error: "Questions must be a non-empty array." }, { status: 400 });
         }
-        if(!options || !(options instanceof Array) || options.length < 2){
-            return NextResponse.json({ error: "At least 2 MCQ options are required." }, { status: 400 });
+
+        // Make sure non-admins can only create one question at a time.
+        if (!isAdmin &&  questions.length > 1) {
+            return NextResponse.json({ error: "Can't create multiple questions at once." }, { status: 403 });
         }
-        // Create new question in database
-        const question = await prisma.question.create({
-            data: {
-                statement,
-                topicId,
-                correctWritten,
-                options,
-                correctOption,
-                imageUrl,
+        // Validate all questions first before creating any
+        const invalidIndex = questions.findIndex((q) =>
+            !q.statement || !q.topicId || !q.correctWritten ||
+            !Array.isArray(q.options) || q.options.length < 2 ||
+            q.correctOption === undefined || q.correctOption === null ||
+            q.correctOption < 0 || q.correctOption >= q.options.length
+        );
+        if (invalidIndex !== -1) {
+            return NextResponse.json({
+                error: `Question at index ${invalidIndex} has invalid or missing fields.`
+            }, { status: 400 });
+        }
+        // All valid — create all at once
+        await prisma.question.createMany({
+            data: questions.map((q) => ({
+                statement: q.statement,
+                topicId: q.topicId,
+                correctWritten: q.correctWritten,
+                options: q.options,
+                correctOption: q.correctOption,
+                imageUrl: q.imageUrl ?? null,
                 type: isAdmin ? QuestionType.DEFAULT : QuestionType.PERSONALIZED,
                 createdById: userKindeId
-            }
+            }))
         });
-        return NextResponse.json({ success: true, data: question });
+        return NextResponse.json({ success: true });
     }
     catch(error){
         const message = error instanceof Error ? error.message : "Unknown error";

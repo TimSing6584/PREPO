@@ -5,6 +5,17 @@ import { Upload, Plus, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import TipTapEditor from '@/components/TipTap/TipTapEditor';
 import { fetchTopics, type Topic } from '@/app/utils/api/topics';
+import Image from 'next/image';
+
+// Define the expected structure of each question in the JSON file
+type JsonQuestion = {
+  statement: string;
+  topicId: string;
+  correctWritten: string;
+  options: string[];
+  correctOption: number;
+  imageUrl?: string | null;
+};
 
 export default function CreateQuestionPage() {
   const router = useRouter();
@@ -14,6 +25,7 @@ export default function CreateQuestionPage() {
     answer?: string;
     options?: string;
     correctOption?: string;
+    jsonFile?: string;
   }>({});
   const [jsonFile, setJsonFile] = useState<File | null>(null);
   const [selectedTopic, setSelectedTopic] = useState('');
@@ -26,6 +38,9 @@ export default function CreateQuestionPage() {
   const [options, setOptions] = useState<string[]>(['', '']);
   const [correctOption, setCorrectOption] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isJsonParsing, setIsJsonParsing] = useState(false);
+  // lock input sections while loading topics, parsing JSON, or submitting
+  const isLocked = isLoadingTopics || isJsonParsing || isSubmitting;
 
   useEffect(() => {
     return () => {
@@ -57,7 +72,9 @@ export default function CreateQuestionPage() {
 
   const handleJsonUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
+      setIsJsonParsing(true);
       setJsonFile(e.target.files[0]);
+      setIsJsonParsing(false);
     }
   };
 
@@ -97,25 +114,33 @@ export default function CreateQuestionPage() {
     return node.content.some((child) => hasNonEmptyText(child));
   };
 
-  const validate = () => {
+  // Check if single upload format has empty inputs
+  const isSingleUploadEmpty = (): boolean => {
+    const empty = !question.trim() && !selectedTopic.trim() && !answer.trim();
+    if (empty) {
+      setErrors((prev) => ({ ...prev, question: 'Please fill in a question or upload a JSON file.' }));
+    }
+    return empty;
+  };
+  // Check if json upload format has empty inputs
+  const isJsonEmpty = (): boolean => {
+    const empty = !jsonFile;
+    if (empty) {
+      setErrors((prev) => ({ ...prev, jsonFile: 'Please upload a JSON file or fill in a question.' }));
+    }
+    return empty;
+  };
+
+  // Validate the structure of question form for single upload
+  const validate_single_upload = (): boolean => {
     const newErrors: {
-      selectedTopic?: string;
-      question?: string;
-      answer?: string;
       options?: string;
       correctOption?: string;
+      answer?: string;
     } = {};
 
-    if (!selectedTopic.trim()) {
-      newErrors.selectedTopic = 'Topic is required.';
-    }
-
-    if (!question.trim()) {
-      newErrors.question = 'Question is required.';
-    }
-
-    const trimmedOptions = options.map((option) => option.trim());
-    if (trimmedOptions.length < 2 || trimmedOptions.some((option) => option.length === 0)) {
+    const trimmedOptions = options.map((o) => o.trim());
+    if (trimmedOptions.length < 2 || trimmedOptions.some((o) => o.length === 0)) {
       newErrors.options = 'At least 2 options are required and none can be empty.';
     }
 
@@ -138,51 +163,121 @@ export default function CreateQuestionPage() {
       newErrors.answer = 'Answer is required.';
     }
 
-    setErrors(newErrors);
+    setErrors((prev) => ({ ...prev, ...newErrors }));
     return Object.keys(newErrors).length === 0;
   };
+
+  // Check if a single question in JSON file is valid
+  const isValidJsonQuestion = (q: unknown): q is JsonQuestion => {
+    if (!q || typeof q !== 'object') return false;
+    const question = q as Record<string, unknown>;
+
+    return (
+      typeof question.statement === 'string' && question.statement.trim().length > 0 &&
+      typeof question.topicId === 'string' && question.topicId.trim().length > 0 &&
+      typeof question.correctWritten === 'string' && question.correctWritten.trim().length > 0 &&
+      Array.isArray(question.options) && question.options.length >= 2 &&
+      question.options.every((o) => typeof o === 'string' && o.trim().length > 0) &&
+      typeof question.correctOption === 'number' &&
+      question.correctOption >= 0 &&
+      question.correctOption <= question.options.length - 1
+    );
+  };
+
+  const validate_json_upload = async (): Promise<{ valid: boolean; questions: JsonQuestion[] }> => {
+    if (!jsonFile) return { valid: false, questions: [] };
+
+    if (!jsonFile.name.endsWith('.json')) {
+      setErrors((prev) => ({ ...prev, jsonFile: 'File must be a .json file.' }));
+      return { valid: false, questions: [] };
+    }
+
+    let parsed: unknown;
+    try {
+      const text = await jsonFile.text();
+      parsed = JSON.parse(text);
+    } catch {
+      setErrors((prev) => ({ ...prev, jsonFile: 'Invalid JSON format.' }));
+      return { valid: false, questions: [] };
+    }
+
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      setErrors((prev) => ({ ...prev, jsonFile: 'JSON must be a non-empty array of questions.' }));
+      return { valid: false, questions: [] };
+    }
+
+    const invalidIndex = parsed.findIndex((q) => !isValidJsonQuestion(q));
+    if (invalidIndex !== -1) {
+      setErrors((prev) => ({ ...prev, jsonFile: `Question at index ${invalidIndex} has invalid or missing fields.` }));
+      return { valid: false, questions: [] };
+    }
+
+    return { valid: true, questions: parsed as JsonQuestion[] };
+  };
+
 
 
   const handleSubmit = async () => {
     if (isSubmitting) return; // prevent double submissions ,aka race conditions
     setIsSubmitting(true);
     try{
-      // Validate at the client side to check for empty inputs.
-      if (!validate()) {
-        return;
-      }
-      // If there is an image, upload it to S3 and get the URL
-      let uploadedImageUrl: string | null = null;
-      if(image){
-        const s3Response = await fetch('/api/s3-upload', {
-            method: 'POST',
-            body: (() => {
-                const formData = new FormData();
-                formData.append("file", image!);
-                formData.append("folder_name", "questions"); //specify a folder in S3
-                return formData;
-            })()
-        });
-        if (!s3Response.ok) {
-          const uploadError = await s3Response.json().catch(() => ({} as { error?: string }));
-          throw new Error(uploadError.error ?? 'Image upload failed.');
+
+      const singleEmpty = isSingleUploadEmpty();
+      const jsonEmpty = isJsonEmpty();
+
+      // At least one must be provided
+      if (singleEmpty && jsonEmpty) return;
+
+      // If one format exists, it must be valid
+
+      if (!singleEmpty && !validate_single_upload()) return;
+
+      const jsonResult = !jsonEmpty ? await validate_json_upload() : { valid: true, questions: [] as JsonQuestion[] };
+      if (!jsonResult.valid) return;
+
+
+      // Build questions to create
+      let questionsToCreate: JsonQuestion[] = [...jsonResult.questions];
+
+      if(!singleEmpty){
+        // If there is an image, upload it to S3 and get the URL
+        let uploadedImageUrl: string | null = null;
+        if(image){
+          const s3Response = await fetch('/api/s3-upload', {
+              method: 'POST',
+              body: (() => {
+                  const formData = new FormData();
+                  formData.append("file", image!);
+                  formData.append("folder_name", "questions"); //specify a folder in S3
+                  return formData;
+              })()
+          });
+
+          if (!s3Response.ok) {
+            const uploadError = await s3Response.json().catch(() => ({} as { error?: string }));
+            throw new Error(uploadError.error ?? 'Image upload failed.');
+          }
+
+          const { url } = await s3Response.json();
+          uploadedImageUrl = url;
         }
-        const { url } = await s3Response.json();
-        uploadedImageUrl = url;
+
+        questionsToCreate = [...questionsToCreate, {
+          statement: question,
+          topicId: selectedTopic,
+          correctWritten: answer,
+          options,
+          correctOption: correctOption!,
+          imageUrl: uploadedImageUrl,
+        }];
       }
+
 
       // Call API to create question in the backend
       const createResponse = await fetch('/api/questions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          statement: question,
-          topicId: selectedTopic,
-          correctWritten: answer,
-          options: options,
-          correctOption: correctOption,
-          imageUrl: uploadedImageUrl,
-        })
+        body: JSON.stringify({ questions: questionsToCreate })
       });
       if (!createResponse.ok) {
         const createError = await createResponse.json().catch(() => ({} as { error?: string }));
@@ -238,7 +333,7 @@ export default function CreateQuestionPage() {
                 setErrors((prev) => ({ ...prev, selectedTopic: undefined }));
               }
             }}
-            disabled={isLoadingTopics}
+            disabled={isLocked}
             className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
               errors.selectedTopic ? 'border-red-400' : 'border-gray-300'
             }`}
@@ -267,6 +362,7 @@ export default function CreateQuestionPage() {
               Question <span className="text-red-500">*</span>
             </label>
             <input
+              disabled={isLocked}
               type="text"
               value={question}
               onChange={(e) => {
@@ -288,19 +384,21 @@ export default function CreateQuestionPage() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Answer <span className="text-red-500">*</span>
             </label>
-            <TipTapEditor
-              initialContent="<p></p>"
-              onChange={(content) => {
-                setAnswer(JSON.stringify(content));
-                if (errors.answer) {
-                  setErrors((prev) => ({ ...prev, answer: undefined }));
-                }
-              }}
-              containerClassName={`w-full rounded-lg border bg-white ${
-                errors.answer ? 'border-red-400' : 'border-gray-300'
-              }`}
-              editorClassName="min-h-[150px] bg-white p-3 text-zinc-900 sm:min-h-[180px] sm:p-4"
-            />
+            <div className={isLocked ? 'opacity-50 pointer-events-none' : ''}>
+              <TipTapEditor
+                initialContent="<p></p>"
+                onChange={(content) => {
+                  setAnswer(JSON.stringify(content));
+                  if (errors.answer) {
+                    setErrors((prev) => ({ ...prev, answer: undefined }));
+                  }
+                }}
+                containerClassName={`w-full rounded-lg border bg-white ${
+                  errors.answer ? 'border-red-400' : 'border-gray-300'
+                }`}
+                editorClassName="min-h-[150px] bg-white p-3 text-zinc-900 sm:min-h-[180px] sm:p-4"
+              />
+            </div>
             {errors.answer ? (
               <p className="mt-2 text-xs text-red-500">{errors.answer}</p>
             ) : (
@@ -315,7 +413,7 @@ export default function CreateQuestionPage() {
             </label>
             {imagePreviewUrl ? (
               <div className="mb-3 flex justify-center">
-                <img
+                <Image
                   src={imagePreviewUrl}
                   alt="Selected question image preview"
                   className="max-h-48 rounded-lg border border-gray-200 object-contain"
@@ -330,7 +428,7 @@ export default function CreateQuestionPage() {
                 className="hidden"
                 id="image-upload"
               />
-              <label htmlFor="image-upload" className="cursor-pointer">
+              <label htmlFor="image-upload" className={isLocked ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}>
                 <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
                 <p className="text-sm text-gray-600">
                   {image ? image.name : 'Upload your image'}
@@ -354,6 +452,7 @@ export default function CreateQuestionPage() {
             {options.map((option, index) => (
               <div key={index} className="flex items-center gap-3">
                 <input
+                  disabled={isLocked}
                   type="radio"
                   name="correctOption"
                   checked={correctOption === index}
@@ -386,6 +485,7 @@ export default function CreateQuestionPage() {
                 </div>
                 {options.length > 2 && (
                   <button
+                    disabled={isLocked}
                     onClick={() => removeOption(index)}
                     className="p-2 text-gray-400 hover:text-red-500 transition-colors"
                   >
@@ -400,6 +500,7 @@ export default function CreateQuestionPage() {
 
           {/* Add More Options Button */}
           <button
+            disabled={isLocked}
             onClick={addOption}
             className="mt-4 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
           >
@@ -418,10 +519,15 @@ export default function CreateQuestionPage() {
           Cancel
         </button>
         <button
+          disabled={isLocked}
           onClick={handleSubmit}
-          className="px-6 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+          className={`px-6 py-2.5 rounded-lg text-white transition-colors ${
+            isLocked
+              ? 'bg-primary-300 cursor-not-allowed'
+              : 'bg-primary-600 hover:bg-primary-700'
+          }`}
         >
-          Submit
+          {isSubmitting ? 'Submitting...' : 'Submit'}
         </button>
       </div>
     </div>
