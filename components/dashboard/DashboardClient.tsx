@@ -203,12 +203,20 @@ export default function DashboardClient({ topics }: { topics: Topic[] }) {
             </h1>
             <p className="text-lg md:text-2xl text-neutral-500 font-semibold">What do you want to master?</p>
             <div className="pt-2">
-              <Link
-                href="/questions/create"
-                className="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-4 py-2 text-sm font-semibold text-primary-700 transition-colors hover:bg-primary-100"
-              >
-                + Create your own personalized question
-              </Link>
+              <div className="flex items-center justify-center gap-2 flex-wrap">
+                <Link
+                  href="/questions/create"
+                  className="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-4 py-2 text-sm font-semibold text-primary-700 transition-colors hover:bg-primary-100"
+                >
+                  + Create your own personalized question
+                </Link>
+                <Link
+                  href="/questions"
+                  className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 transition-colors hover:bg-neutral-100"
+                >
+                  Manage personalized questions
+                </Link>
+              </div>
             </div>
           </div>
 
