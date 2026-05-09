@@ -63,14 +63,14 @@ export default function QuestionCard({
 
   return (
     <div className="bg-white rounded-[2rem] border border-neutral-100 shadow-sm p-8 md:p-12 h-fit min-h-[600px] flex flex-col relative overflow-hidden">
-      
+
       {/* Header */}
       <div className="flex items-start justify-between mb-8">
          <div className="space-y-4 max-w-2xl">
             <div className="flex items-center gap-4">
                {/* Mode Switcher */}
                <div className="bg-neutral-100 rounded-lg p-1 flex items-center gap-1">
-                  <button 
+                  <button
                     onClick={() => {
                       setMode('mcq')
                       onProgressChange?.({ ...progress, mode: 'mcq' })
@@ -82,7 +82,7 @@ export default function QuestionCard({
                   >
                     Multiple choice
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       setMode('written')
                       onProgressChange?.({ ...progress, mode: 'written' })
@@ -95,12 +95,12 @@ export default function QuestionCard({
                     Written
                   </button>
                </div>
-               
+
                <div className="h-6 w-[1px] bg-neutral-200" />
-               
+
                {/* Star Button with Reminder */}
                <div className="relative">
-                 <button 
+                 <button
                     onClick={() => {
                       onToggleStar()
                       setShowStarReminder(false)
@@ -113,7 +113,7 @@ export default function QuestionCard({
                       showStarReminder && "animate-pulse text-amber-400"
                     )} />
                  </button>
-                 
+
                  {showStarReminder && !starred && (
                    <div className="absolute top-8 left-1/2 -translate-x-1/2 w-48 bg-neutral-900 text-white text-xs p-3 rounded-xl shadow-xl z-50 animate-in fade-in slide-in-from-top-2">
                       <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-neutral-900 rotate-45" />
@@ -153,8 +153,8 @@ export default function QuestionCard({
       {/* Content */}
       <div className="flex-1">
         {mode === 'mcq' && question.options ? (
-          <MCQView 
-            options={question.options} 
+          <MCQView
+            options={question.options}
             correctAnswer={question.correctOption}
             initialSelectedOption={progress?.mcq?.selectedOption ?? null}
             initialIsSubmitted={progress?.mcq?.isSubmitted ?? false}
