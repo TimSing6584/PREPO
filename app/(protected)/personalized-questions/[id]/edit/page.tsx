@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useState, type ChangeEvent, type ComponentProps } from 'react';
-import { Upload, Plus, X } from 'lucide-react';
+import { Upload, Plus, X, ArrowLeft } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import TipTapEditor from '@/components/TipTap/TipTapEditor';
 import { fetchTopics, type Topic } from '@/app/utils/api/topics';
 import Navbar from '@/components/main/Navbar';
@@ -249,6 +250,15 @@ export default function EditPersonalizedQuestionPage() {
       <div className="flex-1 -mx-6 md:-mx-12 -mb-6 md:-mb-12">
         <div className="h-full overflow-y-auto p-4 md:p-6 bg-neutral-50/30">
           <div className="max-w-4xl mx-auto space-y-6 pb-20">
+            <div className="flex items-center justify-between px-2">
+              <Link
+                href="/personalized-questions"
+                className="inline-flex items-center gap-2 text-xs font-semibold text-neutral-400 hover:text-neutral-900 transition-colors group"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
+                Back to Personalized Questions
+              </Link>
+            </div>
             <div className="bg-white rounded-[2rem] border border-neutral-100 shadow-sm p-6 md:p-10">
               <h1 className="text-lg font-semibold text-gray-900 mb-2">Edit Personalized Question</h1>
               <p className="text-sm text-gray-500 mb-6">Only your personalized questions can be edited here.</p>
