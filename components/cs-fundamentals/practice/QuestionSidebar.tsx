@@ -44,34 +44,36 @@ export default function QuestionSidebar({
             Questions ({totalCount})
           </h2>
 
-          {/* Filter tabs + Redo page — same row */}
+          {/* Filter tabs (all mode only) + Redo page */}
           <div className="mt-2 flex items-center gap-2">
-            <div className="inline-flex items-center gap-1 rounded-lg bg-neutral-100 p-1">
-              <button
-                type="button"
-                onClick={() => onFilterChange('all')}
-                className={cn(
-                  'rounded-md px-2 py-1 text-xs font-semibold transition-colors',
-                  filter === 'all'
-                    ? 'bg-white text-neutral-900 shadow-sm'
-                    : 'text-neutral-500 hover:text-neutral-900',
-                )}
-              >
-                All
-              </button>
-              <button
-                type="button"
-                onClick={() => onFilterChange('starred')}
-                className={cn(
-                  'rounded-md px-2 py-1 text-xs font-semibold transition-colors',
-                  filter === 'starred'
-                    ? 'bg-white text-neutral-900 shadow-sm'
-                    : 'text-neutral-500 hover:text-neutral-900',
-                )}
-              >
-                Starred ({starredIds.length})
-              </button>
-            </div>
+            {filter === 'all' && (
+              <div className="inline-flex items-center gap-1 rounded-lg bg-neutral-100 p-1">
+                <button
+                  type="button"
+                  onClick={() => onFilterChange('all')}
+                  className={cn(
+                    'rounded-md px-2 py-1 text-xs font-semibold transition-colors',
+                    filter === 'all'
+                      ? 'bg-white text-neutral-900 shadow-sm'
+                      : 'text-neutral-500 hover:text-neutral-900',
+                  )}
+                >
+                  All
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onFilterChange('starred')}
+                  className={cn(
+                    'rounded-md px-2 py-1 text-xs font-semibold transition-colors',
+                    filter === 'starred'
+                      ? 'bg-white text-neutral-900 shadow-sm'
+                      : 'text-neutral-500 hover:text-neutral-900',
+                  )}
+                >
+                  Starred ({starredIds.length})
+                </button>
+              </div>
+            )}
 
             {/* Redo page — green button with icon, same line */}
             <button
@@ -167,13 +169,13 @@ export default function QuestionSidebar({
             onClick={() => canGoPrev && onPageChange(page - 1)}
             disabled={!canGoPrev}
             className={cn(
-              'inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors',
+              'group inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all duration-200',
               canGoPrev
-                ? 'border-neutral-200 text-neutral-700 hover:bg-neutral-50'
+                ? 'border-neutral-200 text-neutral-700 hover:bg-neutral-50 hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0'
                 : 'cursor-not-allowed border-neutral-100 text-neutral-300',
             )}
           >
-            <ChevronLeft className="h-3.5 w-3.5" />
+            <ChevronLeft className="h-3.5 w-3.5 transition-transform duration-200 group-hover:-translate-x-0.5" />
             Prev
           </button>
 
@@ -185,14 +187,14 @@ export default function QuestionSidebar({
             onClick={() => canGoNext && onPageChange(page + 1)}
             disabled={!canGoNext}
             className={cn(
-              'inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors',
+              'group inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all duration-200',
               canGoNext
-                ? 'border-neutral-200 text-neutral-700 hover:bg-neutral-50'
+                ? 'border-neutral-200 text-neutral-700 hover:bg-neutral-50 hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0'
                 : 'cursor-not-allowed border-neutral-100 text-neutral-300',
             )}
           >
             Next
-            <ChevronRight className="h-3.5 w-3.5" />
+            <ChevronRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
           </button>
         </div>
       )}

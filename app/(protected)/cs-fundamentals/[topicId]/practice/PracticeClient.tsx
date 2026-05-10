@@ -202,7 +202,7 @@ export default function PracticeClient({
           <div className="max-w-4xl mx-auto space-y-6 pb-20">
             <div className="flex items-center justify-between px-2">
               <Link
-                href={`/cs-fundamentals/${topicId}?page=${pagination.page}`}
+                href={`/cs-fundamentals/${topicId}?page=${pagination.page}&filter=${filter}`}
                 className="inline-flex items-center gap-2 text-xs font-semibold text-neutral-400 hover:text-neutral-900 transition-colors group"
               >
                 <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
