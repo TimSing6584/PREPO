@@ -195,7 +195,7 @@ export default function CreatePersonalizedQuestionPage() {
         throw new Error(createError.error ?? 'Failed to create question.');
       }
 
-      router.push('/questions');
+      router.push('/personalized-questions');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Something went wrong. Please try again.';
       setErrors((prev) => ({ ...prev, question: message }));

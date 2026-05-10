@@ -3,6 +3,8 @@ import Navbar from '@/components/main/Navbar';
 import { QuestionType } from '@/lib/generated/prisma/client';
 import { prisma } from '@/app/utils/db';
 import PersonalizedQuestionsClient from './PersonalizedQuestionsClient';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 
 export default async function PersonalizedQuestionsPage() {
   const { getUser } = getKindeServerSession();
@@ -45,6 +47,15 @@ export default async function PersonalizedQuestionsPage() {
       <div className="flex-1 -mx-6 md:-mx-12 -mb-6 md:-mb-12">
         <div className="h-full overflow-y-auto p-4 md:p-6 bg-neutral-50/30">
           <div className="max-w-4xl mx-auto space-y-6 pb-20">
+            <div className="flex items-center justify-between px-2">
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-2 text-xs font-semibold text-neutral-400 hover:text-neutral-900 transition-colors group"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
+                Back to Dashboard
+              </Link>
+            </div>
             <PersonalizedQuestionsClient initialQuestions={initialQuestions} />
           </div>
         </div>

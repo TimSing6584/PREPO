@@ -62,7 +62,7 @@ export default function PersonalizedQuestionsClient({
           <p className="mt-1 text-sm text-neutral-500">Edit or delete only your personalized questions.</p>
         </div>
         <button
-          onClick={() => router.push('/questions/create')}
+          onClick={() => router.push('/personalized-questions/create')}
           className="px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 transition-colors"
         >
           + Create new
@@ -109,7 +109,7 @@ export default function PersonalizedQuestionsClient({
                   />
                 ) : null}
                 <Link
-                  href={`/questions/${question.id}/edit`}
+                  href={`/personalized-questions/${question.id}/edit`}
                   className="px-3 py-1.5 rounded-lg border border-blue-200 bg-blue-50 text-blue-700 text-sm hover:bg-blue-100 transition-colors"
                 >
                   Edit

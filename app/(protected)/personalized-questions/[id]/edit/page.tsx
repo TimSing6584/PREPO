@@ -234,7 +234,7 @@ export default function EditPersonalizedQuestionPage() {
         throw new Error(updateError.error ?? 'Failed to update question.');
       }
 
-      router.push('/questions');
+      router.push('/personalized-questions');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Something went wrong. Please try again.';
       setErrors((prev) => ({ ...prev, question: message }));
@@ -450,7 +450,7 @@ export default function EditPersonalizedQuestionPage() {
 
             <div className="flex justify-end gap-3">
               <button
-                onClick={() => router.push('/questions')}
+                onClick={() => router.push('/personalized-questions')}
                 className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 Cancel

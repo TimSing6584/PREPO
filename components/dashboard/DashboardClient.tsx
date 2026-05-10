@@ -205,13 +205,13 @@ export default function DashboardClient({ topics }: { topics: Topic[] }) {
             <div className="pt-2">
               <div className="flex items-center justify-center gap-2 flex-wrap">
                 <Link
-                  href="/questions/create"
+                  href="/personalized-questions/create"
                   className="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-4 py-2 text-sm font-semibold text-primary-700 transition-colors hover:bg-primary-100"
                 >
                   + Create your own personalized question
                 </Link>
                 <Link
-                  href="/questions"
+                  href="/personalized-questions"
                   className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 transition-colors hover:bg-neutral-100"
                 >
                   Manage personalized questions
