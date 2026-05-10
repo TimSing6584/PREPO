@@ -12,9 +12,11 @@ interface QuestionSidebarProps {
   completedIds: string[]
   starredIds: string[]
   filter: QuestionFilter
+  showFilterTabs: boolean
   onFilterChange: (filter: QuestionFilter) => void
   onRedoPage?: () => void
   pagination: PaginationMeta
+  globalNumberById?: Record<string, number>
   onPageChange: (page: number) => void
 }
 
@@ -25,9 +27,11 @@ export default function QuestionSidebar({
   completedIds,
   starredIds,
   filter,
+  showFilterTabs,
   onFilterChange,
   onRedoPage,
   pagination,
+  globalNumberById,
   onPageChange,
 }: QuestionSidebarProps) {
   const { page, totalPages, totalCount } = pagination
@@ -46,14 +50,16 @@ export default function QuestionSidebar({
 
           {/* Filter tabs (all mode only) + Redo page */}
           <div className="mt-2 flex items-center gap-2">
-            {filter === 'all' && (
+            {showFilterTabs && (
               <div className="inline-flex items-center gap-1 rounded-lg bg-neutral-100 p-1">
                 <button
                   type="button"
                   onClick={() => onFilterChange('all')}
                   className={cn(
                     'rounded-md px-2 py-1 text-xs font-semibold transition-colors',
-                    'bg-white text-neutral-900 shadow-sm',
+                    filter === 'all'
+                      ? 'bg-white text-neutral-900 shadow-sm'
+                      : 'text-neutral-500 hover:text-neutral-900',
                   )}
                 >
                   All
@@ -63,7 +69,9 @@ export default function QuestionSidebar({
                   onClick={() => onFilterChange('starred')}
                   className={cn(
                     'rounded-md px-2 py-1 text-xs font-semibold transition-colors',
-                    'text-neutral-500 hover:text-neutral-900',
+                    filter === 'starred'
+                      ? 'bg-white text-neutral-900 shadow-sm'
+                      : 'text-neutral-500 hover:text-neutral-900',
                   )}
                 >
                   Starred ({starredIds.length})
@@ -91,8 +99,7 @@ export default function QuestionSidebar({
         {questions.map((q, index) => {
           const isActive = q.id === currentQuestionId
           const isCompleted = completedIds.includes(q.id)
-          // Global question number across all pages
-          const globalNumber = (pagination.page - 1) * pagination.pageSize + index + 1
+          const globalNumber = globalNumberById?.[q.id] ?? (pagination.page - 1) * pagination.pageSize + index + 1
 
           return (
             <button

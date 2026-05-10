@@ -63,6 +63,9 @@ export default function PracticeClient({
   const [currentQuestionId, setCurrentQuestionId] = useState(initialQuestionId)
   const [progressByQuestion, setProgressByQuestion] = useState<Record<string, StoredQuestionProgress>>({})
   const [starredIds, setStarredIds] = useState<string[]>(initialStarredIds)
+  const [sidebarFilter, setSidebarFilter] = useState<QuestionFilter>(
+    filter === 'starred' ? 'starred' : 'all',
+  )
   const [hasHydratedProgress, setHasHydratedProgress] = useState(false)
   const [showTtlNotice, setShowTtlNotice] = useState(true)
 
@@ -120,17 +123,47 @@ export default function PracticeClient({
     setStarredIds(initialStarredIds)
   }, [initialStarredIds, topicId])
 
+  useEffect(() => {
+    setSidebarFilter(filter === 'starred' ? 'starred' : 'all')
+  }, [filter, topicId])
+
+  const sidebarQuestions = useMemo(() => {
+    if (filter === 'starred') return questions
+    if (sidebarFilter === 'starred') {
+      return questions.filter((q) => starredIds.includes(q.id))
+    }
+    return questions
+  }, [filter, questions, sidebarFilter, starredIds])
+
+  const globalNumberById = useMemo(
+    () =>
+      Object.fromEntries(
+        questions.map((q, index) => [q.id, (pagination.page - 1) * pagination.pageSize + index + 1]),
+      ),
+    [questions, pagination.page, pagination.pageSize],
+  )
+
+  useEffect(() => {
+    if (sidebarQuestions.length === 0) {
+      if (currentQuestionId !== '') setCurrentQuestionId('')
+      return
+    }
+    if (!sidebarQuestions.some((q) => q.id === currentQuestionId)) {
+      setCurrentQuestionId(sidebarQuestions[0].id)
+    }
+  }, [sidebarQuestions, currentQuestionId])
+
   // Derived state
-  const completedIds = questions
+  const completedIds = sidebarQuestions
     .filter((q) => {
       const progress = progressByQuestion[q.id]
       return progress?.mcq?.isSubmitted === true || (progress?.written?.draft ?? '').trim().length > 0
     })
     .map((q) => q.id)
 
-  const currentQuestion = questions.find((q) => q.id === currentQuestionId) ?? questions[0]
+  const currentQuestion = sidebarQuestions.find((q) => q.id === currentQuestionId) ?? sidebarQuestions[0]
   const currentIndex = currentQuestion
-    ? questions.findIndex((q) => q.id === currentQuestion.id)
+    ? sidebarQuestions.findIndex((q) => q.id === currentQuestion.id)
     : -1
 
   // Page navigation (URL-based)
@@ -143,7 +176,8 @@ export default function PracticeClient({
   }
 
   function handleFilterChange(newFilter: QuestionFilter) {
-    router.push(buildUrl(1, newFilter))
+    if (filter === 'starred') return
+    setSidebarFilter(newFilter)
   }
 
   // Redo current page
@@ -184,15 +218,17 @@ export default function PracticeClient({
         {/* Sidebar */}
         <div className="hidden md:block w-80 h-full flex-shrink-0 border-r border-neutral-100 bg-white/50">
           <QuestionSidebar
-            questions={questions}
+            questions={sidebarQuestions}
             currentQuestionId={currentQuestionId}
             onSelectQuestion={setCurrentQuestionId}
             completedIds={completedIds}
             starredIds={starredIds}
-            filter={filter}
+            filter={sidebarFilter}
+            showFilterTabs={filter === 'all'}
             onFilterChange={handleFilterChange}
             onRedoPage={redoCurrentPage}
             pagination={pagination}
+            globalNumberById={globalNumberById}
             onPageChange={goToPage}
           />
         </div>
@@ -234,9 +270,11 @@ export default function PracticeClient({
               </div>
             )}
 
-            {filter === 'starred' && starredIds.length === 0 ? (
+            {sidebarQuestions.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-amber-200 bg-amber-50 px-4 py-10 text-center text-sm text-amber-800">
-                You have no starred questions yet. Click the star icon on any question to save it for later review.
+                {filter === 'starred'
+                  ? 'You have no starred questions yet. Click the star icon on any question to save it for later review.'
+                  : 'No starred questions on this page yet.'}
               </div>
             ) : currentQuestion ? (
               <QuestionCard
@@ -246,14 +284,14 @@ export default function PracticeClient({
                 onToggleStar={() => toggleStar(currentQuestion.id)}
                 onPreviousQuestion={() => {
                   if (currentIndex <= 0) return
-                  setCurrentQuestionId(questions[currentIndex - 1].id)
+                  setCurrentQuestionId(sidebarQuestions[currentIndex - 1].id)
                 }}
                 onNextQuestion={() => {
-                  if (currentIndex < 0 || currentIndex >= questions.length - 1) return
-                  setCurrentQuestionId(questions[currentIndex + 1].id)
+                  if (currentIndex < 0 || currentIndex >= sidebarQuestions.length - 1) return
+                  setCurrentQuestionId(sidebarQuestions[currentIndex + 1].id)
                 }}
                 canGoPrevious={currentIndex > 0}
-                canGoNext={currentIndex >= 0 && currentIndex < questions.length - 1}
+                canGoNext={currentIndex >= 0 && currentIndex < sidebarQuestions.length - 1}
                 onRedo={() =>
                   setProgressByQuestion((prev) => {
                     const next = { ...prev }
