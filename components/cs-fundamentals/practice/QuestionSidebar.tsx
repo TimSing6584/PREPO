@@ -53,9 +53,7 @@ export default function QuestionSidebar({
                   onClick={() => onFilterChange('all')}
                   className={cn(
                     'rounded-md px-2 py-1 text-xs font-semibold transition-colors',
-                    filter === 'all'
-                      ? 'bg-white text-neutral-900 shadow-sm'
-                      : 'text-neutral-500 hover:text-neutral-900',
+                    'bg-white text-neutral-900 shadow-sm',
                   )}
                 >
                   All
@@ -65,9 +63,7 @@ export default function QuestionSidebar({
                   onClick={() => onFilterChange('starred')}
                   className={cn(
                     'rounded-md px-2 py-1 text-xs font-semibold transition-colors',
-                    filter === 'starred'
-                      ? 'bg-white text-neutral-900 shadow-sm'
-                      : 'text-neutral-500 hover:text-neutral-900',
+                    'text-neutral-500 hover:text-neutral-900',
                   )}
                 >
                   Starred ({starredIds.length})
