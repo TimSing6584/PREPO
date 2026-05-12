@@ -134,7 +134,7 @@ export default function QuestionCard({
             </div>
 
             <h1 className="text-2xl md:text-3xl font-bold text-[#101010] leading-tight">
-              Q{currentGlobalIndex + 1}: {question.text}
+              {currentGlobalIndex !== undefined && `Q${currentGlobalIndex + 1}: `}{question.text}
             </h1>
 
             {question.imageUrl && (
