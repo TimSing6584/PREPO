@@ -35,9 +35,7 @@ export async function GET() {
                 createdBy: true,
                 starredBy: true,
             },
-            orderBy: {
-                createdAt: "desc",
-            },
+            orderBy: [{ createdAt: "desc" }, { id: "desc" }]
         });
 
         return NextResponse.json({ success: true, data: questions });
