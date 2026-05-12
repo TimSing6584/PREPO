@@ -39,6 +39,7 @@ interface QuestionCardProps {
       draft: string
     }
   }) => void
+  currentGlobalIndex?: number
 }
 
 export default function QuestionCard({
@@ -52,6 +53,7 @@ export default function QuestionCard({
   onRedo,
   progress,
   onProgressChange,
+  currentGlobalIndex
 }: QuestionCardProps) {
   const [mode, setMode] = useState<'mcq' | 'written'>(progress?.mode ?? 'mcq')
 
@@ -66,10 +68,10 @@ export default function QuestionCard({
 
       {/* Header */}
       <div className="flex items-start justify-between mb-8">
-         <div className="space-y-4 max-w-2xl">
+        <div className="space-y-4 max-w-2xl">
             <div className="flex items-center gap-4">
                {/* Mode Switcher */}
-               <div className="bg-neutral-100 rounded-lg p-1 flex items-center gap-1">
+              <div className="bg-neutral-100 rounded-lg p-1 flex items-center gap-1">
                   <button
                     onClick={() => {
                       setMode('mcq')
@@ -94,45 +96,45 @@ export default function QuestionCard({
                   >
                     Written
                   </button>
-               </div>
+              </div>
 
-               <div className="h-6 w-[1px] bg-neutral-200" />
+              <div className="h-6 w-[1px] bg-neutral-200" />
 
                {/* Star Button with Reminder */}
-               <div className="relative">
-                 <button
+              <div className="relative">
+                <button
                     onClick={() => {
                       onToggleStar()
                       setShowStarReminder(false)
                     }}
                     className="group relative"
-                 >
+                >
                     <Star className={cn(
                       "w-5 h-5 transition-colors",
                       starred ? "fill-amber-400 text-amber-400" : "text-neutral-300 group-hover:text-amber-400",
                       showStarReminder && "animate-pulse text-amber-400"
                     )} />
-                 </button>
+                </button>
 
-                 {showStarReminder && !starred && (
-                   <div className="absolute top-8 left-1/2 -translate-x-1/2 w-48 bg-neutral-900 text-white text-xs p-3 rounded-xl shadow-xl z-50 animate-in fade-in slide-in-from-top-2">
+                {showStarReminder && !starred && (
+                  <div className="absolute top-8 left-1/2 -translate-x-1/2 w-48 bg-neutral-900 text-white text-xs p-3 rounded-xl shadow-xl z-50 animate-in fade-in slide-in-from-top-2">
                       <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-neutral-900 rotate-45" />
                       Tip: Star this question to review it later!
-                   </div>
-                 )}
-               </div>
+                  </div>
+                )}
+              </div>
 
-               <button
-                 onClick={onRedo}
-                 className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 transition-colors"
-               >
-                 <RotateCcw className="h-3.5 w-3.5" />
-                 Redo
-               </button>
+              <button
+                onClick={onRedo}
+                className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 transition-colors"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                Redo
+              </button>
             </div>
 
             <h1 className="text-2xl md:text-3xl font-bold text-[#101010] leading-tight">
-               {question.text}
+              Q{currentGlobalIndex}: {question.text}
             </h1>
 
             {question.imageUrl && (
@@ -147,7 +149,7 @@ export default function QuestionCard({
                 </div>
               </div>
             )}
-         </div>
+        </div>
       </div>
 
       {/* Content */}
@@ -165,10 +167,10 @@ export default function QuestionCard({
               })
             }
             onComplete={(isCorrect) => {
-               if (!isCorrect) {
-                 setShowStarReminder(true)
-                 setTimeout(() => setShowStarReminder(false), 5000)
-               }
+              if (!isCorrect) {
+                setShowStarReminder(true)
+                setTimeout(() => setShowStarReminder(false), 5000)
+              }
             }}
           />
         ) : (
