@@ -15,6 +15,8 @@ type PracticeClientProps = {
   topicId: string
   topicName: string
   questions: PracticeQuestion[]
+  orderedQuestionIds: string[]
+  selectedQuestion: PracticeQuestion | null
   initialQuestionId: string
   pagination: PaginationMeta
   filter: QuestionFilter
@@ -49,6 +51,8 @@ export default function PracticeClient({
   topicId,
   topicName,
   questions,
+  orderedQuestionIds,
+  selectedQuestion,
   initialQuestionId,
   pagination,
   filter,
@@ -143,15 +147,12 @@ export default function PracticeClient({
     [questions, pagination.page, pagination.pageSize],
   )
 
-  useEffect(() => {
-    if (sidebarQuestions.length === 0) {
-      if (currentQuestionId !== '') setCurrentQuestionId('')
-      return
-    }
-    if (!sidebarQuestions.some((q) => q.id === currentQuestionId)) {
-      setCurrentQuestionId(sidebarQuestions[0].id)
-    }
-  }, [sidebarQuestions, currentQuestionId])
+  const questionById = useMemo(() => {
+    const combinedQuestions = selectedQuestion
+      ? [selectedQuestion, ...questions.filter((q) => q.id !== selectedQuestion.id)]
+      : questions
+    return new Map(combinedQuestions.map((q) => [q.id, q]))
+  }, [questions, selectedQuestion])
 
   // Derived state
   const completedIds = sidebarQuestions
@@ -161,23 +162,27 @@ export default function PracticeClient({
     })
     .map((q) => q.id)
 
-  const currentQuestion = sidebarQuestions.find((q) => q.id === currentQuestionId) ?? sidebarQuestions[0]
-  const currentIndex = currentQuestion
-    ? sidebarQuestions.findIndex((q) => q.id === currentQuestion.id)
-    : -1
+  const currentQuestion = questionById.get(currentQuestionId) ?? selectedQuestion ?? sidebarQuestions[0]
+  const currentGlobalIndex = currentQuestion ? orderedQuestionIds.findIndex((id) => id === currentQuestion.id) : -1
 
   // Page navigation (URL-based)
-  function buildUrl(page: number, f: QuestionFilter) {
-    return `/cs-fundamentals/${topicId}/practice?page=${page}&filter=${f}`
+  function buildUrl(page: number, f: QuestionFilter, questionId: string) {
+    const qParam = questionId ? `&q=${encodeURIComponent(questionId)}` : ''
+    return `/cs-fundamentals/${topicId}/practice?page=${page}&filter=${f}${qParam}`
   }
 
   function goToPage(page: number) {
-    router.push(buildUrl(page, filter))
+    router.push(buildUrl(page, filter, currentQuestionId))
   }
 
   function handleFilterChange(newFilter: QuestionFilter) {
     if (filter === 'starred') return
     setSidebarFilter(newFilter)
+  }
+
+  function selectQuestion(id: string) {
+    setCurrentQuestionId(id)
+    router.replace(buildUrl(pagination.page, filter, id))
   }
 
   // Redo current page
@@ -220,7 +225,7 @@ export default function PracticeClient({
           <QuestionSidebar
             questions={sidebarQuestions}
             currentQuestionId={currentQuestionId}
-            onSelectQuestion={setCurrentQuestionId}
+            onSelectQuestion={selectQuestion}
             completedIds={completedIds}
             starredIds={starredIds}
             filter={sidebarFilter}
@@ -270,7 +275,7 @@ export default function PracticeClient({
               </div>
             )}
 
-            {sidebarQuestions.length === 0 ? (
+            {!currentQuestion ? (
               <div className="rounded-2xl border border-dashed border-amber-200 bg-amber-50 px-4 py-10 text-center text-sm text-amber-800">
                 {filter === 'starred'
                   ? 'You have no starred questions yet. Click the star icon on any question to save it for later review.'
@@ -279,19 +284,20 @@ export default function PracticeClient({
             ) : currentQuestion ? (
               <QuestionCard
                 key={currentQuestion.id}
+                currentGlobalIndex={currentGlobalIndex}
                 question={currentQuestion}
                 starred={starredIds.includes(currentQuestion.id)}
                 onToggleStar={() => toggleStar(currentQuestion.id)}
                 onPreviousQuestion={() => {
-                  if (currentIndex <= 0) return
-                  setCurrentQuestionId(sidebarQuestions[currentIndex - 1].id)
+                  if (currentGlobalIndex <= 0) return
+                  selectQuestion(orderedQuestionIds[currentGlobalIndex - 1])
                 }}
                 onNextQuestion={() => {
-                  if (currentIndex < 0 || currentIndex >= sidebarQuestions.length - 1) return
-                  setCurrentQuestionId(sidebarQuestions[currentIndex + 1].id)
+                  if (currentGlobalIndex < 0 || currentGlobalIndex >= orderedQuestionIds.length - 1) return
+                  selectQuestion(orderedQuestionIds[currentGlobalIndex + 1])
                 }}
-                canGoPrevious={currentIndex > 0}
-                canGoNext={currentIndex >= 0 && currentIndex < sidebarQuestions.length - 1}
+                canGoPrevious={currentGlobalIndex > 0}
+                canGoNext={currentGlobalIndex >= 0 && currentGlobalIndex < orderedQuestionIds.length - 1}
                 onRedo={() =>
                   setProgressByQuestion((prev) => {
                     const next = { ...prev }

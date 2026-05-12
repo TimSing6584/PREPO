@@ -1,4 +1,8 @@
-import { getTopicPracticeData, PAGE_SIZE } from '@/app/utils/server/csFundamentals'
+import {
+  getPracticeQuestionById,
+  getPracticeQuestionIds,
+  getTopicPracticeData,
+} from '@/app/utils/server/csFundamentals'
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import PracticeClient from './PracticeClient'
 
@@ -17,18 +21,35 @@ export default async function PracticePage({ params, searchParams }: PageProps) 
   const { getUser } = getKindeServerSession()
   const user = await getUser()
 
-  const { topicName, questions, pagination } = await getTopicPracticeData({
-    topicId,
-    page,
-    filter,
-  })
+  const [{ topicName, questions, pagination }, orderedQuestionIds] = await Promise.all([
+    getTopicPracticeData({
+      topicId,
+      page,
+      filter,
+    }),
+    getPracticeQuestionIds({
+      topicId,
+      filter,
+    }),
+  ])
 
-  // If a specific ?q= was requested and it exists on this page, start there.
-  // Otherwise default to the first question on the page.
-  const initialQuestionId =
-    q && questions.some((question) => question.id === q)
-      ? q
-      : (questions[0]?.id ?? '')
+  const requestedQuestionId = q?.trim() ? q : undefined
+  const questionFromCurrentPage = requestedQuestionId
+    ? questions.find((question) => question.id === requestedQuestionId)
+    : undefined
+  const selectedQuestion =
+    questionFromCurrentPage ??
+    (requestedQuestionId
+      ? await getPracticeQuestionById({
+          topicId,
+          questionId: requestedQuestionId,
+          filter,
+        })
+      : null) ??
+    questions[0] ??
+    null
+
+  const initialQuestionId = selectedQuestion?.id ?? ''
 
   return (
     <PracticeClient
@@ -36,6 +57,8 @@ export default async function PracticePage({ params, searchParams }: PageProps) 
       topicId={topicId}
       topicName={topicName}
       questions={questions}
+      orderedQuestionIds={orderedQuestionIds}
+      selectedQuestion={selectedQuestion}
       initialQuestionId={initialQuestionId}
       pagination={pagination}
       filter={filter}
