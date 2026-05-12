@@ -398,7 +398,7 @@ export default function CreatePersonalizedQuestionPage() {
                 <button
                   disabled={isLocked}
                   onClick={addOption}
-                  className="mt-4 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
+                  className="mt-4 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-200 transition-colors flex items-center gap-2"
                 >
                   <Plus className="w-4 h-4" />
                   More options
