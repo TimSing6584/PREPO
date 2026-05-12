@@ -21,7 +21,7 @@ export default async function PracticePage({ params, searchParams }: PageProps) 
   const { getUser } = getKindeServerSession()
   const user = await getUser()
 
-  const [{ topicName, questions, pagination }, orderedQuestionIds] = await Promise.all([
+  const [{ topicName, questions, pagination }, orderedQuestionIds, allQuestionIdsForIndex] = await Promise.all([
     getTopicPracticeData({
       topicId,
       page,
@@ -31,7 +31,14 @@ export default async function PracticePage({ params, searchParams }: PageProps) 
       topicId,
       filter,
     }),
+    filter === 'all'
+      ? Promise.resolve<string[] | null>(null)
+      : getPracticeQuestionIds({
+          topicId,
+          filter: 'all',
+        }),
   ])
+  const globalOrderedQuestionIds = allQuestionIdsForIndex ?? orderedQuestionIds
 
   const requestedQuestionId = q?.trim() ? q : undefined
   const questionFromCurrentPage = requestedQuestionId
@@ -58,6 +65,7 @@ export default async function PracticePage({ params, searchParams }: PageProps) 
       topicName={topicName}
       questions={questions}
       orderedQuestionIds={orderedQuestionIds}
+      globalOrderedQuestionIds={globalOrderedQuestionIds}
       selectedQuestion={selectedQuestion}
       initialQuestionId={initialQuestionId}
       pagination={pagination}

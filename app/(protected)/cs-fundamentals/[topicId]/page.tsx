@@ -1,7 +1,7 @@
 import Navbar from '@/components/main/Navbar'
 import { ArrowLeft, ChevronLeft, ChevronRight, Star } from 'lucide-react'
 import Link from 'next/link'
-import { getTopicPracticeData, PAGE_SIZE } from '@/app/utils/server/csFundamentals'
+import { getPracticeQuestionIds, getTopicPracticeData } from '@/app/utils/server/csFundamentals'
 import type { QuestionFilter } from '@/app/utils/server/csFundamentals'
 
 type PageProps = {
@@ -15,7 +15,19 @@ export default async function TopicPage({ params, searchParams }: PageProps) {
   const page = Math.max(1, parseInt(pageParam ?? '1', 10) || 1)
   const filter: QuestionFilter = filterParam === 'starred' ? 'starred' : 'all'
 
-  const { topicName, questions, pagination } = await getTopicPracticeData({ topicId, page, filter })
+  const [{ topicName, questions, pagination }, allQuestionIdsForIndex] = await Promise.all([
+    getTopicPracticeData({ topicId, page, filter }),
+    filter === 'all'
+      ? Promise.resolve<string[] | null>(null)
+      : getPracticeQuestionIds({
+          topicId,
+          filter: 'all',
+        }),
+  ])
+
+  const globalNumberById = allQuestionIdsForIndex
+    ? Object.fromEntries(allQuestionIdsForIndex.map((id, index) => [id, index + 1]))
+    : null
 
   const { totalCount, totalPages } = pagination
   const nextFilter: QuestionFilter = filter === 'all' ? 'starred' : 'all'
@@ -81,7 +93,9 @@ export default async function TopicPage({ params, searchParams }: PageProps) {
               ) : (
                 <div className="space-y-3">
                   {questions.map((q, index) => {
-                    const globalIndex = (pagination.page - 1) * PAGE_SIZE + index
+                    const globalIndex =
+                      globalNumberById?.[q.id] ??
+                      (pagination.page - 1) * pagination.pageSize + index + 1
                     return (
                       <Link
                         key={q.id}
@@ -90,7 +104,7 @@ export default async function TopicPage({ params, searchParams }: PageProps) {
                       >
                         <div className="flex items-center gap-4 flex-1 overflow-hidden">
                           <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl text-sm font-bold bg-neutral-100 text-neutral-600 group-hover:bg-neutral-200 transition-colors">
-                            {globalIndex + 1}
+                            {globalIndex}
                           </div>
                           <div className="flex flex-col overflow-hidden">
                             <span className="text-sm md:text-base font-semibold truncate text-neutral-900">

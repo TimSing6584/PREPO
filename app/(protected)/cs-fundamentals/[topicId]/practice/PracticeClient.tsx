@@ -16,6 +16,7 @@ type PracticeClientProps = {
   topicName: string
   questions: PracticeQuestion[]
   orderedQuestionIds: string[]
+  globalOrderedQuestionIds: string[]
   selectedQuestion: PracticeQuestion | null
   initialQuestionId: string
   pagination: PaginationMeta
@@ -52,6 +53,7 @@ export default function PracticeClient({
   topicName,
   questions,
   orderedQuestionIds,
+  globalOrderedQuestionIds,
   selectedQuestion,
   initialQuestionId,
   pagination,
@@ -140,11 +142,8 @@ export default function PracticeClient({
   }, [filter, questions, sidebarFilter, starredIds])
 
   const globalNumberById = useMemo(
-    () =>
-      Object.fromEntries(
-        questions.map((q, index) => [q.id, (pagination.page - 1) * pagination.pageSize + index + 1]),
-      ),
-    [questions, pagination.page, pagination.pageSize],
+    () => Object.fromEntries(globalOrderedQuestionIds.map((id, index) => [id, index + 1])),
+    [globalOrderedQuestionIds],
   )
 
   const questionById = useMemo(() => {
@@ -163,7 +162,12 @@ export default function PracticeClient({
     .map((q) => q.id)
 
   const currentQuestion = questionById.get(currentQuestionId) ?? selectedQuestion ?? sidebarQuestions[0]
-  const currentGlobalIndex = currentQuestion ? orderedQuestionIds.findIndex((id) => id === currentQuestion.id) : -1
+  const currentNavigationIndex = currentQuestion
+    ? orderedQuestionIds.findIndex((id) => id === currentQuestion.id)
+    : -1
+  const currentGlobalIndex = currentQuestion
+    ? globalOrderedQuestionIds.findIndex((id) => id === currentQuestion.id)
+    : -1
 
   // Page navigation (URL-based)
   function buildUrl(page: number, f: QuestionFilter, questionId: string) {
@@ -284,20 +288,26 @@ export default function PracticeClient({
             ) : currentQuestion ? (
               <QuestionCard
                 key={currentQuestion.id}
-                currentGlobalIndex={currentGlobalIndex}
+                currentGlobalIndex={currentGlobalIndex >= 0 ? currentGlobalIndex : undefined}
                 question={currentQuestion}
                 starred={starredIds.includes(currentQuestion.id)}
                 onToggleStar={() => toggleStar(currentQuestion.id)}
                 onPreviousQuestion={() => {
-                  if (currentGlobalIndex <= 0) return
-                  selectQuestion(orderedQuestionIds[currentGlobalIndex - 1])
+                  if (currentNavigationIndex <= 0) return
+                  selectQuestion(orderedQuestionIds[currentNavigationIndex - 1])
                 }}
                 onNextQuestion={() => {
-                  if (currentGlobalIndex < 0 || currentGlobalIndex >= orderedQuestionIds.length - 1) return
-                  selectQuestion(orderedQuestionIds[currentGlobalIndex + 1])
+                  if (
+                    currentNavigationIndex < 0 ||
+                    currentNavigationIndex >= orderedQuestionIds.length - 1
+                  )
+                    return
+                  selectQuestion(orderedQuestionIds[currentNavigationIndex + 1])
                 }}
-                canGoPrevious={currentGlobalIndex > 0}
-                canGoNext={currentGlobalIndex >= 0 && currentGlobalIndex < orderedQuestionIds.length - 1}
+                canGoPrevious={currentNavigationIndex > 0}
+                canGoNext={
+                  currentNavigationIndex >= 0 && currentNavigationIndex < orderedQuestionIds.length - 1
+                }
                 onRedo={() =>
                   setProgressByQuestion((prev) => {
                     const next = { ...prev }
