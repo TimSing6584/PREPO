@@ -68,18 +68,27 @@ export default async function TopicPage({ params, searchParams }: PageProps) {
                     Pick one to open the question card.
                   </p>
                 </div>
+
                 <div className="flex flex-col items-end gap-2">
-                  <Link
-                    href={filterToggleHref}
-                    className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors ${
-                      filter === 'starred'
-                        ? 'border-neutral-200 text-neutral-700 hover:bg-neutral-50'
-                        : 'border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100'
-                    }`}
-                  >
-                    {filter === 'all' && <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />}
-                    {filter === 'all' ? `All Starred` : 'All questions'}
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={`/personalized-questions/create?topicId=${encodeURIComponent(topicId)}`}
+                      className="inline-flex items-center rounded-full border border-primary-200 bg-primary-50 px-3 py-1.5 text-xs font-semibold text-primary-700 hover:bg-primary-100 transition-colors"
+                    >
+                      + Create my question
+                    </Link>
+                    <Link
+                      href={filterToggleHref}
+                      className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                        filter === 'starred'
+                          ? 'border-neutral-200 text-neutral-700 hover:bg-neutral-50'
+                          : 'border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100'
+                      }`}
+                    >
+                      {filter === 'all' && <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />}
+                      {filter === 'all' ? 'All Starred' : 'All questions'}
+                    </Link>
+                  </div>
                   <div className="text-xs font-semibold text-neutral-400">
                     Total {totalCount} questions
                   </div>

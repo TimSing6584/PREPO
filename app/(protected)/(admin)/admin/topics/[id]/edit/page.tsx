@@ -214,7 +214,7 @@ export default function EditTopicPage() {
         <button
           onClick={() => router.push('/admin/topics')}
           disabled={isSubmitting}
-          className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+          className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-200 transition-colors disabled:opacity-50"
         >
           Cancel
         </button>

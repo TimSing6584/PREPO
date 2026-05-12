@@ -2,12 +2,13 @@ import { prisma } from "@/app/utils/db";
 import { NextRequest, NextResponse } from "next/server";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { roleChecker } from "@/app/utils/auth";
+import { QuestionType } from "@/lib/generated/prisma/client";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
 };
 
-async function ensureQuestionAccess(questionId: string) {
+async function ensureQuestionWriteAccess(questionId: string) {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
 
@@ -17,7 +18,7 @@ async function ensureQuestionAccess(questionId: string) {
 
   const question = await prisma.question.findUnique({
     where: { id: questionId },
-    select: { id: true, createdById: true, deleted: true },
+    select: { id: true, createdById: true, type: true, deleted: true },
   });
 
   if (!question || question.deleted) {
@@ -27,7 +28,7 @@ async function ensureQuestionAccess(questionId: string) {
   const isAdmin = await roleChecker("admin");
   const isOwner = question.createdById === user.id;
 
-  if (!isAdmin && !isOwner) {
+  if (!isAdmin && !(question.type === QuestionType.PERSONALIZED && isOwner)) {
     return { error: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
   }
 
@@ -37,6 +38,14 @@ async function ensureQuestionAccess(questionId: string) {
 export async function GET(_: NextRequest, context: RouteContext) {
   try {
     const { id } = await context.params;
+    const { getUser } = getKindeServerSession();
+    const user = await getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
+    const isAdmin = await roleChecker("admin");
 
     const question = await prisma.question.findFirst({
       where: {
@@ -45,6 +54,14 @@ export async function GET(_: NextRequest, context: RouteContext) {
         topic: {
           deleted: false,
         },
+        ...(isAdmin
+          ? {}
+          : {
+              OR: [
+                { type: QuestionType.DEFAULT },
+                { type: QuestionType.PERSONALIZED, createdById: user.id },
+              ],
+            }),
       },
       select: {
         id: true,
@@ -71,7 +88,7 @@ export async function GET(_: NextRequest, context: RouteContext) {
 export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
     const { id } = await context.params;
-    const access = await ensureQuestionAccess(id);
+    const access = await ensureQuestionWriteAccess(id);
 
     if ("error" in access) {
       return access.error;
@@ -110,7 +127,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 export async function DELETE(_: NextRequest, context: RouteContext) {
   try {
     const { id } = await context.params;
-    const access = await ensureQuestionAccess(id);
+    const access = await ensureQuestionWriteAccess(id);
 
     if ("error" in access) {
       return access.error;

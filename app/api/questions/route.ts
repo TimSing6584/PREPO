@@ -6,13 +6,30 @@ import { QuestionType } from "@/lib/generated/prisma/client";
 
 export async function GET() {
     try {
-        const questions = await prisma.question.findMany({
-            where: {
+        const { getUser } = getKindeServerSession();
+        const user = await getUser();
+        if (!user) {
+            return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+        }
+
+        const isAdmin = await roleChecker("admin");
+        const baseWhere = {
+            deleted: false,
+            topic: {
                 deleted: false,
-                topic: {
-                    deleted: false,
-                },
             },
+        };
+
+        const questions = await prisma.question.findMany({
+            where: isAdmin
+                ? baseWhere
+                : {
+                    ...baseWhere,
+                    OR: [
+                        { type: QuestionType.DEFAULT },
+                        { type: QuestionType.PERSONALIZED, createdById: user.id },
+                    ],
+                },
             include: {
                 topic: true,
                 createdBy: true,
