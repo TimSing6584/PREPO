@@ -180,7 +180,16 @@ export default function PracticeClient({
   }
 
   function handleFilterChange(newFilter: QuestionFilter) {
-    if (filter === 'starred') return
+    if (filter === 'starred') {
+      if (newFilter === 'starred') return
+      const selectedIndex = currentQuestionId
+        ? globalOrderedQuestionIds.findIndex((id) => id === currentQuestionId)
+        : -1
+      const targetPage =
+        selectedIndex >= 0 ? Math.floor(selectedIndex / pagination.pageSize) + 1 : 1
+      router.push(buildUrl(targetPage, 'all', currentQuestionId))
+      return
+    }
     setSidebarFilter(newFilter)
   }
 
@@ -233,7 +242,7 @@ export default function PracticeClient({
             completedIds={completedIds}
             starredIds={starredIds}
             filter={sidebarFilter}
-            showFilterTabs={filter === 'all'}
+            showFilterTabs
             onFilterChange={handleFilterChange}
             onRedoPage={redoCurrentPage}
             pagination={pagination}

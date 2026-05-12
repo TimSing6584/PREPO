@@ -74,7 +74,7 @@ export default function QuestionSidebar({
                       : 'text-neutral-500 hover:text-neutral-900',
                   )}
                 >
-                  Starred ({starredIds.length})
+                  Starred/Page ({starredIds.length})
                 </button>
               </div>
             )}
