@@ -26,6 +26,28 @@ export type TopicPracticeData = {
   pagination: PaginationMeta;
 };
 
+function toPracticeQuestion(
+  question: {
+    id: string;
+    statement: string;
+    imageUrl: string | null;
+    options: string[];
+    correctOption: number | null;
+    correctWritten: string | null;
+    starredBy: { id: string }[];
+  }
+): PracticeQuestion {
+  return {
+    id: question.id,
+    text: question.statement,
+    imageUrl: question.imageUrl,
+    options: question.options,
+    correctOption: question.correctOption ?? -1,
+    correctWritten: question.correctWritten ?? "",
+    isStarred: question.starredBy.length > 0,
+  };
+}
+
 
 // Shared where-clause builder
 
@@ -83,7 +105,7 @@ export async function getTopicPracticeData({
         createdAt: true,
         starredBy: { where: { userKindeId }, select: { id: true } },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
     }),
@@ -97,15 +119,62 @@ export async function getTopicPracticeData({
   return {
     topicName: topic?.name ?? topicId,
     pagination: { page: safePage, pageSize: PAGE_SIZE, totalCount, totalPages },
-    questions: questions.map((q) => ({
-      id: q.id,
-      text: q.statement,
-      imageUrl: q.imageUrl,
-      options: q.options,
-      correctOption: q.correctOption,
-      correctWritten: q.correctWritten,
-      isStarred: q.starredBy.length > 0,
-    })),
+    questions: questions.map(toPracticeQuestion),
   };
 }
 
+type GetPracticeQuestionByIdOptions = {
+  topicId: string;
+  questionId: string;
+  filter?: QuestionFilter;
+};
+
+export async function getPracticeQuestionById({
+  topicId,
+  questionId,
+  filter = "all",
+}: GetPracticeQuestionByIdOptions): Promise<PracticeQuestion | null> {
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
+  const userKindeId = user?.id ?? "";
+
+  const question = await prisma.question.findFirst({
+    where: {
+      ...buildWhereClause(topicId, userKindeId, filter),
+      id: questionId,
+    },
+    select: {
+      id: true,
+      statement: true,
+      imageUrl: true,
+      options: true,
+      correctOption: true,
+      correctWritten: true,
+      starredBy: { where: { userKindeId }, select: { id: true } },
+    },
+  });
+
+  return question ? toPracticeQuestion(question) : null;
+}
+
+type GetPracticeQuestionIdsOptions = {
+  topicId: string;
+  filter?: QuestionFilter;
+};
+
+export async function getPracticeQuestionIds({
+  topicId,
+  filter = "all",
+}: GetPracticeQuestionIdsOptions): Promise<string[]> {
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
+  const userKindeId = user?.id ?? "";
+
+  const questions = await prisma.question.findMany({
+    where: buildWhereClause(topicId, userKindeId, filter),
+    select: { id: true },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+  });
+
+  return questions.map((question) => question.id);
+}
