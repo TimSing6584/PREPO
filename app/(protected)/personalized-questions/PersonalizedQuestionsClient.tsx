@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import toast from 'react-hot-toast';
 
 type PersonalizedQuestionItem = {
   id: string;
@@ -46,9 +47,11 @@ export default function PersonalizedQuestionsClient({
         throw new Error(json.error ?? 'Delete failed');
       }
       setQuestions((prev) => prev.filter((question) => question.id !== questionId));
+      toast.success('Question deleted successfully');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Delete failed';
       setError(message);
+      toast.error(message);
     } finally {
       setIsDeletingId(null);
     }

@@ -8,6 +8,7 @@ import Link from 'next/link';
 import TipTapEditor from '@/components/TipTap/TipTapEditor';
 import { fetchTopics, type Topic } from '@/app/utils/api/topics';
 import Navbar from '@/components/main/Navbar';
+import toast from 'react-hot-toast';
 
 type FormErrors = {
   selectedTopic?: string;
@@ -196,9 +197,11 @@ export default function CreatePersonalizedQuestionPage() {
         throw new Error(createError.error ?? 'Failed to create question.');
       }
 
+      toast.success('Question created successfully!');
       router.push('/personalized-questions');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Something went wrong. Please try again.';
+      toast.error(message);
       setErrors((prev) => ({ ...prev, question: message }));
     } finally {
       setIsSubmitting(false);
