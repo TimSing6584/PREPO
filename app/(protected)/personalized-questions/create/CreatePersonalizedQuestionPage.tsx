@@ -145,6 +145,11 @@ export default function CreatePersonalizedQuestionPage() {
     }
 
     setErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length > 0) {
+      toast.error('Please fill in all required fields.');
+    }
+  
     return Object.keys(nextErrors).length === 0;
   };
 
