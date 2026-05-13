@@ -8,6 +8,7 @@ import Link from 'next/link';
 import TipTapEditor from '@/components/TipTap/TipTapEditor';
 import { fetchTopics, type Topic } from '@/app/utils/api/topics';
 import Navbar from '@/components/main/Navbar';
+import toast from 'react-hot-toast';
 
 type QuestionData = {
   id: string;
@@ -189,6 +190,11 @@ export default function EditPersonalizedQuestionPage() {
     }
 
     setErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length > 0) {
+      toast.error('Please fill in all required fields.'); 
+    }
+
     return Object.keys(nextErrors).length === 0;
   };
 
@@ -235,9 +241,11 @@ export default function EditPersonalizedQuestionPage() {
         throw new Error(updateError.error ?? 'Failed to update question.');
       }
 
+      toast.success('Question updated successfully!');
       router.push('/personalized-questions');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Something went wrong. Please try again.';
+      toast.error(message);
       setErrors((prev) => ({ ...prev, question: message }));
     } finally {
       setIsSubmitting(false);
