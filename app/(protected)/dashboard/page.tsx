@@ -1,10 +1,15 @@
 import { prisma } from '@/app/utils/db'
 import DashboardClient from '@/components/dashboard/DashboardClient'
 import type { Topic } from '@/app/utils/api/topics'
-
-export const revalidate = 60
+import { redis } from '@/app/utils/redis'
 
 async function getTopics(): Promise<Topic[]> {
+  const cachedTopics = await redis.get<Topic[]>('topics')
+  if (cachedTopics) {
+    console.log("cached topics found, returning from cache")
+    return cachedTopics
+  }
+  console.log("no cached topics found, fetching from database")
   const topics = await prisma.topic.findMany({
     where: {
       deleted: false,
@@ -24,11 +29,13 @@ async function getTopics(): Promise<Topic[]> {
       createdAt: 'desc',
     },
   })
-
-  return topics.map((topic) => ({
+  const topicsReturned = topics.map((topic) => ({
     ...topic,
     createdAt: topic.createdAt.toISOString(),
   }))
+  await redis.set('topics', JSON.stringify(topicsReturned));
+  await redis.expire('topics', 604800); // Set expiration to 7 days (in seconds)
+  return topicsReturned
 }
 
 export default async function DashboardPage() {
