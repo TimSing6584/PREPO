@@ -2,7 +2,6 @@ import { prisma } from '@/app/utils/db'
 import DashboardClient from '@/components/dashboard/DashboardClient'
 import type { Topic } from '@/app/utils/api/topics'
 import { redis } from '@/app/utils/redis'
-export const revalidate = 60
 
 async function getTopics(): Promise<Topic[]> {
   const cachedTopics = await redis.get<Topic[]>('topics')
@@ -35,6 +34,7 @@ async function getTopics(): Promise<Topic[]> {
     createdAt: topic.createdAt.toISOString(),
   }))
   await redis.set('topics', JSON.stringify(topicsReturned));
+  await redis.expire('topics', 604800); // Set expiration to 7 days (in seconds)
   return topicsReturned
 }
 

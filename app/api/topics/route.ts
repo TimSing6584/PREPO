@@ -1,9 +1,19 @@
 import { prisma } from "@/app/utils/db";
 import { NextRequest, NextResponse } from "next/server";
 import { roleChecker } from "@/app/utils/auth";
-
+import { redis } from "@/app/utils/redis";
+import type { Topic } from '@/app/utils/api/topics'
 export async function GET() {
     try {
+        const cachedTopics = await redis.get<Topic[]>('topics')
+        if (cachedTopics) {
+            console.log("cached topics found, returning from cache")
+            return NextResponse.json({
+                success: true,
+                data: cachedTopics,
+            })
+        }
+        console.log("no cached topics found, fetching from database")
         const topics = await prisma.topic.findMany({
             where: {
                 deleted: false,
@@ -23,10 +33,15 @@ export async function GET() {
                 createdAt: "desc",
             },
         });
-
+        const topicsReturned = topics.map((topic) => ({
+            ...topic,
+            createdAt: topic.createdAt.toISOString(),
+        }))
+        await redis.set('topics', JSON.stringify(topicsReturned));
+        await redis.expire('topics', 604800); // Set expiration to 7 days (in seconds)
         return NextResponse.json({
             success: true,
-            data: topics,
+            data: topicsReturned,
         });
     } catch (error) {
         const message = error instanceof Error ? error.message : "Unknown error";
