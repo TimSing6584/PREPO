@@ -26,7 +26,7 @@ export default function Footer() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 col-span-1 lg:col-span-3 gap-12">
+          <div className="grid grid-cols-2 md:grid-cols-3 col-span-1 lg:col-span-3 gap-12 lg:justify-items-end">
             <div className="space-y-8">
               <h4 className="font-bold text-[#101010] uppercase tracking-widest text-xs">Product</h4>
               <ul className="space-y-4 text-sm text-gray-500">
@@ -43,23 +43,6 @@ export default function Footer() {
                 <li><Link href="#" className="hover:text-black transition-colors">Privacy Policy</Link></li>
                 <li><Link href="#" className="hover:text-black transition-colors">Terms of Service</Link></li>
               </ul>
-            </div>
-
-            <div className="space-y-8">
-              <h4 className="font-bold text-[#101010] uppercase tracking-widest text-xs">Stay Updated</h4>
-              <form className="space-y-4">
-                <div className="relative group">
-                  <input
-                    type="email"
-                    placeholder="Email address"
-                    className="w-full bg-white border border-gray-100 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all shadow-sm"
-                  />
-                  <button type="submit" className="absolute right-2 top-2 p-1.5 bg-[#101010] text-white rounded-xl hover:bg-black transition-all">
-                    <ArrowUpRight className="w-4 h-4" />
-                  </button>
-                </div>
-                {/* <p className="text-[10px] text-gray-400">Join 2,000+ students getting interview tips weekly.</p> */}
-              </form>
             </div>
           </div>
         </div>
