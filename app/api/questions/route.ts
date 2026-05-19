@@ -1,8 +1,9 @@
 import { prisma } from "@/app/utils/db";
 import { NextRequest, NextResponse } from "next/server";
-import {getKindeServerSession} from "@kinde-oss/kinde-auth-nextjs/server";
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { roleChecker } from "@/app/utils/auth";
 import { QuestionType } from "@/lib/generated/prisma/client";
+import { checkRateLimit } from "@/app/utils/ratelimit";
 
 export async function GET() {
     try {
@@ -11,6 +12,9 @@ export async function GET() {
         if (!user) {
             return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
         }
+
+        const rateLimitError = await checkRateLimit('read');
+        if (rateLimitError) return rateLimitError;
 
         const isAdmin = await roleChecker("admin");
         const baseWhere = {
@@ -45,16 +49,19 @@ export async function GET() {
     }
 }
 
-export async function POST(request: NextRequest){
+export async function POST(request: NextRequest) {
     try {
         // Get user from Kinde Server Session
-        const {getUser} = getKindeServerSession();
+        const { getUser } = getKindeServerSession();
         const user = await getUser();
-        if(!user){
+        if (!user) {
             return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
         }
         // Get user's Kinde ID
         const userKindeId = user.id;
+
+        const rateLimitError = await checkRateLimit('write');
+        if (rateLimitError) return rateLimitError;
 
         // Check if user has admin role
         const isAdmin = await roleChecker("admin");
@@ -65,7 +72,7 @@ export async function POST(request: NextRequest){
         }
 
         // Make sure non-admins can only create one question at a time.
-        if (!isAdmin &&  questions.length > 1) {
+        if (!isAdmin && questions.length > 1) {
             return NextResponse.json({ error: "Can't create multiple questions at once." }, { status: 403 });
         }
         // Validate all questions first before creating any
@@ -95,7 +102,7 @@ export async function POST(request: NextRequest){
         });
         return NextResponse.json({ success: true });
     }
-    catch(error){
+    catch (error) {
         const message = error instanceof Error ? error.message : "Unknown error";
         return NextResponse.json({ error: message }, { status: 500 });
     }

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { roleChecker } from "@/app/utils/auth";
 import { QuestionType } from "@/lib/generated/prisma/client";
+import { checkRateLimit } from "@/app/utils/ratelimit";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -45,6 +46,9 @@ export async function GET(_: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
+    const rateLimitError = await checkRateLimit('read');
+    if (rateLimitError) return rateLimitError;
+
     const isAdmin = await roleChecker("admin");
 
     const question = await prisma.question.findFirst({
@@ -57,11 +61,11 @@ export async function GET(_: NextRequest, context: RouteContext) {
         ...(isAdmin
           ? {}
           : {
-              OR: [
-                { type: QuestionType.DEFAULT },
-                { type: QuestionType.PERSONALIZED, createdById: user.id },
-              ],
-            }),
+            OR: [
+              { type: QuestionType.DEFAULT },
+              { type: QuestionType.PERSONALIZED, createdById: user.id },
+            ],
+          }),
       },
       select: {
         id: true,
@@ -93,6 +97,9 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     if ("error" in access) {
       return access.error;
     }
+
+    const rateLimitError = await checkRateLimit('write');
+    if (rateLimitError) return rateLimitError;
 
     const { statement, topicId, correctWritten, options, correctOption, imageUrl } =
       await request.json();
@@ -132,6 +139,9 @@ export async function DELETE(_: NextRequest, context: RouteContext) {
     if ("error" in access) {
       return access.error;
     }
+
+    const rateLimitError = await checkRateLimit('write');
+    if (rateLimitError) return rateLimitError;
 
     await prisma.question.update({
       where: { id },

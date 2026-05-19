@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import { prisma } from '@/app/utils/db'
+import { checkRateLimit } from '@/app/utils/ratelimit'
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,6 +11,9 @@ export async function POST(request: NextRequest) {
     if (!user?.id) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
+
+    const rateLimitError = await checkRateLimit('write')
+    if (rateLimitError) return rateLimitError
 
     const body = (await request.json()) as { questionId?: string; starred?: boolean }
     const questionId = body.questionId
