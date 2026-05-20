@@ -14,6 +14,9 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
+    const rateLimitError = await checkRateLimit('read');
+    if (rateLimitError) return rateLimitError;
+
     const { topicId } = await params;
     if (!topicId) {
       return NextResponse.json({ error: "Topic ID is required." }, { status: 400 });
