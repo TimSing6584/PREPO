@@ -2,11 +2,11 @@ import { prisma } from "@/app/utils/db";
 import { NextRequest, NextResponse } from "next/server";
 import { roleChecker } from "@/app/utils/auth";
 import { redis } from "@/app/utils/redis";
-import { checkRateLimit, checkIpRateLimit } from "@/app/utils/ratelimit";
+import { checkRateLimit } from "@/app/utils/ratelimit";
 import type { Topic } from '@/app/utils/api/topics'
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
     try {
-        const rateLimitError = await checkIpRateLimit(request);
+        const rateLimitError = await checkRateLimit('read');
         if (rateLimitError) return rateLimitError;
         const cachedTopics = await redis.get<Topic[]>('topics')
         if (cachedTopics) {

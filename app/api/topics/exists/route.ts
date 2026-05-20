@@ -1,9 +1,9 @@
 import { prisma } from "@/app/utils/db";
 import { NextRequest, NextResponse } from "next/server";
-import { checkIpRateLimit } from "@/app/utils/ratelimit";
+import { checkRateLimit } from "@/app/utils/ratelimit";
 
 export async function GET(request: NextRequest) {
-    const rateLimitError = await checkIpRateLimit(request);
+    const rateLimitError = await checkRateLimit('read');
     if (rateLimitError) return rateLimitError;
 
     const { searchParams } = new URL(request.url)
