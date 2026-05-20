@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400">
+  <rect width="600" height="400" fill="#101010"/>
+  <ellipse cx="300" cy="200" rx="200" ry="140" fill="#3b82f6" opacity="0.06"/>
+
+  <!-- Question -->
+  <rect x="120" y="36" width="360" height="52" rx="14" fill="#ffffff" fill-opacity="0.08" stroke="#ffffff" stroke-opacity="0.12" stroke-width="1"/>
+  <text x="140" y="58" font-family="sans-serif" font-size="13" font-weight="700" fill="white" fill-opacity="0.85">What is polymorphism?</text>
+  <text x="140" y="76" font-family="sans-serif" font-size="11" fill="white" fill-opacity="0.3">Multiple choice · Operating Systems</text>
+
+  <!-- Option 1 — correct -->
+  <rect x="120" y="104" width="360" height="46" rx="12" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-opacity="0.6" stroke-width="1.5"/>
+  <text x="142" y="132" font-family="sans-serif" font-size="13" font-weight="600" fill="white" fill-opacity="0.85">The ability to take many forms</text>
+  <circle cx="452" cy="127" r="10" fill="#10b981" fill-opacity="0.3" stroke="#10b981" stroke-width="1.5"/>
+  <polyline points="447,127 451,131 458,122" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Option 2 — wrong -->
+  <rect x="120" y="162" width="360" height="46" rx="12" fill="#ef4444" fill-opacity="0.12" stroke="#ef4444" stroke-opacity="0.5" stroke-width="1.5"/>
+  <text x="142" y="190" font-family="sans-serif" font-size="13" fill="white" fill-opacity="0.55">A type of inheritance only</text>
+  <circle cx="452" cy="185" r="10" fill="#ef4444" fill-opacity="0.25" stroke="#ef4444" stroke-width="1.5"/>
+  <line x1="447" y1="180" x2="457" y2="190" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+  <line x1="457" y1="180" x2="447" y2="190" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Option 3 -->
+  <rect x="120" y="220" width="360" height="46" rx="12" fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
+  <text x="142" y="248" font-family="sans-serif" font-size="13" fill="white" fill-opacity="0.3">A design pattern</text>
+
+  <!-- Option 4 -->
+  <rect x="120" y="278" width="360" height="46" rx="12" fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
+  <text x="142" y="306" font-family="sans-serif" font-size="13" fill="white" fill-opacity="0.3">A memory model</text>
+
+  <!-- Footer: correct + star -->
+  <circle cx="138" cy="348" r="8" fill="#10b981" fill-opacity="0.2"/>
+  <polyline points="134,348 137,351 143,344" fill="none" stroke="#10b981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="154" y="353" font-family="sans-serif" font-size="12" font-weight="600" fill="#10b981" fill-opacity="0.8">Correct!</text>
+  <polygon points="430,340 433,333 436,340 444,340 438,345 440,352 433,348 426,352 428,345 422,340" fill="#f59e0b" fill-opacity="0.9"/>
+  <text x="450" y="350" font-family="sans-serif" font-size="12" fill="white" fill-opacity="0.3">Starred</text>
+</svg>

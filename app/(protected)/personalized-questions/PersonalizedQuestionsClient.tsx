@@ -25,14 +25,23 @@ export default function PersonalizedQuestionsClient({
   const [questions, setQuestions] = useState<PersonalizedQuestionItem[]>(initialQuestions);
   const [error, setError] = useState<string | null>(null);
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
+  const [topicFilter, setTopicFilter] = useState<string>('');
+  const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
 
-  const sortedQuestions = useMemo(
-    () =>
-      [...questions].sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      ),
+  const topics = useMemo(
+    () => Array.from(new Set(questions.map((q) => q.topic.name))).sort(),
     [questions]
   );
+
+  const sortedQuestions = useMemo(() => {
+    const filtered = topicFilter
+      ? questions.filter((q) => q.topic.name === topicFilter)
+      : questions;
+    return [...filtered].sort((a, b) => {
+      const diff = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      return sortOrder === 'desc' ? -diff : diff;
+    });
+  }, [questions, topicFilter, sortOrder]);
 
   const handleDelete = async (questionId: string) => {
     const confirmed = window.confirm('Delete this personalized question?');
@@ -72,6 +81,27 @@ export default function PersonalizedQuestionsClient({
         </button>
       </div>
 
+      <div className="mb-5 flex flex-wrap items-center gap-3">
+        <select
+          value={topicFilter}
+          onChange={(e) => setTopicFilter(e.target.value)}
+          className="rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm text-neutral-700 focus:outline-none focus:ring-2 focus:ring-primary-300"
+        >
+          <option value="">All topics</option>
+          {topics.map((topic) => (
+            <option key={topic} value={topic}>{topic}</option>
+          ))}
+        </select>
+        <select
+          value={sortOrder}
+          onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
+          className="rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm text-neutral-700 focus:outline-none focus:ring-2 focus:ring-primary-300"
+        >
+          <option value="desc">Newest first</option>
+          <option value="asc">Oldest first</option>
+        </select>
+      </div>
+
       {error ? (
         <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
@@ -80,7 +110,7 @@ export default function PersonalizedQuestionsClient({
 
       {sortedQuestions.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 px-4 py-8 text-center text-sm text-neutral-500">
-          You do not have any personalized questions yet.
+          {topicFilter ? `No questions found for topic "${topicFilter}".` : 'You do not have any personalized questions yet.'}
         </div>
       ) : (
         <div className="space-y-3">

@@ -1,45 +1,152 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Terminal, Shield, Zap, Star, ChevronLeft, ChevronRight, Play, CheckCircle2 } from 'lucide-react'
-import Image from 'next/image'
+import { ChevronLeft, ChevronRight, CheckCircle2, BookOpen, Zap, Star, Sparkles, MessageSquare, PenLine } from 'lucide-react'
+
+const SlideChooseTopic = () => (
+  <div className="flex-1 w-full h-full relative flex items-center justify-center">
+    <div className="absolute inset-0 bg-primary-500/5 blur-3xl rounded-full" />
+    <div className="relative flex flex-col gap-3 w-56">
+      {[
+        { label: 'Object-Oriented Programming', color: 'bg-indigo-500' },
+        { label: 'Operating Systems', color: 'bg-rose-500' },
+        { label: 'Computer Networks', color: 'bg-sky-500' },
+        { label: 'Databases', color: 'bg-cyan-500' },
+        { label: 'Data Structure & Algorithms', color: 'bg-purple-500'}
+      ].map((topic, i) => (
+        <div
+          key={i}
+          className={`flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/8 border border-white/10 backdrop-blur-sm transition-all ${i === 1 ? 'scale-105 border-white/30 bg-white/15' : ''}`}
+        >
+          <div className={`w-2.5 h-2.5 rounded-full ${topic.color} shrink-0`} />
+          <span className="text-sm font-semibold text-white/80">{topic.label}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+)
+
+const SlidePractice = () => (
+  <div className="flex-1 w-full h-full relative flex items-center justify-center">
+    <div className="absolute inset-0 bg-blue-500/5 blur-3xl rounded-full" />
+    <div className="relative w-64 flex flex-col gap-3">
+      <div className="px-4 py-3 rounded-2xl bg-white/8 border border-white/10 text-sm font-semibold text-white/90">
+        What is polymorphism?
+      </div>
+      <div className="flex flex-col gap-2">
+        {['The ability to take many forms', 'A type of inheritance', 'A design pattern', 'A memory model'].map((opt, i) => (
+          <div
+            key={i}
+            className={`px-4 py-2.5 rounded-xl border text-xs font-medium transition-all ${
+              i === 0
+                ? 'border-emerald-500 bg-emerald-500/20 text-emerald-300'
+                : i === 2
+                ? 'border-red-500 bg-red-500/15 text-red-300'
+                : 'border-white/10 bg-white/5 text-white/50'
+            }`}
+          >
+            {opt}
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center gap-2 mt-1">
+        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+        <span className="text-xs text-emerald-400 font-semibold">Correct!</span>
+        <span className="ml-auto text-xs text-white/30 flex items-center gap-1">
+          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> Starred
+        </span>
+      </div>
+    </div>
+  </div>
+)
+
+const SlidePersonalized = () => (
+  <div className="flex-1 w-full h-full relative flex items-center justify-center">
+    <div className="absolute inset-0 bg-violet-500/5 blur-3xl rounded-full" />
+    <div className="relative w-64 flex flex-col gap-3">
+      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-500/15 border border-amber-500/30">
+        <Star className="w-4 h-4 fill-amber-400 text-amber-400 shrink-0" />
+        <span className="text-xs font-semibold text-amber-300">3 starred questions</span>
+      </div>
+      <div className="px-4 py-3 rounded-2xl bg-white/8 border border-white/10 flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <PenLine className="w-4 h-4 text-primary-400 shrink-0" />
+          <span className="text-xs font-bold text-white/80 uppercase tracking-wider">My Question</span>
+        </div>
+        <p className="text-sm text-white/70">Explain the difference between a process and a thread.</p>
+        <div className="flex gap-2 mt-1">
+          <span className="px-2 py-0.5 rounded-full bg-primary-500/20 text-primary-300 text-xs font-semibold">OS</span>
+          <span className="px-2 py-0.5 rounded-full bg-white/10 text-white/40 text-xs">Visible only to you</span>
+        </div>
+      </div>
+      <div className="px-4 py-2.5 rounded-xl border border-dashed border-white/20 text-xs text-white/30 text-center">
+        + Add another question
+      </div>
+    </div>
+  </div>
+)
+
+const SlideAI = () => (
+  <div className="flex-1 w-full h-full relative flex items-center justify-center">
+    <div className="absolute inset-0 bg-fuchsia-500/5 blur-3xl rounded-full" />
+    <div className="relative w-64 flex flex-col gap-3">
+      <div className="flex gap-2 items-start">
+        <div className="w-7 h-7 rounded-full bg-fuchsia-500/30 border border-fuchsia-400/40 flex items-center justify-center shrink-0 mt-0.5">
+          <Sparkles className="w-3.5 h-3.5 text-fuchsia-300" />
+        </div>
+        <div className="px-4 py-3 rounded-2xl rounded-tl-sm bg-white/8 border border-white/10 text-sm text-white/80 leading-relaxed">
+          Your answer is close — but you missed that threads share the same memory space while processes don't.
+        </div>
+      </div>
+      <div className="flex gap-2 items-start flex-row-reverse">
+        <div className="w-7 h-7 rounded-full bg-white/10 border border-white/10 flex items-center justify-center shrink-0 mt-0.5">
+          <MessageSquare className="w-3.5 h-3.5 text-white/50" />
+        </div>
+        <div className="px-4 py-3 rounded-2xl rounded-tr-sm bg-primary-500/20 border border-primary-500/30 text-sm text-white/80 leading-relaxed">
+          Can you give me a hint on memory isolation?
+        </div>
+      </div>
+      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10">
+        <span className="text-xs text-white/30 flex-1">Ask a follow-up...</span>
+        <Sparkles className="w-3.5 h-3.5 text-fuchsia-400 animate-pulse" />
+      </div>
+    </div>
+  </div>
+)
 
 const demoSteps = [
   {
-    title: "Master Fundamentals",
-    description: "Structure your learning with curated paths covering MCQ foundations to advanced system design.",
-    image: "/logos/google.svg", // Using as placeholder
-    tag: "Structured Learning",
-    color: "bg-primary-500"
+    tag: 'Topics',
+    tagColor: 'bg-primary-500',
+    icon: BookOpen,
+    title: 'Pick your battlefield.',
+    description: 'OOP, OS, Networking, Databases — choose a topic and dive straight into questions built for Big Tech interviews.',
+    visual: SlideChooseTopic,
   },
   {
-    title: "Real-time AI Feedback",
-    description: "Get instant hints and performance analysis as you solve complex problems.",
-    image: "/logos/meta.svg",
-    tag: "AI Powered",
-    color: "bg-blue-500"
+    tag: 'Practice',
+    tagColor: 'bg-blue-500',
+    icon: Zap,
+    title: 'MCQ. Written. Both.',
+    description: 'Rapid-fire multiple choice or open-ended written answers. Get instant feedback and star the questions that trip you up.',
+    visual: SlidePractice,
   },
   {
-    title: "Interactive MCQ Engine",
-    description: "Rapid-fire testing to solidify your CS concepts and technical knowledge.",
-    image: "/logos/amazon.svg",
-    tag: "Concept Mastery",
-    color: "bg-orange-500"
+    tag: 'Personalized',
+    tagColor: 'bg-violet-500',
+    icon: PenLine,
+    title: 'Make the questions yours.',
+    description: 'Create your own questions for any topic, star the ones worth revisiting, and build a practice set that fits exactly how you think.',
+    visual: SlidePersonalized,
   },
   {
-    title: "Progress Tracking",
-    description: "Visualize your growth with detailed analytics on every technical domain.",
-    image: "/logos/microsoft.svg",
-    tag: "Analytics",
-    color: "bg-green-500"
+    tag: 'AI Feedback',
+    tagColor: 'bg-fuchsia-500',
+    icon: Sparkles,
+    title: 'Talk to AI. Level up fast.',
+    description: 'Get instant, contextual feedback on your answers. Ask follow-ups, request hints, and understand exactly where your thinking breaks down.',
+    visual: SlideAI,
   },
-  {
-    title: "Mock Interview Mode",
-    description: "Simulate real big-tech environments with timed sessions and peer reviews.",
-    image: "/logos/apple.svg",
-    tag: "Interview Prep",
-    color: "bg-gray-500"
-  }
 ]
 
 export default function Preview() {
@@ -69,70 +176,54 @@ export default function Preview() {
         </div>
 
         <div className="relative">
-          {/* Main App Mockup Frame */}
           <div className="relative mx-auto max-w-5xl bg-[#101010] rounded-[3rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] border border-white/5 overflow-hidden">
-            {/* Window Header */}
+            {/* Window chrome */}
             <div className="bg-white/5 px-6 py-4 flex items-center gap-4 border-b border-white/5">
               <div className="flex gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                <div className="w-3 h-3 rounded-full bg-amber-400"></div>
-                <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                <div className="w-3 h-3 rounded-full bg-red-400" />
+                <div className="w-3 h-3 rounded-full bg-amber-400" />
+                <div className="w-3 h-3 rounded-full bg-green-400" />
               </div>
             </div>
 
-            {/* Carousel Content */}
+            {/* Carousel */}
             <div className="relative aspect-[16/10] lg:aspect-[21/9] overflow-hidden group">
-              {demoSteps.map((step, index) => (
-                <div 
-                  key={index}
-                  className={`absolute inset-0 transition-all duration-700 ease-in-out flex flex-col lg:flex-row items-center justify-center p-8 lg:p-16 gap-12
-                    ${index === currentStep ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12 pointer-events-none'}`}
-                >
-                  {/* Image/Visual Area */}
-                  <div className="flex-1 w-full h-full relative flex items-center justify-center">
-                    <div className="absolute inset-0 bg-primary-500/5 blur-3xl rounded-full"></div>
-                    <div className="relative w-48 h-48 lg:w-64 lg:h-64 bg-white/5 rounded-[2.5rem] border border-white/10 p-12 backdrop-blur-sm animate-float">
-                      <Image 
-                        src={step.image} 
-                        alt={step.title}
-                        fill
-                        className="p-12 object-contain filter invert brightness-200"
-                      />
+              {demoSteps.map((step, index) => {
+                const Visual = step.visual
+                const Icon = step.icon
+                return (
+                  <div
+                    key={index}
+                    className={`absolute inset-0 transition-all duration-700 ease-in-out flex flex-col lg:flex-row items-center justify-center p-8 lg:p-16 gap-12
+                      ${index === currentStep ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12 pointer-events-none'}`}
+                  >
+                    <Visual />
+
+                    <div className="flex-1 space-y-6 text-center lg:text-left">
+                      <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full ${step.tagColor} bg-opacity-10 text-xs font-bold uppercase tracking-widest text-white border border-white/10`}>
+                        <Icon className="w-3.5 h-3.5" />
+                        {step.tag}
+                      </div>
+                      <h3 className="text-3xl lg:text-5xl font-bold text-white tracking-tight leading-tight">
+                        {step.title}
+                      </h3>
+                      <p className="text-lg text-gray-400 max-w-lg leading-relaxed">
+                        {step.description}
+                      </p>
                     </div>
                   </div>
+                )
+              })}
 
-                  {/* Text Content Area */}
-                  <div className="flex-1 space-y-6 text-center lg:text-left">
-                    <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full ${step.color} bg-opacity-10 text-xs font-bold uppercase tracking-widest text-white border border-white/10`}>
-                      <span className={`w-2 h-2 rounded-full ${step.color} animate-pulse`}></span>
-                      {step.tag}
-                    </div>
-                    <h3 className="text-3xl lg:text-5xl font-bold text-white tracking-tight leading-tight">
-                      {step.title}
-                    </h3>
-                    <p className="text-lg text-gray-400 max-w-lg leading-relaxed">
-                      {step.description}
-                    </p>
-                    <div className="flex items-center justify-center lg:justify-start gap-6 pt-4">
-                      <button className="flex items-center gap-3 bg-white text-black px-6 py-3 rounded-full text-sm font-bold hover:bg-gray-200 transition-all">
-                        <Play className="w-4 h-4 fill-current" />
-                        Watch Demo
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              {/* Navigation Arrows */}
-              <button 
-                onClick={() => { prevStep(); setIsAutoPlaying(false); }}
+              <button
+                onClick={() => { prevStep(); setIsAutoPlaying(false) }}
                 className="absolute left-6 top-1/2 -translate-y-1/2 p-4 rounded-full bg-white/5 border border-white/10 text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-white/10 backdrop-blur-sm"
                 aria-label="Previous step"
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
-              <button 
-                onClick={() => { nextStep(); setIsAutoPlaying(false); }}
+              <button
+                onClick={() => { nextStep(); setIsAutoPlaying(false) }}
                 className="absolute right-6 top-1/2 -translate-y-1/2 p-4 rounded-full bg-white/5 border border-white/10 text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-white/10 backdrop-blur-sm"
                 aria-label="Next step"
               >
@@ -140,13 +231,13 @@ export default function Preview() {
               </button>
             </div>
 
-            {/* Step Indicators */}
+            {/* Step indicators */}
             <div className="bg-white/5 px-8 py-6 flex items-center justify-between border-t border-white/5">
               <div className="flex gap-3">
                 {demoSteps.map((_, index) => (
                   <button
                     key={index}
-                    onClick={() => { setCurrentStep(index); setIsAutoPlaying(false); }}
+                    onClick={() => { setCurrentStep(index); setIsAutoPlaying(false) }}
                     className={`h-1.5 rounded-full transition-all duration-300 ${
                       index === currentStep ? 'w-12 bg-primary-500' : 'w-3 bg-white/20'
                     }`}
@@ -160,10 +251,10 @@ export default function Preview() {
             </div>
           </div>
 
-          {/* Background Decorative Elements */}
+          {/* Background glow */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full -z-10 blur-[100px] opacity-20">
-            <div className="absolute top-0 left-0 w-64 h-64 bg-primary-500 rounded-full"></div>
-            <div className="absolute bottom-0 right-0 w-64 h-64 bg-blue-500 rounded-full"></div>
+            <div className="absolute top-0 left-0 w-64 h-64 bg-primary-500 rounded-full" />
+            <div className="absolute bottom-0 right-0 w-64 h-64 bg-blue-500 rounded-full" />
           </div>
         </div>
       </div>

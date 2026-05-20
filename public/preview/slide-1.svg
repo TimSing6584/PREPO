@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 470" width="600" height="470">
+  <rect width="600" height="470" fill="#101010"/>
+  <ellipse cx="300" cy="235" rx="200" ry="140" fill="#6366f1" opacity="0.06"/>
+  <!-- Card 1 -->
+  <rect x="150" y="60" width="300" height="56" rx="16" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.1" stroke-width="1"/>
+  <circle cx="178" cy="88" r="6" fill="#6366f1"/>
+  <text x="196" y="84" font-family="sans-serif" font-size="13" font-weight="600" fill="white" fill-opacity="0.55">Object-Oriented Programming</text>
+  <text x="196" y="101" font-family="sans-serif" font-size="11" fill="white" fill-opacity="0.25">24 questions</text>
+  <!-- Card 2 — highlighted -->
+  <rect x="150" y="130" width="300" height="56" rx="16" fill="#ffffff" fill-opacity="0.13" stroke="#ffffff" stroke-opacity="0.3" stroke-width="1"/>
+  <circle cx="178" cy="158" r="6" fill="#f43f5e"/>
+  <text x="196" y="154" font-family="sans-serif" font-size="13" font-weight="700" fill="white" fill-opacity="0.9">Operating Systems</text>
+  <text x="196" y="171" font-family="sans-serif" font-size="11" fill="white" fill-opacity="0.35">18 questions</text>
+  <rect x="432" y="148" width="4" height="20" rx="2" fill="#f43f5e"/>
+  <!-- Card 3 -->
+  <rect x="150" y="200" width="300" height="56" rx="16" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.1" stroke-width="1"/>
+  <circle cx="178" cy="228" r="6" fill="#0ea5e9"/>
+  <text x="196" y="224" font-family="sans-serif" font-size="13" font-weight="600" fill="white" fill-opacity="0.55">Computer Networks</text>
+  <text x="196" y="241" font-family="sans-serif" font-size="11" fill="white" fill-opacity="0.25">20 questions</text>
+  <!-- Card 4 -->
+  <rect x="150" y="270" width="300" height="56" rx="16" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.1" stroke-width="1"/>
+  <circle cx="178" cy="298" r="6" fill="#06b6d4"/>
+  <text x="196" y="294" font-family="sans-serif" font-size="13" font-weight="600" fill="white" fill-opacity="0.55">Databases</text>
+  <text x="196" y="311" font-family="sans-serif" font-size="11" fill="white" fill-opacity="0.25">16 questions</text>
+  <!-- Card 5 -->
+  <rect x="150" y="340" width="300" height="56" rx="16" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.1" stroke-width="1"/>
+  <circle cx="178" cy="368" r="6" fill="#a855f7"/>
+  <text x="196" y="364" font-family="sans-serif" font-size="13" font-weight="600" fill="white" fill-opacity="0.55">Data Structures and Algorithms</text>
+  <text x="196" y="381" font-family="sans-serif" font-size="11" fill="white" fill-opacity="0.25">30 questions</text>
+  <!-- Start now button on highlighted card -->
+  <rect x="340" y="143" width="76" height="28" rx="14" fill="#f43f5e" fill-opacity="0.2" stroke="#f43f5e" stroke-opacity="0.4" stroke-width="1"/>
+  <text x="378" y="162" font-family="sans-serif" font-size="11" font-weight="700" fill="#f43f5e" text-anchor="middle">Start now →</text>
+</svg>
