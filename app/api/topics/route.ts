@@ -2,9 +2,12 @@ import { prisma } from "@/app/utils/db";
 import { NextRequest, NextResponse } from "next/server";
 import { roleChecker } from "@/app/utils/auth";
 import { redis } from "@/app/utils/redis";
+import { checkRateLimit } from "@/app/utils/ratelimit";
 import type { Topic } from '@/app/utils/api/topics'
-export async function GET() {
+export async function GET(_request: NextRequest) {
     try {
+        const rateLimitError = await checkRateLimit('read');
+        if (rateLimitError) return rateLimitError;
         const cachedTopics = await redis.get<Topic[]>('topics')
         if (cachedTopics) {
             console.log("cached topics found, returning from cache")
@@ -49,16 +52,19 @@ export async function GET() {
     }
 }
 
-export async function POST(request: NextRequest){
+export async function POST(request: NextRequest) {
     try {
         // Check if user has admin role
         const isAdmin = await roleChecker("admin");
-        if(!isAdmin){
+        if (!isAdmin) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
         }
+
+        const rateLimitError = await checkRateLimit('write');
+        if (rateLimitError) return rateLimitError;
         // Create new topic in database
         const { name, imageUrl } = await request.json();
-        if(!name || !imageUrl){
+        if (!name || !imageUrl) {
             return NextResponse.json({ error: "Name and imageUrl are required." }, { status: 400 });
         }
         const topic = await prisma.topic.create({
@@ -69,7 +75,7 @@ export async function POST(request: NextRequest){
         });
         return NextResponse.json({ success: true, data: topic });
     }
-    catch(error){
+    catch (error) {
         if (error instanceof Error && 'code' in error && error.code === 'P2002') {
             return NextResponse.json({ error: "Topic name already exists." }, { status: 409 });
         }

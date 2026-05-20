@@ -2,6 +2,7 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { NextRequest, NextResponse } from "next/server";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { roleChecker } from "@/app/utils/auth";
+import { checkRateLimit } from "@/app/utils/ratelimit";
 
 const s3Client = new S3Client({
     region: process.env.AWS_REGION,
@@ -32,6 +33,9 @@ export async function POST(request: NextRequest) {
         if (!user) {
             return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
         }
+
+        const rateLimitError = await checkRateLimit('upload');
+        if (rateLimitError) return rateLimitError;
 
         const isAdmin = await roleChecker("admin");
         const formData = await request.formData();

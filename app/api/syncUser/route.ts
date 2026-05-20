@@ -1,13 +1,18 @@
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { prisma } from "@/app/utils/db";
 import { NextResponse } from "next/server";
-import { cookies } from 'next/headers'
+import { cookies } from 'next/headers';
+import { checkRateLimit } from "@/app/utils/ratelimit";
+
 export async function GET() {
-    const {getUser} = getKindeServerSession();
+    const { getUser } = getKindeServerSession();
     const user = await getUser();
-    if(!user){
+    if (!user) {
         return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
+
+    const rateLimitError = await checkRateLimit('read');
+    if (rateLimitError) return rateLimitError;
     const cookieStore = await cookies();
     const userSynced = cookieStore.get("user_synced");
     if (!userSynced || userSynced.value !== user.id) {
@@ -28,5 +33,5 @@ export async function GET() {
             maxAge: 60 * 60 * 24,
         });
     }
-    return NextResponse.json({success:true})
+    return NextResponse.json({ success: true })
 }
