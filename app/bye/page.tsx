@@ -1,24 +1,69 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import Navbar from '@/components/main/Navbar'
 import { LoginLink } from '@kinde-oss/kinde-auth-nextjs'
 import { ArrowLeft } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 
-// Goodbye
 export default function ByePage() {
+  const mascotRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = mascotRef.current
+    if (!el) return
+
+    const peek = () => {
+      el.style.transform = 'translateX(-50%) translateY(-59%)'
+      setTimeout(() => {
+        el.style.transform = 'translateX(-50%) translateY(100%)'
+      }, 2500)
+    }
+
+    const initialTimer = setTimeout(peek, 600)
+    const interval = setInterval(peek, 10000)
+
+    return () => {
+      clearTimeout(initialTimer)
+      clearInterval(interval)
+    }
+  }, [])
+
   return (
     <div className="main-frame px-6 md:px-12 pb-6 md:pb-12 pt-4 md:pt-6 relative overflow-hidden flex flex-col gap-8 md:gap-12 font-geist-sans">
       <Navbar />
 
-      <div className="flex-1 flex items-center justify-center">
-        <div className="w-full max-w-2xl bg-white rounded-[2rem] border border-neutral-100 shadow-sm p-8 md:p-12 text-center space-y-6">
+      <div className="flex-1 flex items-center justify-center mt-9">
+        {/* Mascot — hidden behind card, peeks up from below */}
+        <div
+          ref={mascotRef}
+          className="absolute left-1/2 z-10 w-40 pointer-events-none"
+          style={{
+            bottom: '50%',
+            transform: 'translateX(-50%) translateY(100%) scale(1)',
+            transition: 'transform 1.1s cubic-bezier(0.34, 1.2, 0.64, 1)',
+          }}
+        >
+          <Image
+            src="/mascot/Prepo_Mascot_Bye_Animation.webp"
+            alt="Prepo mascot waving goodbye"
+            width={160}
+            height={160}
+            unoptimized
+            draggable={false}
+            className="w-full h-auto"
+          />
+        </div>
+
+        {/* Card — sits above mascot */}
+        <div className="w-full max-w-2xl bg-white rounded-[2rem] border border-neutral-100 shadow-sm p-8 md:p-12 text-center space-y-6 relative z-20">
           <div className="space-y-3">
             <h1 className="text-3xl md:text-4xl font-bold text-[#101010] tracking-tight">
               Bye bye
             </h1>
             <p className="text-neutral-500 text-base md:text-lg">
-              You’re signed out. Come back anytime.
+              You are signed out. Come back anytime.
             </p>
           </div>
 
@@ -49,4 +94,3 @@ export default function ByePage() {
     </div>
   )
 }
-
