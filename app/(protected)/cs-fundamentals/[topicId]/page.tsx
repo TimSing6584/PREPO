@@ -10,6 +10,7 @@ type PageProps = {
 }
 
 export default async function TopicPage({ params, searchParams }: PageProps) {
+  await new Promise((resolve) => setTimeout(resolve, 5000)) // Simulate loading delay
   const { topicId } = await params
   const { page: pageParam, filter: filterParam } = await searchParams
   const page = Math.max(1, parseInt(pageParam ?? '1', 10) || 1)
