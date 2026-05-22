@@ -14,20 +14,11 @@ export default function ByePage() {
     const el = mascotRef.current
     if (!el) return
 
-    const peek = () => {
+    const initialTimer = setTimeout(() => {
       el.style.transform = 'translateX(-50%) translateY(-59%)'
-      setTimeout(() => {
-        el.style.transform = 'translateX(-50%) translateY(100%)'
-      }, 2500)
-    }
+    }, 600)
 
-    const initialTimer = setTimeout(peek, 600)
-    const interval = setInterval(peek, 10000)
-
-    return () => {
-      clearTimeout(initialTimer)
-      clearInterval(interval)
-    }
+    return () => clearTimeout(initialTimer)
   }, [])
 
   return (
@@ -35,13 +26,13 @@ export default function ByePage() {
       <Navbar />
 
       <div className="flex-1 flex items-center justify-center mt-9">
-        {/* Mascot — hidden behind card, peeks up from below */}
+        {/* Mascot — slides up from behind card on mount */}
         <div
           ref={mascotRef}
           className="absolute left-1/2 z-10 w-40 pointer-events-none"
           style={{
             bottom: '50%',
-            transform: 'translateX(-50%) translateY(100%) scale(1)',
+            transform: 'translateX(-50%) translateY(100%)',
             transition: 'transform 1.1s cubic-bezier(0.34, 1.2, 0.64, 1)',
           }}
         >
