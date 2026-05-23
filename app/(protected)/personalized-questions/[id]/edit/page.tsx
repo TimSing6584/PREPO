@@ -343,10 +343,8 @@ export default function EditPersonalizedQuestionPage() {
                       editorClassName="min-h-[150px] bg-white p-3 text-zinc-900 sm:min-h-[180px] sm:p-4"
                     />
                   )}
-                  {errors.answer ? (
+                  {errors.answer && (
                     <p className="mt-2 text-xs text-red-500">{errors.answer}</p>
-                  ) : (
-                    <p className="mt-2 text-xs text-gray-500">Answer is stored as a JSON string.</p>
                   )}
                 </div>
 

@@ -2,6 +2,7 @@
 
 import { EditorContent, useEditor, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import Link from '@tiptap/extension-link'
 import type { ReactNode } from 'react'
 import {
   Bold,
@@ -166,10 +167,33 @@ function EditorToolbar({ editor }: { editor: Editor | null }) {
         <ToolbarButton
           editor={editor}
           label="Insert URL"
+          active={!!editor?.isActive('link')}
           onClick={() => {
+            if (!editor) return
+
+            // If link is active, unset it
+            if (editor.isActive('link')) {
+              editor.chain().focus().unsetLink().run()
+              return
+            }
+
             const url = window.prompt('Enter URL')
             if (!url?.trim()) return
-            editor?.chain().focus().insertContent(url.trim()).run()
+
+            const { from, to } = editor.state.selection
+            const hasSelection = from !== to
+
+            if (hasSelection) {
+              // Wrap selected text as a link
+              editor.chain().focus().setLink({ href: url.trim() }).run()
+            } else {
+              // Insert the URL as linked text
+              editor
+                .chain()
+                .focus()
+                .insertContent(`<a href="${url.trim()}">${url.trim()}</a>`)
+                .run()
+            }
           }}
         >
           <Link2 className="h-4 w-4" />
@@ -188,7 +212,15 @@ export default function TipTapEditor({
   containerClassName = 'w-full rounded-xl border border-zinc-300 bg-zinc-50',
 }: TiptapEditorProps) {
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit,
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-blue-600 underline cursor-pointer hover:text-blue-800',
+        },
+      }),
+    ],
     content: initialContent,
     editable,
     immediatelyRender: false,
@@ -212,9 +244,38 @@ export default function TipTapEditor({
           margin: 0.5rem 0;
         }
 
-        .tiptap-editor .ProseMirror h1,
-        .tiptap-editor .ProseMirror h2,
+        .tiptap-editor .ProseMirror h1 {
+          font-size: 2rem;
+          font-weight: 700;
+          margin: 1rem 0 0.5rem;
+          line-height: 1.2;
+        }
+
+        .tiptap-editor .ProseMirror h2 {
+          font-size: 1.5rem;
+          font-weight: 700;
+          margin: 1rem 0 0.5rem;
+          line-height: 1.2;
+        }
+
         .tiptap-editor .ProseMirror h3 {
+          font-size: 1.25rem;
+          font-weight: 600;
+          margin: 1rem 0 0.5rem;
+          line-height: 1.2;
+        }
+
+        .tiptap-editor .ProseMirror h4 {
+          font-size: 1.1rem;
+          font-weight: 600;
+          margin: 1rem 0 0.5rem;
+          line-height: 1.2;
+        }
+
+        .tiptap-editor .ProseMirror h5,
+        .tiptap-editor .ProseMirror h6 {
+          font-size: 1rem;
+          font-weight: 600;
           margin: 1rem 0 0.5rem;
           line-height: 1.2;
         }
@@ -246,17 +307,32 @@ export default function TipTapEditor({
           font-style: italic;
         }
 
+        .tiptap-editor .ProseMirror a {
+          color: #2563eb;
+          text-decoration: underline;
+          cursor: pointer;
+        }
+
+        .tiptap-editor .ProseMirror a:hover {
+          color: #1e40af;
+        }
+
         @media (max-width: 640px) {
           .tiptap-editor .ProseMirror {
             font-size: 0.95rem;
             line-height: 1.5;
           }
 
-          .tiptap-editor .ProseMirror h1,
-          .tiptap-editor .ProseMirror h2,
+          .tiptap-editor .ProseMirror h1 {
+            font-size: 1.6rem;
+          }
+
+          .tiptap-editor .ProseMirror h2 {
+            font-size: 1.35rem;
+          }
+
           .tiptap-editor .ProseMirror h3 {
-            line-height: 1.3;
-            margin: 0.75rem 0 0.5rem;
+            font-size: 1.15rem;
           }
 
           .tiptap-editor .ProseMirror ul,
@@ -282,5 +358,3 @@ export default function TipTapEditor({
     </div>
   )
 }
-
-
