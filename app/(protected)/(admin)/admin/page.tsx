@@ -1,26 +1,64 @@
 import Link from 'next/link';
-export default function DashboardPage() {
+import { prisma } from '@/app/utils/db';
+import { QuestionType } from '@/lib/generated/prisma/client';
+
+export const dynamic = 'force-dynamic';
+
+export default async function DashboardPage() {
+  const [activeTopics, defaultQuestions, personalizedQuestions, users] = await Promise.all([
+    prisma.topic.count({
+      where: {
+        deleted: false,
+      },
+    }),
+    prisma.question.count({
+      where: {
+        deleted: false,
+        type: QuestionType.DEFAULT,
+      },
+    }),
+    prisma.question.count({
+      where: {
+        deleted: false,
+        type: QuestionType.PERSONALIZED,
+      },
+    }),
+    prisma.user.count(),
+  ]);
+
+  const stats = [
+    {
+      title: 'Active Topics',
+      value: activeTopics,
+      description: 'Across all categories',
+    },
+    {
+      title: 'Default Questions',
+      value: defaultQuestions,
+      description: 'Created by admins',
+    },
+    {
+      title: 'Personalized Questions',
+      value: personalizedQuestions,
+      description: 'Created by students',
+    },
+    {
+      title: 'Total Users',
+      value: users,
+      description: 'Registered accounts',
+    },
+  ];
+
   return (
     <div className="space-y-6">
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-sm font-medium text-gray-500 uppercase">Total Topics</h3>
-          <p className="text-3xl font-bold text-gray-900 mt-2">0</p>
-          <p className="text-sm text-gray-600 mt-1">Across all categories</p>
-        </div>
-        
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-sm font-medium text-gray-500 uppercase">Total Questions</h3>
-          <p className="text-3xl font-bold text-gray-900 mt-2">0</p>
-          <p className="text-sm text-gray-600 mt-1">Available for practice</p>
-        </div>
-        
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-sm font-medium text-gray-500 uppercase">Active Users</h3>
-          <p className="text-3xl font-bold text-gray-900 mt-2">0</p>
-          <p className="text-sm text-gray-600 mt-1">Currently studying</p>
-        </div>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+        {stats.map((stat) => (
+          <div key={stat.title} className="rounded-lg border border-gray-200 bg-white p-6">
+            <h3 className="text-sm font-medium uppercase text-gray-500">{stat.title}</h3>
+            <p className="mt-2 text-3xl font-bold text-gray-900">{stat.value}</p>
+            <p className="mt-1 text-sm text-gray-600">{stat.description}</p>
+          </div>
+        ))}
       </div>
 
       {/* Quick Actions */}
