@@ -33,5 +33,5 @@ export async function GET() {
             maxAge: 60 * 60 * 24,
         });
     }
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, userId: user.id })
 }
