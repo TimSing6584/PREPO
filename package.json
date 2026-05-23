@@ -18,6 +18,7 @@
     "@kinde-oss/kinde-auth-nextjs": "^2.11.0",
     "@prisma/adapter-pg": "^7.4.0",
     "@prisma/client": "^7.4.0",
+    "@sentry/nextjs": "^10",
     "@tiptap/extension-link": "^3.23.6",
     "@tiptap/pm": "^3.22.5",
     "@tiptap/react": "^3.22.5",
