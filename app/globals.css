@@ -124,3 +124,23 @@ html {
     transform: scale(1);
   }
 }
+
+.mascot-ring {
+  border-radius: 9999px;
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 0px rgba(234, 179, 8, 0.15),
+      0 0 0 8px rgba(234, 179, 8, 0.08),
+      0 0 0 16px rgba(234, 179, 8, 0.04);
+  }
+  50% {
+    box-shadow:
+      0 0 0 8px rgba(234, 179, 8, 0.2),
+      0 0 0 18px rgba(234, 179, 8, 0.1),
+      0 0 0 30px rgba(234, 179, 8, 0.04);
+  }
+}
