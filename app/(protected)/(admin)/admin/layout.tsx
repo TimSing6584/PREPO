@@ -7,7 +7,6 @@ import {
   LayoutDashboard,
   BookOpen,
   MessageSquare,
-  User
 } from 'lucide-react';
 
 const menuItems = [
@@ -28,11 +27,6 @@ const menuItems = [
   },
 ];
 
-const accountItem = {
-  name: 'My Account',
-  href: '/admin/account',
-  icon: User,
-};
 
 export default function AdminLayout({
   children,
@@ -95,24 +89,6 @@ export default function AdminLayout({
           </div>
         </nav>
 
-        {/* Account Section */}
-        <div className="p-4 pb-6 border-t border-gray-200">
-          <Link
-            href={accountItem.href}
-            className={`
-              flex items-center gap-3 px-4 py-3 rounded-lg
-              transition-colors duration-200
-              ${
-                isActive(accountItem.href)
-                  ? 'bg-primary-50 text-primary-700 font-medium'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }
-            `}
-          >
-            <accountItem.icon className="w-5 h-5" />
-            <span>{accountItem.name}</span>
-          </Link>
-        </div>
       </aside>
 
       {/* Main Content */}
@@ -121,18 +97,8 @@ export default function AdminLayout({
         <header className="bg-white border-b border-gray-200 px-8 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-900">
-              {menuItems.find(item => isActive(item.href))?.name ||
-               (isActive(accountItem.href) ? accountItem.name : 'Admin')}
+              {menuItems.find(item => isActive(item.href))?.name}
             </h1>
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">Admin User</p>
-                <p className="text-xs text-gray-500">Administrator</p>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                <User className="w-5 h-5 text-primary-700" />
-              </div>
-            </div>
           </div>
         </header>
 
