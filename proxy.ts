@@ -42,7 +42,7 @@ export default withAuth(
     },
     {
         // Middleware still runs on all routes, but doesn't protect the home route
-        publicPaths: ["/", "/bye", "/api/auth/:path*"], // e.g. ["/api/public", "/blog", "/about"],
+        publicPaths: ["/", "/bye", "/api/auth/:path*", "/privacy-policy"], // e.g. ["/api/public", "/blog", "/about"],
         isAuthorized: ({ token, req }: { token: KindeAccessToken; req: NextRequest }) => {
             if (req.nextUrl.pathname.startsWith("/admin")) {
                 const roles = token?.roles as { key: string }[] | undefined;
