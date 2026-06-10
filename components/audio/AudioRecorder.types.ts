@@ -1,3 +1,7 @@
+import type { SpeechEvaluation } from "./speechEvaluation.types";
+
+export type { SpeechEvaluation };
+
 /** Maximum recording duration before auto-stop (1 minute 30 seconds). */
 export const MAX_RECORDING_MS = 90_000;
 
@@ -20,69 +24,17 @@ export type AudioRecorderStatus =
 
 /**
  * Props accepted by the AudioRecorder component.
- * All props are optional — the component is fully self-contained without any.
  */
 export interface AudioRecorderProps {
-    /** Restored transcript shown in the transcript card (e.g. from localStorage). */
-    initialTranscript?: string;
-    /** Called with the latest transcript chunk whenever a successful response is received. */
-    onTranscript?: (transcript: string) => void;
-    /** Called with the full accumulated transcript for persistence. */
-    onTranscriptChange?: (transcript: string) => void;
-}
-
-/**
- * Successful response shape from the Transcription_API.
- */
-export interface TranscribeSuccessResponse {
-    transcript: string;
-}
-
-/**
- * Error response shape from the Transcription_API.
- */
-export interface TranscribeErrorResponse {
-    detail: string;
-}
-
-/**
- * Union of all possible Transcription_API response shapes.
- */
-export type TranscribeResponse = TranscribeSuccessResponse | TranscribeErrorResponse;
-
-/**
- * Type guard that narrows a TranscribeResponse to a TranscribeSuccessResponse.
- *
- * Returns true when the response contains a `transcript` field.
- */
-export function isSuccess(r: TranscribeResponse): r is TranscribeSuccessResponse {
-    return 'transcript' in r;
-}
-
-/**
- * Constructs the multipart FormData payload required by the Transcription_API.
- *
- * The blob is appended under field name `"audio"` with filename `"recording.webm"`.
- * The browser will automatically set the `Content-Type` of the part to the
- * blob's own MIME type (`audio/webm`) when the request is sent.
- *
- * Requirements: 2.1, 2.2
- */
-export function buildFormData(blob: Blob): FormData {
-    const form = new FormData();
-    form.append('audio', blob, 'recording.webm');
-    return form;
+    statement: string;
+    modelAnswer: string;
+    /** Called with the full evaluation result for persistence. */
+    onEvaluation?: (evaluation: SpeechEvaluation) => void;
+    onEvaluatingChange?: (isEvaluating: boolean) => void;
 }
 
 /**
  * Maps a caught error value to a user-facing string message.
- *
- * - `NotAllowedError` → microphone permission denied message
- * - `NotFoundError`   → no microphone found message
- * - Any other `Error` → the error's own message
- * - Non-Error values  → generic fallback message
- *
- * Requirements: 1.5, 4.1, 4.2
  */
 export function getErrorMessage(err: unknown): string {
     if (err instanceof DOMException) {

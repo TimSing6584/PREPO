@@ -6,6 +6,11 @@ import Navbar from '@/components/main/Navbar'
 import QuestionSidebar from '@/components/cs-fundamentals/practice/QuestionSidebar'
 import QuestionCard from '@/components/cs-fundamentals/practice/QuestionCard'
 import type { PracticeQuestion } from '@/components/cs-fundamentals/practice/types'
+import {
+  mergeQuestionProgress,
+  type QuestionProgressPatch,
+  type StoredQuestionProgress,
+} from '@/components/cs-fundamentals/practice/progress'
 import type { PaginationMeta, QuestionFilter } from '@/app/utils/server/csFundamentals'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
@@ -21,19 +26,6 @@ type PracticeClientProps = {
   initialQuestionId: string
   pagination: PaginationMeta
   filter: QuestionFilter
-}
-
-type StoredQuestionProgress = {
-  mode?: 'mcq' | 'written'
-  mcq?: {
-    selectedOption: number | null
-    isSubmitted: boolean
-    isCorrect: boolean | null
-  }
-  written?: {
-    draft: string
-    transcript?: string
-  }
 }
 
 type PracticeProgressStore = {
@@ -326,10 +318,13 @@ export default function PracticeClient({
                   })
                 }
                 progress={progressByQuestion[currentQuestion.id]}
-                onProgressChange={(nextProgress) =>
+                onProgressChange={(patch: QuestionProgressPatch) =>
                   setProgressByQuestion((prev) => ({
                     ...prev,
-                    [currentQuestion.id]: nextProgress,
+                    [currentQuestion.id]: mergeQuestionProgress(
+                      prev[currentQuestion.id],
+                      patch,
+                    ),
                   }))
                 }
               />

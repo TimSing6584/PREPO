@@ -4,14 +4,18 @@ import { useEffect, useMemo, useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import TipTapEditor from '@/components/TipTap/TipTapEditor'
 import AudioRecorder from '@/components/audio/AudioRecorder'
+import SpeechEvaluationLoading from '@/components/audio/SpeechEvaluationLoading'
+import SpeechEvaluationResult from '@/components/audio/SpeechEvaluationResult'
+import type { SpeechEvaluation } from '@/components/audio/speechEvaluation.types'
 import type { ComponentProps } from 'react'
 
 interface WrittenViewProps {
+  statement: string
   correctAnswer: string
   initialDraft?: string
-  initialTranscript?: string
+  initialSpeechEvaluation?: SpeechEvaluation | null
   onDraftChange?: (draft: string) => void
-  onTranscriptChange?: (transcript: string) => void
+  onSpeechEvaluationChange?: (evaluation: SpeechEvaluation) => void
 }
 
 type EditorContent = NonNullable<ComponentProps<typeof TipTapEditor>['initialContent']>
@@ -22,15 +26,43 @@ const hasRichTextShape = (value: unknown): value is Exclude<EditorContent, strin
   return candidate.type === 'doc'
 }
 
+function extractTipTapText(node: unknown): string {
+  if (!node || typeof node !== 'object') return ''
+  const candidate = node as { text?: string; content?: unknown[] }
+  if (typeof candidate.text === 'string') return candidate.text
+  if (!Array.isArray(candidate.content)) return ''
+  return candidate.content.map(extractTipTapText).join('')
+}
+
+function toPlainAnswer(correctAnswer: string): string {
+  try {
+    const parsed = JSON.parse(correctAnswer) as unknown
+    if (hasRichTextShape(parsed)) {
+      const text = extractTipTapText(parsed).trim()
+      if (text) return text
+    }
+  } catch {
+    // fall through to raw string
+  }
+  return correctAnswer.trim()
+}
+
 export default function WrittenView({
+  statement,
   correctAnswer,
   initialDraft = '',
-  initialTranscript = '',
+  initialSpeechEvaluation = null,
   onDraftChange,
-  onTranscriptChange,
+  onSpeechEvaluationChange,
 }: WrittenViewProps) {
   const [answer, setAnswer] = useState(initialDraft)
   const [showAnswer, setShowAnswer] = useState(false)
+  const [speechEvaluation, setSpeechEvaluation] = useState<SpeechEvaluation | null>(
+    initialSpeechEvaluation,
+  )
+  const [isEvaluating, setIsEvaluating] = useState(false)
+
+  const modelAnswer = useMemo(() => toPlainAnswer(correctAnswer), [correctAnswer])
 
   const parsedCorrectAnswer = useMemo(() => {
     try {
@@ -44,6 +76,10 @@ export default function WrittenView({
   useEffect(() => {
     setAnswer(initialDraft)
   }, [initialDraft])
+
+  useEffect(() => {
+    setSpeechEvaluation(initialSpeechEvaluation)
+  }, [initialSpeechEvaluation])
 
   return (
     <div className="space-y-6">
@@ -59,14 +95,20 @@ export default function WrittenView({
       />
 
       <AudioRecorder
-        initialTranscript={initialTranscript}
-        onTranscript={(transcript) => {
-          const value = answer ? `${answer}\n\n${transcript}` : transcript
-          setAnswer(value)
-          onDraftChange?.(value)
+        statement={statement}
+        modelAnswer={modelAnswer}
+        onEvaluatingChange={setIsEvaluating}
+        onEvaluation={(evaluation) => {
+          setSpeechEvaluation(evaluation)
+          onSpeechEvaluationChange?.(evaluation)
         }}
-        onTranscriptChange={onTranscriptChange}
       />
+
+      {isEvaluating && <SpeechEvaluationLoading />}
+
+      {speechEvaluation && !isEvaluating && (
+        <SpeechEvaluationResult evaluation={speechEvaluation} />
+      )}
 
       <div className="space-y-4">
         <button

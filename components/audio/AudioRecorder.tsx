@@ -6,25 +6,27 @@ import toast from "react-hot-toast";
 import {
   AudioRecorderProps,
   AudioRecorderStatus,
-  buildFormData,
   formatRecordingDuration,
   getErrorMessage,
-  isSuccess,
   MAX_RECORDING_MS,
-  TranscribeResponse,
 } from "./AudioRecorder.types";
 import RecordingWaveform from "./RecordingWaveform";
+import {
+  buildPipelineFormData,
+  isPipelineSuccess,
+  type PipelineResponse,
+} from "./speechEvaluation.types";
 
 export default function AudioRecorder({
-  initialTranscript,
-  onTranscript,
-  onTranscriptChange,
+  statement,
+  modelAnswer,
+  onEvaluation,
+  onEvaluatingChange,
 }: AudioRecorderProps) {
   const [status, setStatus] = useState<AudioRecorderStatus>({ kind: "idle" });
-  const [transcript, setTranscript] = useState<string | null>(
-    initialTranscript?.trim() ? initialTranscript : null,
+  const [recordingStream, setRecordingStream] = useState<MediaStream | null>(
+    null,
   );
-  const [recordingStream, setRecordingStream] = useState<MediaStream | null>(null);
   const [elapsedMs, setElapsedMs] = useState(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -46,15 +48,14 @@ export default function AudioRecorder({
     mediaRecorderRef.current?.stop();
   }, []);
 
-  useEffect(() => {
-    setTranscript(initialTranscript?.trim() ? initialTranscript : null);
-  }, [initialTranscript]);
-
   useEffect(() => () => clearRecordingTimers(), [clearRecordingTimers]);
+
+  useEffect(() => {
+    onEvaluatingChange?.(status.kind === "loading");
+  }, [onEvaluatingChange, status.kind]);
 
   const handleToggle = async () => {
     if (status.kind === "idle") {
-      // Guard against browsers that don't support MediaRecorder
       if (typeof MediaRecorder === "undefined") {
         setStatus({
           kind: "error",
@@ -91,10 +92,13 @@ export default function AudioRecorder({
 
         if (hitLimitRef.current) {
           hitLimitRef.current = false;
-          toast("Recording stopped — 1:30 limit reached. Only the first 1 minute 30 seconds were saved.", {
-            icon: "⏱️",
-            duration: 5000,
-          });
+          toast(
+            "Recording stopped — 1:30 limit reached. Only the first 1 minute 30 seconds were saved.",
+            {
+              icon: "⏱️",
+              duration: 5000,
+            },
+          );
         }
 
         streamRef.current?.getTracks().forEach((track) => track.stop());
@@ -114,44 +118,39 @@ export default function AudioRecorder({
 
         setStatus({ kind: "loading" });
 
-        const form = buildFormData(blob);
+        const form = buildPipelineFormData(blob, statement, modelAnswer);
 
         try {
-          const res = await fetch("/api/pipeline", {
+          const res = await fetch("/api/speech-evaluation", {
             method: "POST",
             body: form,
           });
 
-          let data: TranscribeResponse | null = null;
+          let data: PipelineResponse | null = null;
           try {
-            data = (await res.json()) as TranscribeResponse;
+            data = (await res.json()) as PipelineResponse;
           } catch {
-            // Response body wasn't valid JSON
             setStatus({
               kind: "error",
-              message: `Transcription failed (HTTP ${res.status}). The server returned an unexpected response.`,
+              message: `Speech evaluation failed (HTTP ${res.status}). The server returned an unexpected response.`,
             });
             return;
           }
 
-          if (isSuccess(data)) {
-            setTranscript((prev) => {
-              const next = prev
-                ? `${prev}\n\n${data.transcript}`
-                : data.transcript;
-              onTranscriptChange?.(next);
-              return next;
-            });
-            onTranscript?.(data.transcript);
+          if (isPipelineSuccess(data)) {
+            onEvaluation?.(data);
             setStatus({ kind: "idle" });
           } else {
-            setStatus({ kind: "error", message: data.detail });
+            setStatus({
+              kind: "error",
+              message: data.detail ?? "Speech evaluation failed.",
+            });
           }
         } catch {
           setStatus({
             kind: "error",
             message:
-              "Could not reach the transcription service. Please check your connection and try again.",
+              "Could not reach the speech evaluation service. Please check your connection and try again.",
           });
         }
       };
@@ -176,7 +175,6 @@ export default function AudioRecorder({
     }
   };
 
-  // Derive button props from current status
   const isRecording = status.kind === "recording";
   const isRequestingPermission = status.kind === "requesting-permission";
   const isLoading = status.kind === "loading";
@@ -185,16 +183,9 @@ export default function AudioRecorder({
     ? "Stop Recording"
     : isRequestingPermission
       ? "Requesting…"
-      : isLoading
-        ? "Transcribing…"
-        : "Start Recording";
+      : "Record answer";
 
-  const buttonIcon = isLoading ? (
-    <span
-      className="h-5 w-5 animate-spin rounded-full border-2 border-primary-600 border-t-transparent"
-      aria-hidden="true"
-    />
-  ) : isRecording ? (
+  const buttonIcon = isRecording ? (
     <MicOff className="h-5 w-5" />
   ) : (
     <Mic className="h-5 w-5" />
@@ -236,7 +227,9 @@ export default function AudioRecorder({
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
               </span>
-              <span className="text-sm font-medium text-red-700">Listening…</span>
+              <span className="text-sm font-medium text-red-700">
+                Listening…
+              </span>
               <span className="text-xs text-red-400">max 1:30</span>
             </div>
             <span
@@ -264,7 +257,6 @@ export default function AudioRecorder({
         button
       )}
 
-      {/* Error banner — only when status.kind === 'error' */}
       {status.kind === "error" && (
         <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">
           <span aria-hidden="true">⚠</span>
@@ -280,16 +272,6 @@ export default function AudioRecorder({
         </div>
       )}
 
-      {/* Transcript card — only when transcript !== null */}
-      {transcript !== null && (
-        <div className="rounded-2xl border border-neutral-100 bg-white px-5 py-4 shadow-sm">
-          <h2 className="text-sm font-semibold text-neutral-500 uppercase tracking-wide">
-            Transcript
-          </h2>
-          <hr className="my-2 border-neutral-100" />
-          <p className="text-neutral-800 whitespace-pre-wrap">{transcript}</p>
-        </div>
-      )}
     </div>
   );
 }

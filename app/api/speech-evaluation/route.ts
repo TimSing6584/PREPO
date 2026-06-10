@@ -35,16 +35,33 @@ export async function POST(request: NextRequest) {
     const serviceUrl = process.env.MICROSERVICE_URL;
     if (!serviceUrl) {
       return NextResponse.json(
-        { detail: "Transcription service is not configured." },
+        { detail: "Speech evaluation service is not configured." },
         { status: 503 },
       );
     }
 
     const formData = await request.formData();
     const audio = formData.get("audio");
+    const statement = formData.get("statement");
+    const modelAnswer = formData.get("model_answer");
+
     if (!audio || !(audio instanceof File)) {
       return NextResponse.json(
         { detail: "Audio file is required." },
+        { status: 400 },
+      );
+    }
+
+    if (typeof statement !== "string" || !statement.trim()) {
+      return NextResponse.json(
+        { detail: "Question statement is required." },
+        { status: 400 },
+      );
+    }
+
+    if (typeof modelAnswer !== "string" || !modelAnswer.trim()) {
+      return NextResponse.json(
+        { detail: "Model answer is required." },
         { status: 400 },
       );
     }
@@ -58,7 +75,10 @@ export async function POST(request: NextRequest) {
 
     if (audio.size > MAX_AUDIO_BYTES) {
       return NextResponse.json(
-        { detail: "Recording is too large. Please keep it under 1 minute 30 seconds." },
+        {
+          detail:
+            "Recording is too large. Please keep it under 1 minute 30 seconds.",
+        },
         { status: 400 },
       );
     }
@@ -72,11 +92,16 @@ export async function POST(request: NextRequest) {
 
     const upstreamForm = new FormData();
     upstreamForm.append("audio", audio, audio.name || "recording.webm");
+    upstreamForm.append("statement", statement.trim());
+    upstreamForm.append("model_answer", modelAnswer.trim());
 
-    const upstream = await fetch(`${serviceUrl.replace(/\/$/, "")}/pipeline`, {
-      method: "POST",
-      body: upstreamForm,
-    });
+    const upstream = await fetch(
+      `${serviceUrl.replace(/\/$/, "")}/pipeline/speech-assess`,
+      {
+        method: "POST",
+        body: upstreamForm,
+      },
+    );
 
     const responseText = await upstream.text();
     let payload: unknown;
@@ -85,7 +110,7 @@ export async function POST(request: NextRequest) {
     } catch {
       return NextResponse.json(
         {
-          detail: `Transcription failed (HTTP ${upstream.status}). The service returned an unexpected response.`,
+          detail: `Speech evaluation failed (HTTP ${upstream.status}). The service returned an unexpected response.`,
         },
         { status: upstream.ok ? 502 : upstream.status },
       );
@@ -96,7 +121,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         detail:
-          "Could not reach the transcription service. Please check your connection and try again.",
+          "Could not reach the speech evaluation service. Please check your connection and try again.",
       },
       { status: 502 },
     );
