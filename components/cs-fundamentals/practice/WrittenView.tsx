@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import TipTapEditor from '@/components/TipTap/TipTapEditor'
+import AudioRecorder from '@/components/audio/AudioRecorder'
 import type { ComponentProps } from 'react'
 
 interface WrittenViewProps {
@@ -51,6 +52,14 @@ export default function WrittenView({
         }}
         placeholder="Type your answer here..."
         className="w-full h-40 p-4 rounded-xl border-2 border-neutral-200 focus:border-blue-500 focus:ring-0 resize-none transition-all placeholder:text-neutral-400"
+      />
+
+      <AudioRecorder
+        onTranscript={(transcript) => {
+          const value = answer ? `${answer}\n\n${transcript}` : transcript
+          setAnswer(value)
+          onDraftChange?.(value)
+        }}
       />
 
       <div className="space-y-4">
