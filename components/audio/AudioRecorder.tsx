@@ -117,7 +117,7 @@ export default function AudioRecorder({
         const form = buildFormData(blob);
 
         try {
-          const res = await fetch("http://localhost:8000/transcription", {
+          const res = await fetch("/api/pipeline", {
             method: "POST",
             body: form,
           });
