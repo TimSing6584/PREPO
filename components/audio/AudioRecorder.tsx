@@ -1,24 +1,56 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Mic, MicOff } from "lucide-react";
+import toast from "react-hot-toast";
 import {
   AudioRecorderProps,
   AudioRecorderStatus,
   buildFormData,
+  formatRecordingDuration,
   getErrorMessage,
   isSuccess,
+  MAX_RECORDING_MS,
   TranscribeResponse,
 } from "./AudioRecorder.types";
 import RecordingWaveform from "./RecordingWaveform";
 
-export default function AudioRecorder({ onTranscript }: AudioRecorderProps) {
+export default function AudioRecorder({
+  initialTranscript,
+  onTranscript,
+  onTranscriptChange,
+}: AudioRecorderProps) {
   const [status, setStatus] = useState<AudioRecorderStatus>({ kind: "idle" });
-  const [transcript, setTranscript] = useState<string | null>(null);
+  const [transcript, setTranscript] = useState<string | null>(
+    initialTranscript?.trim() ? initialTranscript : null,
+  );
   const [recordingStream, setRecordingStream] = useState<MediaStream | null>(null);
+  const [elapsedMs, setElapsedMs] = useState(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
+  const recordingStartRef = useRef<number | null>(null);
+  const limitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tickIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const hitLimitRef = useRef(false);
+
+  const clearRecordingTimers = useCallback(() => {
+    if (limitTimerRef.current) clearTimeout(limitTimerRef.current);
+    if (tickIntervalRef.current) clearInterval(tickIntervalRef.current);
+    limitTimerRef.current = null;
+    tickIntervalRef.current = null;
+    recordingStartRef.current = null;
+  }, []);
+
+  const stopRecording = useCallback(() => {
+    mediaRecorderRef.current?.stop();
+  }, []);
+
+  useEffect(() => {
+    setTranscript(initialTranscript?.trim() ? initialTranscript : null);
+  }, [initialTranscript]);
+
+  useEffect(() => () => clearRecordingTimers(), [clearRecordingTimers]);
 
   const handleToggle = async () => {
     if (status.kind === "idle") {
@@ -54,6 +86,17 @@ export default function AudioRecorder({ onTranscript }: AudioRecorderProps) {
       };
 
       mediaRecorder.onstop = async () => {
+        clearRecordingTimers();
+        setElapsedMs(0);
+
+        if (hitLimitRef.current) {
+          hitLimitRef.current = false;
+          toast("Recording stopped — 1:30 limit reached. Only the first 1 minute 30 seconds were saved.", {
+            icon: "⏱️",
+            duration: 5000,
+          });
+        }
+
         streamRef.current?.getTracks().forEach((track) => track.stop());
         streamRef.current = null;
         setRecordingStream(null);
@@ -92,7 +135,13 @@ export default function AudioRecorder({ onTranscript }: AudioRecorderProps) {
           }
 
           if (isSuccess(data)) {
-            setTranscript(data.transcript);
+            setTranscript((prev) => {
+              const next = prev
+                ? `${prev}\n\n${data.transcript}`
+                : data.transcript;
+              onTranscriptChange?.(next);
+              return next;
+            });
             onTranscript?.(data.transcript);
             setStatus({ kind: "idle" });
           } else {
@@ -109,9 +158,21 @@ export default function AudioRecorder({ onTranscript }: AudioRecorderProps) {
 
       mediaRecorderRef.current = mediaRecorder;
       mediaRecorder.start();
+      hitLimitRef.current = false;
+      recordingStartRef.current = Date.now();
+      setElapsedMs(0);
+      tickIntervalRef.current = setInterval(() => {
+        if (recordingStartRef.current) {
+          setElapsedMs(Date.now() - recordingStartRef.current);
+        }
+      }, 200);
+      limitTimerRef.current = setTimeout(() => {
+        hitLimitRef.current = true;
+        stopRecording();
+      }, MAX_RECORDING_MS);
       setStatus({ kind: "recording" });
     } else if (status.kind === "recording") {
-      mediaRecorderRef.current?.stop();
+      stopRecording();
     }
   };
 
@@ -146,6 +207,8 @@ export default function AudioRecorder({ onTranscript }: AudioRecorderProps) {
       : "inline-flex items-center gap-2 rounded-2xl px-5 py-3 font-medium bg-primary-600 text-white";
 
   const isDisabled = isRequestingPermission || isLoading;
+  const remainingMs = Math.max(0, MAX_RECORDING_MS - elapsedMs);
+  const isNearLimit = isRecording && remainingMs <= 10_000;
 
   const button = (
     <button
@@ -167,13 +230,23 @@ export default function AudioRecorder({ onTranscript }: AudioRecorderProps) {
           role="status"
           aria-live="polite"
         >
-          <div className="mb-3 flex items-center gap-2.5">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
+              </span>
+              <span className="text-sm font-medium text-red-700">Listening…</span>
+              <span className="text-xs text-red-400">max 1:30</span>
+            </div>
+            <span
+              className={`tabular-nums text-sm font-semibold ${
+                isNearLimit ? "text-amber-600 animate-pulse" : "text-red-600"
+              }`}
+              aria-live="polite"
+            >
+              {formatRecordingDuration(elapsedMs)} / 1:30
             </span>
-            <span className="text-sm font-medium text-red-700">Listening…</span>
-            <span className="text-xs text-red-400">speak now</span>
           </div>
           <RecordingWaveform stream={recordingStream} />
         </div>

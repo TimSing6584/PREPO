@@ -9,7 +9,9 @@ import type { ComponentProps } from 'react'
 interface WrittenViewProps {
   correctAnswer: string
   initialDraft?: string
+  initialTranscript?: string
   onDraftChange?: (draft: string) => void
+  onTranscriptChange?: (transcript: string) => void
 }
 
 type EditorContent = NonNullable<ComponentProps<typeof TipTapEditor>['initialContent']>
@@ -23,7 +25,9 @@ const hasRichTextShape = (value: unknown): value is Exclude<EditorContent, strin
 export default function WrittenView({
   correctAnswer,
   initialDraft = '',
+  initialTranscript = '',
   onDraftChange,
+  onTranscriptChange,
 }: WrittenViewProps) {
   const [answer, setAnswer] = useState(initialDraft)
   const [showAnswer, setShowAnswer] = useState(false)
@@ -55,11 +59,13 @@ export default function WrittenView({
       />
 
       <AudioRecorder
+        initialTranscript={initialTranscript}
         onTranscript={(transcript) => {
           const value = answer ? `${answer}\n\n${transcript}` : transcript
           setAnswer(value)
           onDraftChange?.(value)
         }}
+        onTranscriptChange={onTranscriptChange}
       />
 
       <div className="space-y-4">

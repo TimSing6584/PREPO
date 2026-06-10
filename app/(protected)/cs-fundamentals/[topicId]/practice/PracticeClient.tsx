@@ -32,6 +32,7 @@ type StoredQuestionProgress = {
   }
   written?: {
     draft: string
+    transcript?: string
   }
 }
 

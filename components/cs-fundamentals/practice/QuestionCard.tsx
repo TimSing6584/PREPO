@@ -26,6 +26,7 @@ interface QuestionCardProps {
     }
     written?: {
       draft: string
+      transcript?: string
     }
   }
   onProgressChange?: (progress: {
@@ -37,6 +38,7 @@ interface QuestionCardProps {
     }
     written?: {
       draft: string
+      transcript?: string
     }
   }) => void
   currentGlobalIndex?: number
@@ -177,10 +179,17 @@ export default function QuestionCard({
           <WrittenView
             correctAnswer={question.correctWritten}
             initialDraft={progress?.written?.draft ?? ''}
+            initialTranscript={progress?.written?.transcript ?? ''}
             onDraftChange={(draft) =>
               onProgressChange?.({
                 ...progress,
-                written: { draft },
+                written: { ...progress?.written, draft },
+              })
+            }
+            onTranscriptChange={(transcript) =>
+              onProgressChange?.({
+                ...progress,
+                written: { ...progress?.written, draft: progress?.written?.draft ?? '', transcript },
               })
             }
           />

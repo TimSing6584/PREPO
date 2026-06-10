@@ -1,3 +1,13 @@
+/** Maximum recording duration before auto-stop (1 minute 30 seconds). */
+export const MAX_RECORDING_MS = 90_000;
+
+export function formatRecordingDuration(ms: number): string {
+    const totalSeconds = Math.min(Math.floor(ms / 1000), MAX_RECORDING_MS / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
 /**
  * Discriminated union representing every possible state of the AudioRecorder component.
  */
@@ -13,8 +23,12 @@ export type AudioRecorderStatus =
  * All props are optional — the component is fully self-contained without any.
  */
 export interface AudioRecorderProps {
-    /** Called with the transcript text whenever a successful response is received. */
+    /** Restored transcript shown in the transcript card (e.g. from localStorage). */
+    initialTranscript?: string;
+    /** Called with the latest transcript chunk whenever a successful response is received. */
     onTranscript?: (transcript: string) => void;
+    /** Called with the full accumulated transcript for persistence. */
+    onTranscriptChange?: (transcript: string) => void;
 }
 
 /**
