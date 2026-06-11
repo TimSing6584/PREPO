@@ -15,13 +15,13 @@ import {
   buildPipelineFormData,
   isPipelineSuccess,
   type PipelineResponse,
-} from "./speechEvaluation.types";
+} from "./speechAssessment.types";
 
 export default function AudioRecorder({
   statement,
   modelAnswer,
-  onEvaluation,
-  onEvaluatingChange,
+  onAssessment,
+  onAssessingChange,
 }: AudioRecorderProps) {
   const [status, setStatus] = useState<AudioRecorderStatus>({ kind: "idle" });
   const [recordingStream, setRecordingStream] = useState<MediaStream | null>(
@@ -51,8 +51,8 @@ export default function AudioRecorder({
   useEffect(() => () => clearRecordingTimers(), [clearRecordingTimers]);
 
   useEffect(() => {
-    onEvaluatingChange?.(status.kind === "loading");
-  }, [onEvaluatingChange, status.kind]);
+    onAssessingChange?.(status.kind === "loading");
+  }, [onAssessingChange, status.kind]);
 
   const handleToggle = async () => {
     if (status.kind === "idle") {
@@ -121,7 +121,7 @@ export default function AudioRecorder({
         const form = buildPipelineFormData(blob, statement, modelAnswer);
 
         try {
-          const res = await fetch("/api/speech-evaluation", {
+          const res = await fetch("/api/speech-assessment", {
             method: "POST",
             body: form,
           });
@@ -132,25 +132,25 @@ export default function AudioRecorder({
           } catch {
             setStatus({
               kind: "error",
-              message: `Speech evaluation failed (HTTP ${res.status}). The server returned an unexpected response.`,
+              message: `Speech assessment failed (HTTP ${res.status}). The server returned an unexpected response.`,
             });
             return;
           }
 
           if (isPipelineSuccess(data)) {
-            onEvaluation?.(data);
+            onAssessment?.(data);
             setStatus({ kind: "idle" });
           } else {
             setStatus({
               kind: "error",
-              message: data.detail ?? "Speech evaluation failed.",
+              message: data.detail ?? "Speech assessment failed.",
             });
           }
         } catch {
           setStatus({
             kind: "error",
             message:
-              "Could not reach the speech evaluation service. Please check your connection and try again.",
+              "Could not reach the speech assessment service. Please check your connection and try again.",
           });
         }
       };

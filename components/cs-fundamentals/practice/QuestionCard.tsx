@@ -156,10 +156,10 @@ export default function QuestionCard({
             statement={question.text}
             correctAnswer={question.correctWritten}
             initialDraft={progress?.written?.draft ?? ''}
-            initialSpeechEvaluation={progress?.written?.speechEvaluation ?? null}
+            initialSpeechAssessment={progress?.written?.speechAssessment ?? null}
             onDraftChange={(draft) => onProgressChange?.({ written: { draft } })}
-            onSpeechEvaluationChange={(speechEvaluation) =>
-              onProgressChange?.({ written: { speechEvaluation } })
+            onSpeechAssessmentChange={(speechAssessment) =>
+              onProgressChange?.({ written: { speechAssessment } })
             }
           />
         )}

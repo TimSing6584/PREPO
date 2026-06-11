@@ -1,6 +1,6 @@
-import type { SpeechEvaluation } from "./speechEvaluation.types";
+import type { SpeechAssessment } from "./speechAssessment.types";
 
-export type { SpeechEvaluation };
+export type { SpeechAssessment };
 
 /** Maximum recording duration before auto-stop (1 minute 30 seconds). */
 export const MAX_RECORDING_MS = 90_000;
@@ -28,9 +28,9 @@ export type AudioRecorderStatus =
 export interface AudioRecorderProps {
     statement: string;
     modelAnswer: string;
-    /** Called with the full evaluation result for persistence. */
-    onEvaluation?: (evaluation: SpeechEvaluation) => void;
-    onEvaluatingChange?: (isEvaluating: boolean) => void;
+    /** Called with the full assessment result for persistence. */
+    onAssessment?: (assessment: SpeechAssessment) => void;
+    onAssessingChange?: (isAssessing: boolean) => void;
 }
 
 /**

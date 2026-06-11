@@ -1,6 +1,6 @@
 "use client";
 
-export default function SpeechEvaluationLoading() {
+export default function SpeechAssessmentLoading() {
   return (
     <div
       className="rounded-2xl border border-primary-100 bg-primary-50/60 px-5 py-6 shadow-sm animate-in fade-in duration-300"
@@ -14,7 +14,7 @@ export default function SpeechEvaluationLoading() {
         />
         <div>
           <p className="text-sm font-semibold text-primary-900">
-            Evaluating your answer…
+            Assessing your answer…
           </p>
           <p className="text-xs text-primary-700/80">
             Transcribing speech and comparing it to the model answer. This may

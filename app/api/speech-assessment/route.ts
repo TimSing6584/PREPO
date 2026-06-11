@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     const serviceUrl = process.env.MICROSERVICE_URL;
     if (!serviceUrl) {
       return NextResponse.json(
-        { detail: "Speech evaluation service is not configured." },
+        { detail: "Speech assessment service is not configured." },
         { status: 503 },
       );
     }
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
     } catch {
       return NextResponse.json(
         {
-          detail: `Speech evaluation failed (HTTP ${upstream.status}). The service returned an unexpected response.`,
+          detail: `Speech assessment failed (HTTP ${upstream.status}). The service returned an unexpected response.`,
         },
         { status: upstream.ok ? 502 : upstream.status },
       );
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         detail:
-          "Could not reach the speech evaluation service. Please check your connection and try again.",
+          "Could not reach the speech assessment service. Please check your connection and try again.",
       },
       { status: 502 },
     );

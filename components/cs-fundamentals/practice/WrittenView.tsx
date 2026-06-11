@@ -4,18 +4,18 @@ import { useEffect, useMemo, useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import TipTapEditor from '@/components/TipTap/TipTapEditor'
 import AudioRecorder from '@/components/audio/AudioRecorder'
-import SpeechEvaluationLoading from '@/components/audio/SpeechEvaluationLoading'
-import SpeechEvaluationResult from '@/components/audio/SpeechEvaluationResult'
-import type { SpeechEvaluation } from '@/components/audio/speechEvaluation.types'
+import SpeechAssessmentLoading from '@/components/audio/SpeechAssessmentLoading'
+import SpeechAssessmentResult from '@/components/audio/SpeechAssessmentResult'
+import type { SpeechAssessment } from '@/components/audio/speechAssessment.types'
 import type { ComponentProps } from 'react'
 
 interface WrittenViewProps {
   statement: string
   correctAnswer: string
   initialDraft?: string
-  initialSpeechEvaluation?: SpeechEvaluation | null
+  initialSpeechAssessment?: SpeechAssessment | null
   onDraftChange?: (draft: string) => void
-  onSpeechEvaluationChange?: (evaluation: SpeechEvaluation) => void
+  onSpeechAssessmentChange?: (assessment: SpeechAssessment) => void
 }
 
 type EditorContent = NonNullable<ComponentProps<typeof TipTapEditor>['initialContent']>
@@ -51,16 +51,16 @@ export default function WrittenView({
   statement,
   correctAnswer,
   initialDraft = '',
-  initialSpeechEvaluation = null,
+  initialSpeechAssessment = null,
   onDraftChange,
-  onSpeechEvaluationChange,
+  onSpeechAssessmentChange,
 }: WrittenViewProps) {
   const [answer, setAnswer] = useState(initialDraft)
   const [showAnswer, setShowAnswer] = useState(false)
-  const [speechEvaluation, setSpeechEvaluation] = useState<SpeechEvaluation | null>(
-    initialSpeechEvaluation,
+  const [speechAssessment, setSpeechAssessment] = useState<SpeechAssessment | null>(
+    initialSpeechAssessment,
   )
-  const [isEvaluating, setIsEvaluating] = useState(false)
+  const [isAssessing, setIsAssessing] = useState(false)
 
   const modelAnswer = useMemo(() => toPlainAnswer(correctAnswer), [correctAnswer])
 
@@ -78,8 +78,8 @@ export default function WrittenView({
   }, [initialDraft])
 
   useEffect(() => {
-    setSpeechEvaluation(initialSpeechEvaluation)
-  }, [initialSpeechEvaluation])
+    setSpeechAssessment(initialSpeechAssessment)
+  }, [initialSpeechAssessment])
 
   return (
     <div className="space-y-6">
@@ -97,17 +97,17 @@ export default function WrittenView({
       <AudioRecorder
         statement={statement}
         modelAnswer={modelAnswer}
-        onEvaluatingChange={setIsEvaluating}
-        onEvaluation={(evaluation) => {
-          setSpeechEvaluation(evaluation)
-          onSpeechEvaluationChange?.(evaluation)
+        onAssessingChange={setIsAssessing}
+        onAssessment={(assessment) => {
+          setSpeechAssessment(assessment)
+          onSpeechAssessmentChange?.(assessment)
         }}
       />
 
-      {isEvaluating && <SpeechEvaluationLoading />}
+      {isAssessing && <SpeechAssessmentLoading />}
 
-      {speechEvaluation && !isEvaluating && (
-        <SpeechEvaluationResult evaluation={speechEvaluation} />
+      {speechAssessment && !isAssessing && (
+        <SpeechAssessmentResult assessment={speechAssessment} />
       )}
 
       <div className="space-y-4">

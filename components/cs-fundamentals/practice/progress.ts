@@ -1,4 +1,4 @@
-import type { SpeechEvaluation } from '@/components/audio/speechEvaluation.types'
+import type { SpeechAssessment } from '@/components/audio/speechAssessment.types'
 
 export type StoredQuestionProgress = {
   mode?: 'mcq' | 'written'
@@ -9,7 +9,7 @@ export type StoredQuestionProgress = {
   }
   written?: {
     draft: string
-    speechEvaluation?: SpeechEvaluation
+    speechAssessment?: SpeechAssessment
   }
 }
 

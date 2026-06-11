@@ -1,10 +1,10 @@
-export interface SpeechEvaluation {
+export interface SpeechAssessment {
   transcript: string;
   score: number;
   feedback: string;
 }
 
-export interface PipelineSuccessResponse extends SpeechEvaluation {}
+export interface PipelineSuccessResponse extends SpeechAssessment {}
 
 export interface PipelineErrorResponse {
   detail: string;
