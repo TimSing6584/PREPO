@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest --run",
     "db:studio": "infisical run --env=dev -- prisma studio",
     "db:migrate_dev": "infisical run --env=dev -- prisma migrate dev",
     "db:migrate_deploy": "infisical run --env=dev -- prisma migrate deploy",
@@ -36,16 +37,23 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^20",
     "@types/pg": "^8.16.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^2.1.9",
     "cross-env": "^10.1.0",
     "dotenv-cli": "^11.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "fast-check": "^3.23.2",
+    "jsdom": "^26.1.0",
     "prisma": "^7.4.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^2.1.9"
   }
 }

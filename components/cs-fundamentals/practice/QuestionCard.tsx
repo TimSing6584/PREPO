@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, RotateCcw, Star } from 'lucide-react'
 import MCQView from './MCQView'
 import WrittenView from './WrittenView'
 import { cn } from '@/lib/utils'
+import type { QuestionProgressPatch, StoredQuestionProgress } from './progress'
 import type { PracticeQuestion } from './types'
 
 interface QuestionCardProps {
@@ -17,28 +18,8 @@ interface QuestionCardProps {
   canGoPrevious?: boolean
   canGoNext?: boolean
   onRedo?: () => void
-  progress?: {
-    mode?: 'mcq' | 'written'
-    mcq?: {
-      selectedOption: number | null
-      isSubmitted: boolean
-      isCorrect: boolean | null
-    }
-    written?: {
-      draft: string
-    }
-  }
-  onProgressChange?: (progress: {
-    mode?: 'mcq' | 'written'
-    mcq?: {
-      selectedOption: number | null
-      isSubmitted: boolean
-      isCorrect: boolean | null
-    }
-    written?: {
-      draft: string
-    }
-  }) => void
+  progress?: StoredQuestionProgress
+  onProgressChange?: (patch: QuestionProgressPatch) => void
   currentGlobalIndex?: number
 }
 
@@ -75,7 +56,7 @@ export default function QuestionCard({
                   <button
                     onClick={() => {
                       setMode('mcq')
-                      onProgressChange?.({ ...progress, mode: 'mcq' })
+                      onProgressChange?.({ mode: 'mcq' })
                     }}
                     className={cn(
                       "px-3 py-1.5 rounded-md text-sm font-semibold transition-all",
@@ -87,7 +68,7 @@ export default function QuestionCard({
                   <button
                     onClick={() => {
                       setMode('written')
-                      onProgressChange?.({ ...progress, mode: 'written' })
+                      onProgressChange?.({ mode: 'written' })
                     }}
                     className={cn(
                       "px-3 py-1.5 rounded-md text-sm font-semibold transition-all",
@@ -161,10 +142,7 @@ export default function QuestionCard({
             initialSelectedOption={progress?.mcq?.selectedOption ?? null}
             initialIsSubmitted={progress?.mcq?.isSubmitted ?? false}
             onProgressChange={(mcqProgress) =>
-              onProgressChange?.({
-                ...progress,
-                mcq: mcqProgress,
-              })
+              onProgressChange?.({ mcq: mcqProgress })
             }
             onComplete={(isCorrect) => {
               if (!isCorrect) {
@@ -175,13 +153,13 @@ export default function QuestionCard({
           />
         ) : (
           <WrittenView
+            statement={question.text}
             correctAnswer={question.correctWritten}
             initialDraft={progress?.written?.draft ?? ''}
-            onDraftChange={(draft) =>
-              onProgressChange?.({
-                ...progress,
-                written: { draft },
-              })
+            initialSpeechAssessment={progress?.written?.speechAssessment ?? null}
+            onDraftChange={(draft) => onProgressChange?.({ written: { draft } })}
+            onSpeechAssessmentChange={(speechAssessment) =>
+              onProgressChange?.({ written: { speechAssessment } })
             }
           />
         )}
