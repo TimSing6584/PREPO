@@ -1,6 +1,7 @@
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit } from "@/app/utils/ratelimit";
+import { generateServiceToken } from "@/app/utils/speech_assessment_service";
 
 const MAX_AUDIO_BYTES = 15 * 1024 * 1024;
 const ALLOWED_AUDIO_TYPES = new Set([
@@ -95,10 +96,14 @@ export async function POST(request: NextRequest) {
     upstreamForm.append("statement", statement.trim());
     upstreamForm.append("model_answer", modelAnswer.trim());
 
+    const token = generateServiceToken();
     const upstream = await fetch(
       `${serviceUrl.replace(/\/$/, "")}/pipeline/speech-assess`,
       {
         method: "POST",
+        headers: {
+            Authorization: `Bearer ${token}`
+        },
         body: upstreamForm,
       },
     );
