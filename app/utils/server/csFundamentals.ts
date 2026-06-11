@@ -1,8 +1,10 @@
 import "server-only";
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
-import { QuestionType } from "@/lib/generated/prisma/client";
 import { prisma } from "@/app/utils/db";
+import { getQuestions } from "@/app/utils/server/questions";
+import type { QuestionRecord } from "@/app/utils/server/questions";
 import type { PracticeQuestion } from "@/components/cs-fundamentals/practice/types";
 
 // Constants
@@ -26,17 +28,9 @@ export type TopicPracticeData = {
   pagination: PaginationMeta;
 };
 
-function toPracticeQuestion(
-  question: {
-    id: string;
-    statement: string;
-    imageUrl: string | null;
-    options: string[];
-    correctOption: number | null;
-    correctWritten: string | null;
-    starredBy: { id: string }[];
-  }
-): PracticeQuestion {
+const getQuestionsForTopic = cache(getQuestions);
+
+function toPracticeQuestion(question: QuestionRecord): PracticeQuestion {
   return {
     id: question.id,
     text: question.statement,
@@ -44,28 +38,24 @@ function toPracticeQuestion(
     options: question.options,
     correctOption: question.correctOption ?? -1,
     correctWritten: question.correctWritten ?? "",
-    isStarred: question.starredBy.length > 0,
+    isStarred: question.isStarred,
   };
 }
 
-
-// Shared where-clause builder
-
-function buildWhereClause(
-  topicId: string,
-  userKindeId: string,
+function applyFilter(
+  questions: QuestionRecord[],
   filter: QuestionFilter
-) {
-  return {
-    topicId,
-    deleted: false,
-    topic: { deleted: false },
-    OR: [
-      { type: QuestionType.DEFAULT },
-      { type: QuestionType.PERSONALIZED, createdById: userKindeId },
-    ],
-    ...(filter === "starred" ? { starredBy: { some: { userKindeId } } } : {}),
-  };
+): QuestionRecord[] {
+  if (filter === "starred") {
+    return questions.filter((question) => question.isStarred);
+  }
+  return questions;
+}
+
+async function getUserKindeId(): Promise<string> {
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
+  return user?.id ?? "";
 }
 
 // Practice page data (sidebar + question card)
@@ -81,45 +71,30 @@ export async function getTopicPracticeData({
   page = 1,
   filter = "all",
 }: GetPracticeDataOptions): Promise<TopicPracticeData> {
-  const { getUser } = getKindeServerSession();
-  const user = await getUser();
-  const userKindeId = user?.id ?? "";
+  const userKindeId = await getUserKindeId();
 
-  const where = buildWhereClause(topicId, userKindeId, filter);
-
-  const [topic, totalCount, questions] = await Promise.all([
+  const [topic, allQuestions] = await Promise.all([
     prisma.topic.findFirst({
       where: { id: topicId, deleted: false },
       select: { name: true },
     }),
-    prisma.question.count({ where }),
-    prisma.question.findMany({
-      where,
-      select: {
-        id: true,
-        statement: true,
-        imageUrl: true,
-        options: true,
-        correctOption: true,
-        correctWritten: true,
-        createdAt: true,
-        starredBy: { where: { userKindeId }, select: { id: true } },
-      },
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      skip: (page - 1) * PAGE_SIZE,
-      take: PAGE_SIZE,
-    }),
+    getQuestionsForTopic(userKindeId, topicId),
   ]);
-  // If the topic doesn't exist or is deleted, show 404
+
   if (!topic) notFound();
 
+  const filtered = applyFilter(allQuestions, filter);
+  const totalCount = filtered.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
   const safePage = Math.min(Math.max(1, page), totalPages);
+  const pageQuestions = filtered
+    .slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE)
+    .map(toPracticeQuestion);
 
   return {
-    topicName: topic?.name ?? topicId,
+    topicName: topic.name,
     pagination: { page: safePage, pageSize: PAGE_SIZE, totalCount, totalPages },
-    questions: questions.map(toPracticeQuestion),
+    questions: pageQuestions,
   };
 }
 
@@ -134,25 +109,12 @@ export async function getPracticeQuestionById({
   questionId,
   filter = "all",
 }: GetPracticeQuestionByIdOptions): Promise<PracticeQuestion | null> {
-  const { getUser } = getKindeServerSession();
-  const user = await getUser();
-  const userKindeId = user?.id ?? "";
-
-  const question = await prisma.question.findFirst({
-    where: {
-      ...buildWhereClause(topicId, userKindeId, filter),
-      id: questionId,
-    },
-    select: {
-      id: true,
-      statement: true,
-      imageUrl: true,
-      options: true,
-      correctOption: true,
-      correctWritten: true,
-      starredBy: { where: { userKindeId }, select: { id: true } },
-    },
-  });
+  const userKindeId = await getUserKindeId();
+  const filtered = applyFilter(
+    await getQuestionsForTopic(userKindeId, topicId),
+    filter
+  );
+  const question = filtered.find((item) => item.id === questionId);
 
   return question ? toPracticeQuestion(question) : null;
 }
@@ -166,15 +128,11 @@ export async function getPracticeQuestionIds({
   topicId,
   filter = "all",
 }: GetPracticeQuestionIdsOptions): Promise<string[]> {
-  const { getUser } = getKindeServerSession();
-  const user = await getUser();
-  const userKindeId = user?.id ?? "";
+  const userKindeId = await getUserKindeId();
+  const filtered = applyFilter(
+    await getQuestionsForTopic(userKindeId, topicId),
+    filter
+  );
 
-  const questions = await prisma.question.findMany({
-    where: buildWhereClause(topicId, userKindeId, filter),
-    select: { id: true },
-    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-  });
-
-  return questions.map((question) => question.id);
+  return filtered.map((question) => question.id);
 }

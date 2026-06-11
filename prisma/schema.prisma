@@ -67,6 +67,10 @@ model Question {
   createdBy   User     @relation("UserQuestions", fields: [createdById], references: [kindeId])
 
   starredBy      StarredQuestion[]
+
+  // Indexes aligned with hybrid fetch patterns (see app/utils/server/questions/)
+  @@index([topicId, type, deleted, createdAt(sort: Desc), id(sort: Desc)], map: "Question_default_by_topic_idx")
+  @@index([topicId, createdById, type, deleted, createdAt(sort: Desc), id(sort: Desc)], map: "Question_personalized_by_user_topic_idx")
 }
 
 model StarredQuestion {

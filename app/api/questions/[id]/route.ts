@@ -4,6 +4,12 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { roleChecker } from "@/app/utils/auth";
 import { QuestionType } from "@/lib/generated/prisma/client";
 import { checkRateLimit } from "@/app/utils/ratelimit";
+import {
+  deleteDefaultQuestion,
+  deletePersonalizedQuestion,
+  updateDefaultQuestion,
+  updatePersonalizedQuestion,
+} from "@/app/utils/server/questions";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -19,7 +25,7 @@ async function ensureQuestionWriteAccess(questionId: string) {
 
   const question = await prisma.question.findUnique({
     where: { id: questionId },
-    select: { id: true, createdById: true, type: true, deleted: true },
+    select: { id: true, createdById: true, type: true, deleted: true, topicId: true },
   });
 
   if (!question || question.deleted) {
@@ -112,17 +118,22 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "At least 2 MCQ options are required." }, { status: 400 });
     }
 
-    const updatedQuestion = await prisma.question.update({
-      where: { id },
-      data: {
-        statement,
-        topicId,
-        correctWritten,
-        options,
-        correctOption,
-        imageUrl,
-      },
-    });
+    const updateData = {
+      statement,
+      topicId,
+      correctWritten,
+      options,
+      correctOption,
+      imageUrl,
+    };
+
+    const updatedQuestion =
+      access.question.type === QuestionType.DEFAULT
+        ? await updateDefaultQuestion(id, updateData, {
+            topicId: access.question.topicId,
+            type: access.question.type,
+          })
+        : await updatePersonalizedQuestion(id, updateData);
 
     return NextResponse.json({ success: true, data: updatedQuestion });
   } catch (error) {
@@ -143,10 +154,14 @@ export async function DELETE(_: NextRequest, context: RouteContext) {
     const rateLimitError = await checkRateLimit('write');
     if (rateLimitError) return rateLimitError;
 
-    await prisma.question.update({
-      where: { id },
-      data: { deleted: true },
-    });
+    if (access.question.type === QuestionType.DEFAULT) {
+      await deleteDefaultQuestion(id, {
+        topicId: access.question.topicId,
+        type: access.question.type,
+      });
+    } else {
+      await deletePersonalizedQuestion(id);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

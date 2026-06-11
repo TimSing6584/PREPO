@@ -4,6 +4,10 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { roleChecker } from "@/app/utils/auth";
 import { QuestionType } from "@/lib/generated/prisma/client";
 import { checkRateLimit } from "@/app/utils/ratelimit";
+import {
+    createDefaultQuestions,
+    createPersonalizedQuestion,
+} from "@/app/utils/server/questions";
 
 export async function GET() {
     try {
@@ -87,19 +91,23 @@ export async function POST(request: NextRequest) {
                 error: `Question at index ${invalidIndex} has invalid or missing fields.`
             }, { status: 400 });
         }
-        // All valid — create all at once
-        await prisma.question.createMany({
-            data: questions.map((q) => ({
-                statement: q.statement,
-                topicId: q.topicId,
-                correctWritten: q.correctWritten,
-                options: q.options,
-                correctOption: q.correctOption,
-                imageUrl: q.imageUrl ?? null,
-                type: isAdmin ? QuestionType.DEFAULT : QuestionType.PERSONALIZED,
-                createdById: userKindeId
-            }))
-        });
+        const questionData = questions.map((q) => ({
+            statement: q.statement,
+            topicId: q.topicId,
+            correctWritten: q.correctWritten,
+            options: q.options,
+            correctOption: q.correctOption,
+            imageUrl: q.imageUrl ?? null,
+            type: isAdmin ? QuestionType.DEFAULT : QuestionType.PERSONALIZED,
+            createdById: userKindeId,
+        }));
+
+        if (isAdmin) {
+            await createDefaultQuestions(questionData);
+        } else {
+            await createPersonalizedQuestion(questionData[0]);
+        }
+
         return NextResponse.json({ success: true });
     }
     catch (error) {
