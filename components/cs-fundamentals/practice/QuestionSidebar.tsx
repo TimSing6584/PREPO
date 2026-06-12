@@ -92,14 +92,14 @@ export default function QuestionSidebar({
               </div>
             )}
 
-            {/* Redo page — green button with icon, same line */}
+            {/* Redo all — green button with icon, same line */}
             <button
               type="button"
               onClick={onRedoPage}
               className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 border border-emerald-200 px-2 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 transition-colors"
             >
               <RotateCcw className="h-3 w-3" />
-              Redo page
+              Redo all
             </button>
           </div>
         </div>
