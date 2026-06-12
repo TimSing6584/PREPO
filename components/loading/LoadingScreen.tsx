@@ -15,7 +15,7 @@ export default function LoadingScreen() {
     () => SLOGANS[Math.floor(Math.random() * SLOGANS.length)]
   )
   return (
-    <div className="main-frame px-6 md:px-12 pb-6 md:pb-12 pt-4 md:pt-6 relative overflow-hidden flex flex-col gap-4 md:gap-6 font-geist-sans">
+    <div className="main-frame px-4 sm:px-6 md:px-12 pb-6 md:pb-12 pt-4 md:pt-6 relative overflow-hidden flex flex-col gap-3 sm:gap-4 md:gap-6 font-geist-sans">
       <Navbar />
 
       <div className="flex-1 flex flex-col items-center justify-center gap-6">

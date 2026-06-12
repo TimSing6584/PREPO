@@ -174,7 +174,7 @@ export default function DashboardClient({ topics }: { topics: Topic[] }) {
   }, [greetingText])
 
   return (
-    <div className="main-frame px-6 md:px-12 pb-6 md:pb-12 pt-4 md:pt-6 relative overflow-hidden flex flex-col gap-8 md:gap-12 font-geist-sans">
+    <div className="main-frame px-4 sm:px-6 md:px-12 pb-6 md:pb-12 pt-4 md:pt-6 relative overflow-hidden flex flex-col gap-6 sm:gap-8 md:gap-12 font-geist-sans">
       <Navbar />
 
       <div className="w-full max-w-[1400px] mx-auto flex flex-col gap-10 z-10">

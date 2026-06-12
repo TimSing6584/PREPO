@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckCircle2, ChevronLeft, ChevronRight, Menu, RotateCcw, Star } from 'lucide-react'
+import { CheckCircle2, ChevronLeft, ChevronRight, RotateCcw, Star, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { PracticeQuestion } from './types'
 import type { PaginationMeta, QuestionFilter } from '@/app/utils/server/csFundamentals'
@@ -18,6 +18,8 @@ interface QuestionSidebarProps {
   pagination: PaginationMeta
   globalNumberById?: Record<string, number>
   onPageChange: (page: number) => void
+  onClose?: () => void
+  showCloseButton?: boolean
 }
 
 export default function QuestionSidebar({
@@ -33,6 +35,8 @@ export default function QuestionSidebar({
   pagination,
   globalNumberById,
   onPageChange,
+  onClose,
+  showCloseButton = false,
 }: QuestionSidebarProps) {
   const { page, totalPages, totalCount } = pagination
   const canGoPrev = page > 1
@@ -42,14 +46,14 @@ export default function QuestionSidebar({
     <div className="w-full h-full flex flex-col bg-transparent">
 
       {/* Header */}
-      <div className="px-6 py-4 border-b border-neutral-100 flex items-center justify-between">
-        <div className="flex flex-col">
-          <h2 className="text-lg font-bold text-[#101010]">
+      <div className="px-4 sm:px-6 py-4 border-b border-neutral-100 flex items-start justify-between gap-3">
+        <div className="flex min-w-0 flex-1 flex-col">
+          <h2 className="text-base sm:text-lg font-bold text-[#101010]">
             Questions ({totalCount})
           </h2>
 
           {/* Filter tabs (all mode only) + Redo page */}
-          <div className="mt-2 flex items-center gap-2">
+          <div className="mt-2 flex flex-wrap items-center gap-2">
             {showFilterTabs && (
               <div className="inline-flex items-center gap-1 rounded-lg bg-neutral-100 p-1">
                 <button
@@ -91,7 +95,16 @@ export default function QuestionSidebar({
           </div>
         </div>
 
-        <Menu className="w-5 h-5 text-neutral-400 md:hidden" />
+        {showCloseButton ? (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close question list"
+            className="shrink-0 rounded-lg border border-neutral-200 p-1.5 text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900 transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        ) : null}
       </div>
 
       {/* Question list */}
