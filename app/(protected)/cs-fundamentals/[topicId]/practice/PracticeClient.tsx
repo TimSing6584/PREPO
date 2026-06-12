@@ -40,6 +40,8 @@ const storageKeyForTopic = (userId: string, topicId: string) =>
   `practiceProgress:v2:${userId}:${topicId}`
 const warningDismissedKeyForTopic = (userId: string, topicId: string) =>
   `practiceProgressWarningDismissed:v1:${userId}:${topicId}`
+const mobileSidebarOpenKeyForTopic = (topicId: string) =>
+  `practiceMobileSidebarOpen:v1:${topicId}`
 
 export default function PracticeClient({
   userId,
@@ -69,6 +71,32 @@ export default function PracticeClient({
   const [hasHydratedProgress, setHasHydratedProgress] = useState(false)
   const [showTtlNotice, setShowTtlNotice] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  useEffect(() => {
+    try {
+      setSidebarOpen(sessionStorage.getItem(mobileSidebarOpenKeyForTopic(topicId)) === 'true')
+    } catch {
+      setSidebarOpen(false)
+    }
+  }, [topicId, pagination.page])
+
+  const openSidebar = () => {
+    setSidebarOpen(true)
+    try {
+      sessionStorage.setItem(mobileSidebarOpenKeyForTopic(topicId), 'true')
+    } catch {
+      // ignore storage errors
+    }
+  }
+
+  const closeSidebar = () => {
+    setSidebarOpen(false)
+    try {
+      sessionStorage.removeItem(mobileSidebarOpenKeyForTopic(topicId))
+    } catch {
+      // ignore storage errors
+    }
+  }
 
   // Sync initialQuestionId when navigation changes it
   useEffect(() => {
@@ -171,7 +199,6 @@ export default function PracticeClient({
   }
 
   function goToPage(page: number) {
-    setSidebarOpen(false)
     router.push(buildUrl(page, filter, currentQuestionId))
   }
 
@@ -191,7 +218,7 @@ export default function PracticeClient({
 
   function selectQuestion(id: string) {
     setCurrentQuestionId(id)
-    setSidebarOpen(false)
+    closeSidebar()
     router.replace(buildUrl(pagination.page, filter, id))
   }
 
@@ -261,7 +288,7 @@ export default function PracticeClient({
           <button
             type="button"
             aria-label="Close question list"
-            onClick={() => setSidebarOpen(false)}
+            onClick={closeSidebar}
             className="absolute inset-0 bg-black/40"
           />
           <div
@@ -273,7 +300,7 @@ export default function PracticeClient({
             <QuestionSidebar
               {...sidebarProps}
               showCloseButton
-              onClose={() => setSidebarOpen(false)}
+              onClose={closeSidebar}
             />
           </div>
         </div>
@@ -292,7 +319,7 @@ export default function PracticeClient({
                 </Link>
                 <button
                   type="button"
-                  onClick={() => setSidebarOpen(true)}
+                  onClick={openSidebar}
                   className="md:hidden inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 transition-colors"
                 >
                   <Menu className="h-3.5 w-3.5" />
