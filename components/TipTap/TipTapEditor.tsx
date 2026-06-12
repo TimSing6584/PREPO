@@ -1,9 +1,9 @@
 'use client'
 
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { EditorContent, useEditor, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
-import type { ReactNode } from 'react'
 import {
   Bold,
   ChevronDown,
@@ -11,6 +11,7 @@ import {
   List,
   ListOrdered,
   Minus,
+  MoreHorizontal,
   Pilcrow,
   Quote,
   Link2,
@@ -36,12 +37,14 @@ function ToolbarButton({
   active = false,
   label,
   children,
+  className = '',
 }: {
   editor: Editor | null
   onClick: () => void
   active?: boolean
   label: string
   children: ReactNode
+  className?: string
 }) {
   return (
     <button
@@ -50,25 +53,143 @@ function ToolbarButton({
       title={label}
       onClick={onClick}
       disabled={!editor}
-      className={`inline-flex h-8 w-8 items-center justify-center rounded-md border text-xs transition sm:h-9 sm:w-9 sm:text-sm ${
+      className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border text-xs transition sm:h-9 sm:w-9 sm:text-sm ${
         active
           ? 'border-zinc-400 bg-zinc-200 text-zinc-900'
           : 'border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900'
-      } disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-400 disabled:opacity-70`}
+      } disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-400 disabled:opacity-70 ${className}`}
     >
       {children}
     </button>
   )
 }
 
+function HeadingSelect({
+  editor,
+  headingLevel,
+  className = '',
+}: {
+  editor: Editor | null
+  headingLevel?: number
+  className?: string
+}) {
+  return (
+    <div className={`relative min-w-0 ${className}`}>
+      <select
+        className="h-8 w-full min-w-0 appearance-none rounded-md border border-zinc-300 bg-white py-1 pl-2 pr-6 text-xs text-zinc-700 outline-none sm:h-9 sm:text-sm"
+        value={headingLevel ?? 0}
+        onChange={(event) => {
+          const value = Number(event.target.value)
+          if (!editor) return
+          if (value === 0) {
+            editor.chain().focus().setParagraph().run()
+            return
+          }
+          editor.chain().focus().toggleHeading({ level: value as 1 | 2 | 3 | 4 | 5 | 6 }).run()
+        }}
+      >
+        <option value={0}>Paragraph</option>
+        <option value={1}>Heading 1</option>
+        <option value={2}>Heading 2</option>
+        <option value={3}>Heading 3</option>
+        <option value={4}>Heading 4</option>
+        <option value={5}>Heading 5</option>
+        <option value={6}>Heading 6</option>
+      </select>
+      <ChevronDown className="pointer-events-none absolute right-1 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-500 sm:right-1.5 sm:h-4 sm:w-4" />
+    </div>
+  )
+}
+
+function insertLink(editor: Editor | null) {
+  if (!editor) return
+
+  if (editor.isActive('link')) {
+    editor.chain().focus().unsetLink().run()
+    return
+  }
+
+  const url = window.prompt('Enter URL')
+  if (!url?.trim()) return
+
+  const { from, to } = editor.state.selection
+  const hasSelection = from !== to
+
+  if (hasSelection) {
+    editor.chain().focus().setLink({ href: url.trim() }).run()
+  } else {
+    editor
+      .chain()
+      .focus()
+      .insertContent(`<a href="${url.trim()}">${url.trim()}</a>`)
+      .run()
+  }
+}
+
 function EditorToolbar({ editor }: { editor: Editor | null }) {
+  const [moreOpen, setMoreOpen] = useState(false)
+  const moreMenuRef = useRef<HTMLDivElement>(null)
+
   const headingLevel = [1, 2, 3, 4, 5, 6].find((level) =>
     editor?.isActive('heading', { level }),
   )
 
+  useEffect(() => {
+    if (!moreOpen) return
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
+        setMoreOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [moreOpen])
+
+  const moreMenuItems = [
+    {
+      label: 'Bullet list',
+      icon: List,
+      active: !!editor?.isActive('bulletList'),
+      onClick: () => editor?.chain().focus().toggleBulletList().run(),
+    },
+    {
+      label: 'Ordered list',
+      icon: ListOrdered,
+      active: !!editor?.isActive('orderedList'),
+      onClick: () => editor?.chain().focus().toggleOrderedList().run(),
+    },
+    {
+      label: 'Blockquote',
+      icon: Quote,
+      active: !!editor?.isActive('blockquote'),
+      onClick: () => editor?.chain().focus().toggleBlockquote().run(),
+    },
+    {
+      label: 'Horizontal rule',
+      icon: Minus,
+      active: false,
+      onClick: () => editor?.chain().focus().setHorizontalRule().run(),
+    },
+    {
+      label: 'Paragraph',
+      icon: Pilcrow,
+      active: !!editor?.isActive('paragraph'),
+      onClick: () => editor?.chain().focus().setParagraph().run(),
+    },
+    {
+      label: 'Insert URL',
+      icon: Link2,
+      active: !!editor?.isActive('link'),
+      onClick: () => insertLink(editor),
+    },
+  ]
+
   return (
     <div className="border-b border-zinc-300 bg-zinc-100 p-1.5 sm:p-2">
-      <div className="flex min-w-max items-center gap-1 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {/* Mobile: compact toolbar + overflow menu */}
+      <div className="flex sm:hidden items-center gap-1">
         <ToolbarButton editor={editor} label="Undo" onClick={() => editor?.chain().focus().undo().run()}>
           <Undo2 className="h-4 w-4" />
         </ToolbarButton>
@@ -76,32 +197,7 @@ function EditorToolbar({ editor }: { editor: Editor | null }) {
           <Redo2 className="h-4 w-4" />
         </ToolbarButton>
 
-        <div className="mx-1 hidden h-6 w-px bg-zinc-300 sm:block" />
-
-        <div className="relative">
-          <select
-            className="h-8 appearance-none rounded-md border border-zinc-300 bg-white py-1 pl-2 pr-6 text-xs text-zinc-700 outline-none sm:h-9 sm:text-sm"
-            value={headingLevel ?? 0}
-            onChange={(event) => {
-              const value = Number(event.target.value)
-              if (!editor) return
-              if (value === 0) {
-                editor.chain().focus().setParagraph().run()
-                return
-              }
-              editor.chain().focus().toggleHeading({ level: value as 1 | 2 | 3 | 4 | 5 | 6 }).run()
-            }}
-          >
-            <option value={0}>Paragraph</option>
-            <option value={1}>Heading 1</option>
-            <option value={2}>Heading 2</option>
-            <option value={3}>Heading 3</option>
-            <option value={4}>Heading 4</option>
-            <option value={5}>Heading 5</option>
-            <option value={6}>Heading 6</option>
-          </select>
-          <ChevronDown className="pointer-events-none absolute right-1 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-500 sm:right-1.5 sm:h-4 sm:w-4" />
-        </div>
+        <HeadingSelect editor={editor} headingLevel={headingLevel} className="min-w-[5.5rem] flex-1" />
 
         <ToolbarButton
           editor={editor}
@@ -120,7 +216,79 @@ function EditorToolbar({ editor }: { editor: Editor | null }) {
           <Italic className="h-4 w-4" />
         </ToolbarButton>
 
-        <div className="mx-1 hidden h-6 w-px bg-zinc-300 sm:block" />
+        <div className="relative shrink-0" ref={moreMenuRef}>
+          <button
+            type="button"
+            aria-label="More formatting options"
+            aria-expanded={moreOpen}
+            onClick={() => setMoreOpen((open) => !open)}
+            disabled={!editor}
+            className={`inline-flex h-8 w-8 items-center justify-center rounded-md border text-xs transition ${
+              moreOpen
+                ? 'border-zinc-400 bg-zinc-200 text-zinc-900'
+                : 'border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900'
+            } disabled:cursor-not-allowed disabled:opacity-70`}
+          >
+            <MoreHorizontal className="h-4 w-4" />
+          </button>
+
+          {moreOpen ? (
+            <div className="absolute right-0 top-full z-30 mt-1 w-48 overflow-hidden rounded-lg border border-zinc-200 bg-white py-1 shadow-lg">
+              {moreMenuItems.map((item) => {
+                const Icon = item.icon
+                return (
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={() => {
+                      item.onClick()
+                      setMoreOpen(false)
+                    }}
+                    className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition hover:bg-zinc-50 ${
+                      item.active ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-700'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" />
+                    <span>{item.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      {/* Desktop: full toolbar */}
+      <div className="hidden sm:flex flex-wrap items-center gap-1">
+        <ToolbarButton editor={editor} label="Undo" onClick={() => editor?.chain().focus().undo().run()}>
+          <Undo2 className="h-4 w-4" />
+        </ToolbarButton>
+        <ToolbarButton editor={editor} label="Redo" onClick={() => editor?.chain().focus().redo().run()}>
+          <Redo2 className="h-4 w-4" />
+        </ToolbarButton>
+
+        <div className="mx-1 h-6 w-px bg-zinc-300" />
+
+        <HeadingSelect editor={editor} headingLevel={headingLevel} className="w-auto" />
+
+        <ToolbarButton
+          editor={editor}
+          label="Bold"
+          active={!!editor?.isActive('bold')}
+          onClick={() => editor?.chain().focus().toggleBold().run()}
+        >
+          <Bold className="h-4 w-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          editor={editor}
+          label="Italic"
+          active={!!editor?.isActive('italic')}
+          onClick={() => editor?.chain().focus().toggleItalic().run()}
+        >
+          <Italic className="h-4 w-4" />
+        </ToolbarButton>
+
+        <div className="mx-1 h-6 w-px bg-zinc-300" />
 
         <ToolbarButton
           editor={editor}
@@ -162,39 +330,13 @@ function EditorToolbar({ editor }: { editor: Editor | null }) {
           <Pilcrow className="h-4 w-4" />
         </ToolbarButton>
 
-        <div className="mx-1 hidden h-6 w-px bg-zinc-300 sm:block" />
+        <div className="mx-1 h-6 w-px bg-zinc-300" />
 
         <ToolbarButton
           editor={editor}
           label="Insert URL"
           active={!!editor?.isActive('link')}
-          onClick={() => {
-            if (!editor) return
-
-            // If link is active, unset it
-            if (editor.isActive('link')) {
-              editor.chain().focus().unsetLink().run()
-              return
-            }
-
-            const url = window.prompt('Enter URL')
-            if (!url?.trim()) return
-
-            const { from, to } = editor.state.selection
-            const hasSelection = from !== to
-
-            if (hasSelection) {
-              // Wrap selected text as a link
-              editor.chain().focus().setLink({ href: url.trim() }).run()
-            } else {
-              // Insert the URL as linked text
-              editor
-                .chain()
-                .focus()
-                .insertContent(`<a href="${url.trim()}">${url.trim()}</a>`)
-                .run()
-            }
-          }}
+          onClick={() => insertLink(editor)}
         >
           <Link2 className="h-4 w-4" />
         </ToolbarButton>
@@ -209,7 +351,7 @@ export default function TipTapEditor({
   showToolbar = true,
   editable = true,
   editorClassName = 'min-h-[220px] bg-white p-3 text-zinc-900 sm:min-h-[280px] sm:p-4 lg:min-h-[320px] lg:p-5',
-  containerClassName = 'w-full rounded-xl border border-zinc-300 bg-zinc-50',
+  containerClassName = 'w-full max-w-full overflow-hidden rounded-xl border border-zinc-300 bg-zinc-50',
 }: TiptapEditorProps) {
   const editor = useEditor({
     extensions: [

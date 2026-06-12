@@ -267,7 +267,7 @@ export default function EditPersonalizedQuestionPage() {
                 Back to Personalized Questions
               </Link>
             </div>
-            <div className="bg-white rounded-[2rem] border border-neutral-100 shadow-sm p-6 md:p-10">
+            <div className="bg-white rounded-2xl sm:rounded-[2rem] border border-neutral-100 shadow-sm p-4 sm:p-6 md:p-10">
               <h1 className="text-lg font-semibold text-gray-900 mb-2">Edit Personalized Question</h1>
               <p className="text-sm text-gray-500 mb-6">Only your personalized questions can be edited here.</p>
 
@@ -298,7 +298,7 @@ export default function EditPersonalizedQuestionPage() {
                 {errors.selectedTopic ? <p className="mt-2 text-xs text-red-500">{errors.selectedTopic}</p> : null}
               </div>
 
-              <div className="border border-gray-200 rounded-lg p-6 mb-6">
+              <div className="border border-gray-200 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
                 <h2 className="text-base font-medium text-gray-900 mb-4">Question Info</h2>
 
                 <div className="mb-4">
@@ -397,7 +397,7 @@ export default function EditPersonalizedQuestionPage() {
                 </div>
               </div>
 
-              <div className="border border-gray-200 rounded-lg p-6">
+              <div className="border border-gray-200 rounded-lg p-4 sm:p-6">
                 <h2 className="text-base font-medium text-gray-900 mb-2">
                   MCQ type <span className="text-red-500">*</span>
                 </h2>

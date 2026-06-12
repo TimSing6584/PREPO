@@ -45,25 +45,26 @@ export default function QuestionCard({
   }, [progress?.mode, question.id])
 
   return (
-    <div className="bg-white rounded-[2rem] border border-neutral-100 shadow-sm p-8 md:p-12 h-fit min-h-[600px] flex flex-col relative overflow-hidden">
+    <div className="bg-white rounded-2xl sm:rounded-[2rem] border border-neutral-100 shadow-sm p-4 sm:p-8 md:p-12 h-fit min-h-0 sm:min-h-[600px] flex flex-col relative overflow-hidden">
 
       {/* Header */}
-      <div className="flex items-start justify-between mb-8">
-        <div className="space-y-4 max-w-2xl">
-            <div className="flex items-center gap-4">
+      <div className="flex items-start justify-between mb-4 sm:mb-8">
+        <div className="space-y-3 sm:space-y-4 max-w-2xl min-w-0 w-full">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4">
                {/* Mode Switcher */}
-              <div className="bg-neutral-100 rounded-lg p-1 flex items-center gap-1">
+              <div className="bg-neutral-100 rounded-lg p-1 flex items-center gap-1 max-w-full">
                   <button
                     onClick={() => {
                       setMode('mcq')
                       onProgressChange?.({ mode: 'mcq' })
                     }}
                     className={cn(
-                      "px-3 py-1.5 rounded-md text-sm font-semibold transition-all",
+                      "px-2.5 sm:px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-all",
                       mode === 'mcq' ? "bg-white text-black shadow-sm" : "text-neutral-500 hover:text-neutral-900"
                     )}
                   >
-                    Multiple choice
+                    <span className="sm:hidden">MCQ</span>
+                    <span className="hidden sm:inline">Multiple choice</span>
                   </button>
                   <button
                     onClick={() => {
@@ -71,7 +72,7 @@ export default function QuestionCard({
                       onProgressChange?.({ mode: 'written' })
                     }}
                     className={cn(
-                      "px-3 py-1.5 rounded-md text-sm font-semibold transition-all",
+                      "px-2.5 sm:px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-all",
                       mode === 'written' ? "bg-white text-black shadow-sm" : "text-neutral-500 hover:text-neutral-900"
                     )}
                   >
@@ -79,7 +80,7 @@ export default function QuestionCard({
                   </button>
               </div>
 
-              <div className="h-6 w-[1px] bg-neutral-200" />
+              <div className="hidden sm:block h-6 w-[1px] bg-neutral-200" />
 
                {/* Star Button with Reminder */}
               <div className="relative">
@@ -114,7 +115,7 @@ export default function QuestionCard({
               </button>
             </div>
 
-            <h1 className="text-2xl md:text-3xl font-bold text-[#101010] leading-tight">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#101010] leading-tight break-words">
               {currentGlobalIndex !== undefined && `Q${currentGlobalIndex + 1}: `}{question.text}
             </h1>
 
