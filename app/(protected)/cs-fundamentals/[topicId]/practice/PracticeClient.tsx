@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Navbar from '@/components/main/Navbar'
 import QuestionSidebar from '@/components/cs-fundamentals/practice/QuestionSidebar'
@@ -71,6 +71,8 @@ export default function PracticeClient({
   const [hasHydratedProgress, setHasHydratedProgress] = useState(false)
   const [showTtlNotice, setShowTtlNotice] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const sidebarOpenButtonRef = useRef<HTMLButtonElement>(null)
+  const sidebarPanelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     try {
@@ -80,23 +82,49 @@ export default function PracticeClient({
     }
   }, [topicId, pagination.page])
 
-  const openSidebar = () => {
+  const openSidebar = useCallback(() => {
     setSidebarOpen(true)
     try {
       sessionStorage.setItem(mobileSidebarOpenKeyForTopic(topicId), 'true')
     } catch {
       // ignore storage errors
     }
-  }
+  }, [topicId])
 
-  const closeSidebar = () => {
+  const closeSidebar = useCallback(() => {
     setSidebarOpen(false)
     try {
       sessionStorage.removeItem(mobileSidebarOpenKeyForTopic(topicId))
     } catch {
       // ignore storage errors
     }
-  }
+    requestAnimationFrame(() => {
+      sidebarOpenButtonRef.current?.focus()
+    })
+  }, [topicId])
+
+  useEffect(() => {
+    if (!sidebarOpen) return
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeSidebar()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [sidebarOpen, closeSidebar])
+
+  useEffect(() => {
+    if (!sidebarOpen) return
+    requestAnimationFrame(() => {
+      const closeButton = sidebarPanelRef.current?.querySelector<HTMLElement>(
+        'button[aria-label="Close question list"]',
+      )
+      closeButton?.focus()
+    })
+  }, [sidebarOpen, pagination.page])
 
   // Sync initialQuestionId when navigation changes it
   useEffect(() => {
@@ -277,33 +305,32 @@ export default function PracticeClient({
           <QuestionSidebar {...sidebarProps} />
         </div>
 
-        {/* Mobile sidebar drawer */}
-        <div
-          className={cn(
-            'fixed inset-0 z-50 md:hidden transition-opacity duration-200',
-            sidebarOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
-          )}
-          aria-hidden={!sidebarOpen}
-        >
-          <button
-            type="button"
-            aria-label="Close question list"
-            onClick={closeSidebar}
-            className="absolute inset-0 bg-black/40"
-          />
+        {/* Mobile sidebar drawer — only mounted while open so focus can't linger hidden */}
+        {sidebarOpen ? (
           <div
-            className={cn(
-              'absolute inset-y-0 left-0 h-full w-[min(100vw-2.5rem,20rem)] border-r border-neutral-100 bg-white shadow-xl transition-transform duration-200',
-              sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-            )}
+            className="fixed inset-0 z-50 md:hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Question list"
           >
-            <QuestionSidebar
-              {...sidebarProps}
-              showCloseButton
-              onClose={closeSidebar}
+            <button
+              type="button"
+              aria-label="Close question list overlay"
+              onClick={closeSidebar}
+              className="absolute inset-0 bg-black/40"
             />
+            <div
+              ref={sidebarPanelRef}
+              className="absolute inset-y-0 left-0 h-full w-[min(100vw-2.5rem,20rem)] border-r border-neutral-100 bg-white shadow-xl"
+            >
+              <QuestionSidebar
+                {...sidebarProps}
+                showCloseButton
+                onClose={closeSidebar}
+              />
+            </div>
           </div>
-        </div>
+        ) : null}
 
         {/* Main content */}
         <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 bg-neutral-50/30">
@@ -318,6 +345,7 @@ export default function PracticeClient({
                   Back to Questions
                 </Link>
                 <button
+                  ref={sidebarOpenButtonRef}
                   type="button"
                   onClick={openSidebar}
                   className="md:hidden inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 transition-colors"
