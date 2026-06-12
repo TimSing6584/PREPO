@@ -49,8 +49,8 @@ export default function MCQView({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-3">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="space-y-2 sm:space-y-3">
         {options.map((option, index) => {
           const isSelected = selectedOption === index
           const isCorrect = index === correctAnswer
@@ -81,13 +81,13 @@ export default function MCQView({
                 saveProgress(index, false)
               }}
               className={cn(
-                "w-full text-left p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-between group",
+                "w-full text-left p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-between gap-2 group",
                 borderClass,
                 bgClass,
                 !isSubmitted && "hover:border-blue-300"
               )}
             >
-              <span className="font-medium text-neutral-700">{option}</span>
+              <span className="text-sm sm:text-base font-medium text-neutral-700">{option}</span>
               {icon}
             </button>
           )
@@ -98,7 +98,7 @@ export default function MCQView({
         <button
           onClick={handleSubmit}
           disabled={selectedOption === null}
-          className="px-6 py-3 bg-neutral-900 text-white font-semibold rounded-xl hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-neutral-900 text-white font-semibold rounded-xl hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           Check Answer
         </button>

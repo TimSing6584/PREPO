@@ -115,7 +115,7 @@ export default function QuestionCard({
               </button>
             </div>
 
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#101010] leading-tight break-words">
+            <h1 className="text-lg sm:text-xl md:text-3xl font-bold text-[#101010] leading-snug sm:leading-tight break-words">
               {currentGlobalIndex !== undefined && `Q${currentGlobalIndex + 1}: `}{question.text}
             </h1>
 
