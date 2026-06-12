@@ -1,25 +1,35 @@
-'use client'
+"use client";
 
-import { CheckCircle2, ChevronLeft, ChevronRight, RotateCcw, Star, X } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import type { PracticeQuestion } from './types'
-import type { PaginationMeta, QuestionFilter } from '@/app/utils/server/csFundamentals'
+import {
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  RotateCcw,
+  Star,
+  X,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { PracticeQuestion } from "./types";
+import type {
+  PaginationMeta,
+  QuestionFilter,
+} from "@/app/utils/server/csFundamentals";
 
 interface QuestionSidebarProps {
-  questions: PracticeQuestion[]
-  currentQuestionId: string
-  onSelectQuestion: (id: string) => void
-  completedIds: string[]
-  starredIds: string[]
-  filter: QuestionFilter
-  showFilterTabs: boolean
-  onFilterChange: (filter: QuestionFilter) => void
-  onRedoPage?: () => void
-  pagination: PaginationMeta
-  globalNumberById?: Record<string, number>
-  onPageChange: (page: number) => void
-  onClose?: () => void
-  showCloseButton?: boolean
+  questions: PracticeQuestion[];
+  currentQuestionId: string;
+  onSelectQuestion: (id: string) => void;
+  completedIds: string[];
+  starredIds: string[];
+  filter: QuestionFilter;
+  showFilterTabs: boolean;
+  onFilterChange: (filter: QuestionFilter) => void;
+  onRedoPage?: () => void;
+  pagination: PaginationMeta;
+  globalNumberById?: Record<string, number>;
+  onPageChange: (page: number) => void;
+  onClose?: () => void;
+  showCloseButton?: boolean;
 }
 
 export default function QuestionSidebar({
@@ -38,13 +48,12 @@ export default function QuestionSidebar({
   onClose,
   showCloseButton = false,
 }: QuestionSidebarProps) {
-  const { page, totalPages, totalCount } = pagination
-  const canGoPrev = page > 1
-  const canGoNext = page < totalPages
+  const { page, totalPages, totalCount } = pagination;
+  const canGoPrev = page > 1;
+  const canGoNext = page < totalPages;
 
   return (
     <div className="w-full h-full flex flex-col bg-transparent">
-
       {/* Header */}
       <div className="px-4 sm:px-6 py-4 border-b border-neutral-100 flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-1 flex-col">
@@ -58,24 +67,24 @@ export default function QuestionSidebar({
               <div className="inline-flex items-center gap-1 rounded-lg bg-neutral-100 p-1">
                 <button
                   type="button"
-                  onClick={() => onFilterChange('all')}
+                  onClick={() => onFilterChange("all")}
                   className={cn(
-                    'rounded-md px-2 py-1 text-xs font-semibold transition-colors',
-                    filter === 'all'
-                      ? 'bg-white text-neutral-900 shadow-sm'
-                      : 'text-neutral-500 hover:text-neutral-900',
+                    "rounded-md px-2 py-1 text-xs font-semibold transition-colors",
+                    filter === "all"
+                      ? "bg-white text-neutral-900 shadow-sm"
+                      : "text-neutral-500 hover:text-neutral-900",
                   )}
                 >
                   All
                 </button>
                 <button
                   type="button"
-                  onClick={() => onFilterChange('starred')}
+                  onClick={() => onFilterChange("starred")}
                   className={cn(
-                    'rounded-md px-2 py-1 text-xs font-semibold transition-colors',
-                    filter === 'starred'
-                      ? 'bg-white text-neutral-900 shadow-sm'
-                      : 'text-neutral-500 hover:text-neutral-900',
+                    "rounded-md px-2 py-1 text-xs font-semibold transition-colors",
+                    filter === "starred"
+                      ? "bg-white text-neutral-900 shadow-sm"
+                      : "text-neutral-500 hover:text-neutral-900",
                   )}
                 >
                   Starred/Page ({starredIds.length})
@@ -110,28 +119,30 @@ export default function QuestionSidebar({
       {/* Question list */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {questions.map((q, index) => {
-          const isActive = q.id === currentQuestionId
-          const isCompleted = completedIds.includes(q.id)
-          const globalNumber = globalNumberById?.[q.id] ?? (pagination.page - 1) * pagination.pageSize + index + 1
+          const isActive = q.id === currentQuestionId;
+          const isCompleted = completedIds.includes(q.id);
+          const globalNumber =
+            globalNumberById?.[q.id] ??
+            (pagination.page - 1) * pagination.pageSize + index + 1;
 
           return (
             <button
               key={q.id}
               onClick={() => onSelectQuestion(q.id)}
               className={cn(
-                'w-full text-left px-4 py-3 rounded-xl transition-all duration-200 flex items-center justify-between group border min-h-[64px]',
+                "w-full text-left px-4 py-3 rounded-xl transition-all duration-200 flex items-center justify-between group border min-h-[64px]",
                 isActive
-                  ? 'bg-neutral-900 border-neutral-900 shadow-md'
-                  : 'bg-white border-neutral-100 hover:border-neutral-200 hover:bg-neutral-50',
+                  ? "bg-neutral-900 border-neutral-900 shadow-md"
+                  : "bg-white border-neutral-100 hover:border-neutral-200 hover:bg-neutral-50",
               )}
             >
               <div className="flex items-center gap-4 flex-1 overflow-hidden">
                 <div
                   className={cn(
-                    'flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl text-sm font-bold transition-colors',
+                    "flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl text-sm font-bold transition-colors",
                     isActive
-                      ? 'bg-neutral-800 text-white'
-                      : 'bg-neutral-100 text-neutral-500 group-hover:bg-neutral-200',
+                      ? "bg-neutral-800 text-white"
+                      : "bg-neutral-100 text-neutral-500 group-hover:bg-neutral-200",
                   )}
                 >
                   {globalNumber}
@@ -139,8 +150,8 @@ export default function QuestionSidebar({
                 <div className="flex flex-col overflow-hidden">
                   <span
                     className={cn(
-                      'text-sm font-semibold truncate',
-                      isActive ? 'text-white' : 'text-neutral-900',
+                      "text-sm font-semibold truncate",
+                      isActive ? "text-white" : "text-neutral-900",
                     )}
                   >
                     {q.text}
@@ -152,20 +163,20 @@ export default function QuestionSidebar({
                 {starredIds.includes(q.id) && (
                   <Star
                     className={cn(
-                      'w-4 h-4',
+                      "w-4 h-4",
                       isActive
-                        ? 'fill-amber-300 text-amber-300'
-                        : 'fill-amber-400 text-amber-400',
+                        ? "fill-amber-300 text-amber-300"
+                        : "fill-amber-400 text-amber-400",
                     )}
                   />
                 )}
                 {isCompleted && (
                   <span
                     className={cn(
-                      'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide',
+                      "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
                       isActive
-                        ? 'bg-emerald-400/20 text-emerald-300'
-                        : 'bg-emerald-100 text-emerald-700',
+                        ? "bg-emerald-400/20 text-emerald-300"
+                        : "bg-emerald-100 text-emerald-700",
                     )}
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" />
@@ -174,7 +185,7 @@ export default function QuestionSidebar({
                 )}
               </div>
             </button>
-          )
+          );
         })}
       </div>
 
@@ -185,10 +196,10 @@ export default function QuestionSidebar({
             onClick={() => canGoPrev && onPageChange(page - 1)}
             disabled={!canGoPrev}
             className={cn(
-              'group inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all duration-200',
+              "group inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all duration-200",
               canGoPrev
-                ? 'border-neutral-200 text-neutral-700 hover:bg-neutral-50 hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0'
-                : 'cursor-not-allowed border-neutral-100 text-neutral-300',
+                ? "border-neutral-200 text-neutral-700 hover:bg-neutral-50 hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0"
+                : "cursor-not-allowed border-neutral-100 text-neutral-300",
             )}
           >
             <ChevronLeft className="h-3.5 w-3.5 transition-transform duration-200 group-hover:-translate-x-0.5" />
@@ -203,10 +214,10 @@ export default function QuestionSidebar({
             onClick={() => canGoNext && onPageChange(page + 1)}
             disabled={!canGoNext}
             className={cn(
-              'group inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all duration-200',
+              "group inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all duration-200",
               canGoNext
-                ? 'border-neutral-200 text-neutral-700 hover:bg-neutral-50 hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0'
-                : 'cursor-not-allowed border-neutral-100 text-neutral-300',
+                ? "border-neutral-200 text-neutral-700 hover:bg-neutral-50 hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0"
+                : "cursor-not-allowed border-neutral-100 text-neutral-300",
             )}
           >
             Next
@@ -215,5 +226,5 @@ export default function QuestionSidebar({
         </div>
       )}
     </div>
-  )
+  );
 }

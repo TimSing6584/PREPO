@@ -272,10 +272,32 @@ export default function PracticeClient({
     setSidebarFilter(newFilter);
   }
 
+  function getPageForQuestion(questionId: string) {
+    const index = globalOrderedQuestionIds.findIndex((qid) => qid === questionId);
+    if (index < 0) return pagination.page;
+    return Math.floor(index / pagination.pageSize) + 1;
+  }
+
   function selectQuestion(id: string) {
+    if (id === currentQuestionId) {
+      closeSidebar();
+      return;
+    }
+
     setCurrentQuestionId(id);
     closeSidebar();
-    router.replace(buildUrl(pagination.page, filter, id));
+
+    const targetPage = getPageForQuestion(id);
+    const url = buildUrl(targetPage, filter, id);
+    const isOnCurrentPage = questions.some((q) => q.id === id);
+
+    // Same-page switch: update URL without a server round-trip
+    if (isOnCurrentPage && targetPage === pagination.page) {
+      window.history.replaceState(window.history.state, "", url);
+      return;
+    }
+
+    router.replace(url);
   }
 
   // Redo current page

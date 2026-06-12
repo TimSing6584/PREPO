@@ -374,7 +374,7 @@ export default function EditPersonalizedQuestionPage() {
                       />
                     </div>
                   ) : null}
-                  <div className="border border-gray-300 rounded-lg p-4 text-center">
+                  <div className="border border-gray-300 rounded-lg p-4 text-center overflow-hidden">
                     <input
                       type="file"
                       accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/jpg,image/webp"
@@ -384,10 +384,10 @@ export default function EditPersonalizedQuestionPage() {
                     />
                     <label
                       htmlFor="image-upload"
-                      className={isLocked ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
+                      className={`block w-full min-w-0 ${isLocked ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                     >
                       <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-600 break-all px-1">
                         {image ? image.name : existingImageUrl ? 'Existing image (click to change)' : 'Upload your image'}
                       </p>
                       <p className="text-xs text-gray-400 mt-1">Allowed: PNG, JPG, JPEG, WEBP</p>
