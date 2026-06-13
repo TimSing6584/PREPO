@@ -1,94 +1,100 @@
-'use client'
+"use client";
 
-import { useEffect, useMemo, useState } from 'react'
-import { Eye, EyeOff } from 'lucide-react'
-import TipTapEditor from '@/components/TipTap/TipTapEditor'
-import AudioRecorder from '@/components/audio/AudioRecorder'
-import SpeechAssessmentLoading from '@/components/audio/SpeechAssessmentLoading'
-import SpeechAssessmentResult from '@/components/audio/SpeechAssessmentResult'
-import type { SpeechAssessment } from '@/components/audio/speechAssessment.types'
-import type { ComponentProps } from 'react'
+import { useEffect, useMemo, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
+import TipTapEditor from "@/components/TipTap/TipTapEditor";
+import AudioRecorder from "@/components/audio/AudioRecorder";
+import SpeechAssessmentLoading from "@/components/audio/SpeechAssessmentLoading";
+import SpeechAssessmentResult from "@/components/audio/SpeechAssessmentResult";
+import type { SpeechAssessment } from "@/components/audio/speechAssessment.types";
+import type { ComponentProps } from "react";
 
 interface WrittenViewProps {
-  statement: string
-  correctAnswer: string
-  initialDraft?: string
-  initialSpeechAssessment?: SpeechAssessment | null
-  onDraftChange?: (draft: string) => void
-  onSpeechAssessmentChange?: (assessment: SpeechAssessment) => void
+  statement: string;
+  correctAnswer: string;
+  initialDraft?: string;
+  initialSpeechAssessment?: SpeechAssessment | null;
+  onDraftChange?: (draft: string) => void;
+  onSpeechAssessmentChange?: (assessment: SpeechAssessment) => void;
 }
 
-type EditorContent = NonNullable<ComponentProps<typeof TipTapEditor>['initialContent']>
+type EditorContent = NonNullable<
+  ComponentProps<typeof TipTapEditor>["initialContent"]
+>;
 
-const hasRichTextShape = (value: unknown): value is Exclude<EditorContent, string> => {
-  if (!value || typeof value !== 'object') return false
-  const candidate = value as { type?: unknown }
-  return candidate.type === 'doc'
-}
+const hasRichTextShape = (
+  value: unknown,
+): value is Exclude<EditorContent, string> => {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as { type?: unknown };
+  return candidate.type === "doc";
+};
 
 function extractTipTapText(node: unknown): string {
-  if (!node || typeof node !== 'object') return ''
-  const candidate = node as { text?: string; content?: unknown[] }
-  if (typeof candidate.text === 'string') return candidate.text
-  if (!Array.isArray(candidate.content)) return ''
-  return candidate.content.map(extractTipTapText).join('')
+  if (!node || typeof node !== "object") return "";
+  const candidate = node as { text?: string; content?: unknown[] };
+  if (typeof candidate.text === "string") return candidate.text;
+  if (!Array.isArray(candidate.content)) return "";
+  return candidate.content.map(extractTipTapText).join("");
 }
 
 function toPlainAnswer(correctAnswer: string): string {
   try {
-    const parsed = JSON.parse(correctAnswer) as unknown
+    const parsed = JSON.parse(correctAnswer) as unknown;
     if (hasRichTextShape(parsed)) {
-      const text = extractTipTapText(parsed).trim()
-      if (text) return text
+      const text = extractTipTapText(parsed).trim();
+      if (text) return text;
     }
   } catch {
     // fall through to raw string
   }
-  return correctAnswer.trim()
+  return correctAnswer.trim();
 }
 
 export default function WrittenView({
   statement,
   correctAnswer,
-  initialDraft = '',
+  initialDraft = "",
   initialSpeechAssessment = null,
   onDraftChange,
   onSpeechAssessmentChange,
 }: WrittenViewProps) {
-  const [answer, setAnswer] = useState(initialDraft)
-  const [showAnswer, setShowAnswer] = useState(false)
-  const [speechAssessment, setSpeechAssessment] = useState<SpeechAssessment | null>(
-    initialSpeechAssessment,
-  )
-  const [isAssessing, setIsAssessing] = useState(false)
+  const [answer, setAnswer] = useState(initialDraft);
+  const [showAnswer, setShowAnswer] = useState(false);
+  const [speechAssessment, setSpeechAssessment] =
+    useState<SpeechAssessment | null>(initialSpeechAssessment);
+  const [isAssessing, setIsAssessing] = useState(false);
 
-  const modelAnswer = useMemo(() => toPlainAnswer(correctAnswer), [correctAnswer])
+  const modelAnswer = useMemo(
+    () => toPlainAnswer(correctAnswer),
+    [correctAnswer],
+  );
 
   const parsedCorrectAnswer = useMemo(() => {
     try {
-      const parsed = JSON.parse(correctAnswer) as unknown
-      return hasRichTextShape(parsed) ? parsed : null
+      const parsed = JSON.parse(correctAnswer) as unknown;
+      return hasRichTextShape(parsed) ? parsed : null;
     } catch {
-      return null
+      return null;
     }
-  }, [correctAnswer])
+  }, [correctAnswer]);
 
   useEffect(() => {
-    setAnswer(initialDraft)
-  }, [initialDraft])
+    setAnswer(initialDraft);
+  }, [initialDraft]);
 
   useEffect(() => {
-    setSpeechAssessment(initialSpeechAssessment)
-  }, [initialSpeechAssessment])
+    setSpeechAssessment(initialSpeechAssessment);
+  }, [initialSpeechAssessment]);
 
   return (
     <div className="space-y-6">
       <textarea
         value={answer}
         onChange={(e) => {
-          const value = e.target.value
-          setAnswer(value)
-          onDraftChange?.(value)
+          const value = e.target.value;
+          setAnswer(value);
+          onDraftChange?.(value);
         }}
         placeholder="Type your answer here..."
         className="w-full h-40 p-4 rounded-xl border-2 border-neutral-200 focus:border-blue-500 focus:ring-0 resize-none transition-all placeholder:text-neutral-400"
@@ -99,8 +105,8 @@ export default function WrittenView({
         modelAnswer={modelAnswer}
         onAssessingChange={setIsAssessing}
         onAssessment={(assessment) => {
-          setSpeechAssessment(assessment)
-          onSpeechAssessmentChange?.(assessment)
+          setSpeechAssessment(assessment);
+          onSpeechAssessmentChange?.(assessment);
         }}
       />
 
@@ -115,8 +121,12 @@ export default function WrittenView({
           onClick={() => setShowAnswer(!showAnswer)}
           className="flex items-center gap-2 text-sm font-semibold text-neutral-500 hover:text-neutral-900 transition-colors"
         >
-          {showAnswer ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-          {showAnswer ? 'Hide Answer' : 'Show Answer'}
+          {showAnswer ? (
+            <EyeOff className="w-4 h-4" />
+          ) : (
+            <Eye className="w-4 h-4" />
+          )}
+          {showAnswer ? "Hide Answer" : "Show Answer"}
         </button>
 
         {showAnswer && (
@@ -130,11 +140,13 @@ export default function WrittenView({
                 editorClassName="min-h-0 bg-transparent p-0 text-emerald-900"
               />
             ) : (
-              <p className="whitespace-pre-wrap text-emerald-900">{correctAnswer}</p>
+              <p className="whitespace-pre-wrap text-emerald-900">
+                {correctAnswer}
+              </p>
             )}
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -253,9 +253,9 @@ export default function EditPersonalizedQuestionPage() {
   };
 
   return (
-    <div className="main-frame px-6 md:px-12 pb-6 md:pb-12 pt-4 md:pt-6 relative overflow-hidden flex flex-col gap-4 md:gap-6 font-geist-sans">
+    <div className="main-frame px-4 sm:px-6 md:px-12 pb-6 md:pb-12 pt-4 md:pt-6 relative overflow-hidden flex flex-col gap-3 sm:gap-4 md:gap-6 font-geist-sans">
       <Navbar />
-      <div className="flex-1 -mx-6 md:-mx-12 -mb-6 md:-mb-12">
+      <div className="flex-1 -mx-4 sm:-mx-6 md:-mx-12 -mb-6 md:-mb-12">
         <div className="h-full overflow-y-auto p-4 md:p-6 bg-neutral-50/30">
           <div className="max-w-4xl mx-auto space-y-6 pb-20">
             <div className="flex items-center justify-between px-2">
@@ -267,7 +267,7 @@ export default function EditPersonalizedQuestionPage() {
                 Back to Personalized Questions
               </Link>
             </div>
-            <div className="bg-white rounded-[2rem] border border-neutral-100 shadow-sm p-6 md:p-10">
+            <div className="bg-white rounded-2xl sm:rounded-[2rem] border border-neutral-100 shadow-sm p-4 sm:p-6 md:p-10">
               <h1 className="text-lg font-semibold text-gray-900 mb-2">Edit Personalized Question</h1>
               <p className="text-sm text-gray-500 mb-6">Only your personalized questions can be edited here.</p>
 
@@ -298,7 +298,7 @@ export default function EditPersonalizedQuestionPage() {
                 {errors.selectedTopic ? <p className="mt-2 text-xs text-red-500">{errors.selectedTopic}</p> : null}
               </div>
 
-              <div className="border border-gray-200 rounded-lg p-6 mb-6">
+              <div className="border border-gray-200 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
                 <h2 className="text-base font-medium text-gray-900 mb-4">Question Info</h2>
 
                 <div className="mb-4">
@@ -374,7 +374,7 @@ export default function EditPersonalizedQuestionPage() {
                       />
                     </div>
                   ) : null}
-                  <div className="border border-gray-300 rounded-lg p-4 text-center">
+                  <div className="border border-gray-300 rounded-lg p-4 text-center overflow-hidden">
                     <input
                       type="file"
                       accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/jpg,image/webp"
@@ -384,10 +384,10 @@ export default function EditPersonalizedQuestionPage() {
                     />
                     <label
                       htmlFor="image-upload"
-                      className={isLocked ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
+                      className={`block w-full min-w-0 ${isLocked ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                     >
                       <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-600 break-all px-1">
                         {image ? image.name : existingImageUrl ? 'Existing image (click to change)' : 'Upload your image'}
                       </p>
                       <p className="text-xs text-gray-400 mt-1">Allowed: PNG, JPG, JPEG, WEBP</p>
@@ -397,7 +397,7 @@ export default function EditPersonalizedQuestionPage() {
                 </div>
               </div>
 
-              <div className="border border-gray-200 rounded-lg p-6">
+              <div className="border border-gray-200 rounded-lg p-4 sm:p-6">
                 <h2 className="text-base font-medium text-gray-900 mb-2">
                   MCQ type <span className="text-red-500">*</span>
                 </h2>
