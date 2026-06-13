@@ -42,7 +42,7 @@ export default async function TopicPage({ params, searchParams }: PageProps) {
           <div className="max-w-4xl mx-auto space-y-4 sm:space-y-8 pb-16 sm:pb-20">
 
             {/* Header nav */}
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between px-1 sm:px-2">
+            <div className="flex flex-col gap-4 sm:gap-2 sm:flex-row sm:items-center sm:justify-between px-1 sm:px-2">
               <Link
                 href="/dashboard"
                 className="inline-flex items-center gap-2 text-xs font-semibold text-neutral-400 hover:text-neutral-900 transition-colors group"
