@@ -15,9 +15,7 @@ export default function ByePage() {
     if (!el) return
 
     const applyPeek = () => {
-      const isMobile = window.matchMedia('(max-width: 639px)').matches
-      const offset = isMobile ? '-45%' : '-59%'
-      el.style.transform = `translateX(-50%) translateY(${offset})`
+      el.style.transform = 'translateX(-50%) translateY(-0.75rem)'
     }
 
     const initialTimer = setTimeout(applyPeek, 600)
@@ -34,7 +32,7 @@ export default function ByePage() {
           {/* Mascot — slides up from behind the bye-bye card */}
           <div
             ref={mascotRef}
-            className="absolute left-1/2 z-10 w-28 md:w-40 pointer-events-none"
+            className="absolute left-1/2 z-10 w-24 md:w-40 pointer-events-none"
             style={{
               bottom: 'calc(100% - 1.25rem)',
               transform: 'translateX(-50%) translateY(100%)',
@@ -53,12 +51,12 @@ export default function ByePage() {
           </div>
 
           {/* Card — mascot stands on this */}
-          <div className="w-full bg-white rounded-[2rem] border border-neutral-100 shadow-sm p-8 md:p-12 text-center space-y-6 relative z-20">
-            <div className="space-y-3">
-              <h1 className="text-3xl md:text-4xl font-bold text-[#101010] tracking-tight">
+          <div className="w-full max-w-md md:max-w-2xl mx-auto bg-white rounded-[2rem] border border-neutral-100 shadow-sm p-6 md:p-12 text-center space-y-5 md:space-y-6 relative z-20">
+            <div className="space-y-2 md:space-y-3">
+              <h1 className="text-2xl md:text-4xl font-bold text-[#101010] tracking-tight">
                 Bye bye
               </h1>
-              <p className="text-neutral-500 text-base md:text-lg">
+              <p className="text-neutral-500 text-sm md:text-lg">
                 You are signed out. Come back anytime.
               </p>
             </div>
