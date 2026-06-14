@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
     upstreamForm.append("statement", statement.trim());
     upstreamForm.append("model_answer", modelAnswer.trim());
 
-    const token = generateServiceToken();
+    const token = generateServiceToken(user.id);
     const upstream = await fetch(
       `${serviceUrl.replace(/\/$/, "")}/pipeline/speech-assess`,
       {
