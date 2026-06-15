@@ -22,7 +22,7 @@ export const rateLimiters = {
     // Sensitive ops (s3 upload): 10 requests per minute
     upload: new Ratelimit({
         redis,
-        limiter: Ratelimit.slidingWindow(10, '1 m'),
+        limiter: Ratelimit.slidingWindow(5, '1 m'),
         prefix: 'rl:upload',
         analytics: true,
     }),

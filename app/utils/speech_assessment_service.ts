@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken"
 
-export function generateServiceToken(): string {
+export function generateServiceToken(userId: string): string {
     const secret = process.env.SPEECH_ASSESS_SERVICE_JWT_SECRET
 
     if (!secret) {
@@ -8,7 +8,7 @@ export function generateServiceToken(): string {
     }
 
     return jwt.sign(
-        { service: "nextjs" },
+        { service: "nextjs", sub: userId },
         secret,
         { expiresIn: "30s" }
     )
