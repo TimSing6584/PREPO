@@ -38,6 +38,23 @@ export const rateLimiters = {
 type LimiterKey = keyof typeof rateLimiters
 
 /**
+ * Thrown by enforceRateLimit when a limit is exceeded. Server Components
+ * can't return a NextResponse, so this is caught by an error.tsx boundary
+ * instead.
+ */
+export class RateLimitExceededError extends Error {
+    // Next.js strips message/name from errors crossing the RSC boundary in
+    // production; only `digest` survives, so use it to identify this error
+    // in error.tsx.
+    digest = 'RATE_LIMIT_EXCEEDED'
+
+    constructor() {
+        super('Too many requests. Please slow down.')
+        this.name = 'RateLimitExceededError'
+    }
+}
+
+/**
  * Checks rate limit for the current authenticated user.
  * Returns a 429 NextResponse if exceeded, otherwise null.
  */
@@ -70,6 +87,26 @@ export async function checkRateLimit(
     }
 
     return null
+}
+
+/**
+ * Rate limit guard for Server Components/pages, which render DB queries
+ * directly and can't return a NextResponse. Throws RateLimitExceededError
+ * when exceeded, to be caught by an error.tsx boundary.
+ */
+export async function enforceRateLimit(type: LimiterKey): Promise<void> {
+    const { getUser } = getKindeServerSession()
+    const user = await getUser()
+
+    if (!user?.id) {
+        throw new Error('Not authenticated')
+    }
+
+    const { success } = await rateLimiters[type].limit(user.id)
+
+    if (!success) {
+        throw new RateLimitExceededError()
+    }
 }
 
 /**
