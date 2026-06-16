@@ -2,6 +2,9 @@ import { prisma } from '@/app/utils/db'
 import DashboardClient from '@/components/dashboard/DashboardClient'
 import type { Topic } from '@/app/utils/api/topics'
 import { redis } from '@/app/utils/redis'
+import { enforceRateLimit } from '@/app/utils/ratelimit'
+
+export const dynamic = 'force-dynamic'
 
 async function getTopics(): Promise<Topic[]> {
   const cachedTopics = await redis.get<Topic[]>('topics')
@@ -39,6 +42,7 @@ async function getTopics(): Promise<Topic[]> {
 }
 
 export default async function DashboardPage() {
+  await enforceRateLimit('read')
   const topics = await getTopics()
   return <DashboardClient topics={topics} />
 }

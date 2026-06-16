@@ -3,6 +3,9 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Star } from 'lucide-react'
 import Link from 'next/link'
 import { getPracticeQuestionIds, getTopicPracticeData } from '@/app/utils/server/csFundamentals'
 import type { QuestionFilter } from '@/app/utils/server/csFundamentals'
+import { enforceRateLimit } from '@/app/utils/ratelimit'
+
+export const dynamic = 'force-dynamic'
 
 type PageProps = {
   params: Promise<{ topicId: string }>
@@ -10,6 +13,8 @@ type PageProps = {
 }
 
 export default async function TopicPage({ params, searchParams }: PageProps) {
+  await enforceRateLimit('read')
+
   const { topicId } = await params
   const { page: pageParam, filter: filterParam } = await searchParams
   const page = Math.max(1, parseInt(pageParam ?? '1', 10) || 1)

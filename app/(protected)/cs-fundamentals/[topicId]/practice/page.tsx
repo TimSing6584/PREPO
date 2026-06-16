@@ -5,6 +5,9 @@ import {
 } from '@/app/utils/server/csFundamentals'
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import PracticeClient from './PracticeClient'
+import { enforceRateLimit } from '@/app/utils/ratelimit'
+
+export const dynamic = 'force-dynamic'
 
 type PageProps = {
   params: Promise<{ topicId: string }>
@@ -12,6 +15,8 @@ type PageProps = {
 }
 
 export default async function PracticePage({ params, searchParams }: PageProps) {
+  await enforceRateLimit('read')
+
   const { topicId } = await params
   const { page: pageParam, filter: filterParam, q } = await searchParams
 

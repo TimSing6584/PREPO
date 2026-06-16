@@ -5,8 +5,13 @@ import { prisma } from '@/app/utils/db';
 import PersonalizedQuestionsClient from './PersonalizedQuestionsClient';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import { enforceRateLimit } from '@/app/utils/ratelimit';
+
+export const dynamic = 'force-dynamic';
 
 export default async function PersonalizedQuestionsPage() {
+  await enforceRateLimit('read');
+
   const { getUser } = getKindeServerSession();
   const user = await getUser();
   const userKindeId = user?.id ?? '';

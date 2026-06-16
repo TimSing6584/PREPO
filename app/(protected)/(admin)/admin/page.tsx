@@ -1,10 +1,13 @@
 import Link from 'next/link';
 import { prisma } from '@/app/utils/db';
 import { QuestionType } from '@/lib/generated/prisma/client';
+import { enforceRateLimit } from '@/app/utils/ratelimit';
 
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
+  await enforceRateLimit('read');
+
   const [activeTopics, defaultQuestions, personalizedQuestions, users] = await Promise.all([
     prisma.topic.count({
       where: {
