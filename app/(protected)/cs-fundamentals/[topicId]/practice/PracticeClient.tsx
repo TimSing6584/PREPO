@@ -35,14 +35,10 @@ type PracticeClientProps = {
 type PracticeProgressStore = {
   questions: Record<string, StoredQuestionProgress>;
   updatedAt: number;
-  expiresAt: number;
 };
 
-const PRACTICE_PROGRESS_TTL_MS = 15 * 24 * 60 * 60 * 1000;
 const storageKeyForTopic = (userId: string, topicId: string) =>
   `practiceProgress:v2:${userId}:${topicId}`;
-const warningDismissedKeyForTopic = (userId: string, topicId: string) =>
-  `practiceProgressWarningDismissed:v1:${userId}:${topicId}`;
 const mobileSidebarOpenKeyForTopic = (topicId: string) =>
   `practiceMobileSidebarOpen:v1:${topicId}`;
 
@@ -74,7 +70,6 @@ export default function PracticeClient({
     filter === "starred" ? "starred" : "all",
   );
   const [hasHydratedProgress, setHasHydratedProgress] = useState(false);
-  const [showTtlNotice, setShowTtlNotice] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const sidebarOpenButtonRef = useRef<HTMLButtonElement>(null);
   const sidebarPanelRef = useRef<HTMLDivElement>(null);
@@ -139,33 +134,13 @@ export default function PracticeClient({
     setCurrentQuestionId(initialQuestionId);
   }, [initialQuestionId]);
 
-  //TTL notice
-  useEffect(() => {
-    try {
-      const dismissed = localStorage.getItem(
-        warningDismissedKeyForTopic(userId, topicId),
-      );
-      setShowTtlNotice(dismissed !== "true");
-    } catch {
-      setShowTtlNotice(true);
-    }
-  }, [topicId, userId]);
-
   // Hydrate progress from localStorage
   useEffect(() => {
     try {
       const stored = localStorage.getItem(storageKeyForTopic(userId, topicId));
       if (stored) {
         const parsed = JSON.parse(stored) as Partial<PracticeProgressStore>;
-        const now = Date.now();
-        const expiresAt =
-          typeof parsed.expiresAt === "number" ? parsed.expiresAt : 0;
-        if (expiresAt > now) {
-          setProgressByQuestion(parsed.questions ?? {});
-        } else {
-          localStorage.removeItem(storageKeyForTopic(userId, topicId));
-          setProgressByQuestion({});
-        }
+        setProgressByQuestion(parsed.questions ?? {});
       }
     } catch {
       setProgressByQuestion({});
@@ -177,11 +152,9 @@ export default function PracticeClient({
   // Persist progress to localStorage
   useEffect(() => {
     if (!hasHydratedProgress) return;
-    const now = Date.now();
     const payload: PracticeProgressStore = {
       questions: progressByQuestion,
-      updatedAt: now,
-      expiresAt: now + PRACTICE_PROGRESS_TTL_MS,
+      updatedAt: Date.now(),
     };
     localStorage.setItem(
       storageKeyForTopic(userId, topicId),
@@ -415,28 +388,6 @@ export default function PracticeClient({
                 </span>
               </div>
             </div>
-
-            {showTtlNotice && (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800 flex items-start justify-between gap-3">
-                <p>
-                  Your practice progress is saved locally and will be
-                  automatically cleared after 15 days.
-                </p>
-                <button
-                  type="button"
-                  className="shrink-0 text-amber-700 hover:text-amber-900 transition-colors underline underline-offset-2"
-                  onClick={() => {
-                    setShowTtlNotice(false);
-                    localStorage.setItem(
-                      warningDismissedKeyForTopic(userId, topicId),
-                      "true",
-                    );
-                  }}
-                >
-                  Hide
-                </button>
-              </div>
-            )}
 
             {!currentQuestion ? (
               <div className="rounded-2xl border border-dashed border-amber-200 bg-amber-50 px-4 py-10 text-center text-sm text-amber-800">
