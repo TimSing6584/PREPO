@@ -1,6 +1,6 @@
 'use client'
 
-import { User as UserIcon, Linkedin, Github, Mail } from 'lucide-react'
+import { User as UserIcon, Linkedin, Mail } from 'lucide-react'
 import Image from 'next/image'
 
 const founders = [
@@ -75,7 +75,7 @@ export default function About() {
                 >
                   <Linkedin className="w-6 h-6 text-white" />
                 </a>
-                <a
+                {/* <a
                   href={founder.github}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -83,7 +83,7 @@ export default function About() {
                   aria-label="GitHub"
                 >
                   <Github className="w-6 h-6 text-white" />
-                </a>
+                </a> */}
                 <a
                   href={`mailto:${founder.email}`}
                   target="_blank"
