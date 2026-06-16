@@ -5,6 +5,8 @@ import { getPracticeQuestionIds, getTopicPracticeData } from '@/app/utils/server
 import type { QuestionFilter } from '@/app/utils/server/csFundamentals'
 import { enforceRateLimit } from '@/app/utils/ratelimit'
 
+export const dynamic = 'force-dynamic'
+
 type PageProps = {
   params: Promise<{ topicId: string }>
   searchParams: Promise<{ page?: string; filter?: string }>

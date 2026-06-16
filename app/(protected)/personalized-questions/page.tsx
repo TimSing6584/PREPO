@@ -7,6 +7,8 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { enforceRateLimit } from '@/app/utils/ratelimit';
 
+export const dynamic = 'force-dynamic';
+
 export default async function PersonalizedQuestionsPage() {
   await enforceRateLimit('read');
 

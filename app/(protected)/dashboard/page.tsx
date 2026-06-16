@@ -4,6 +4,8 @@ import type { Topic } from '@/app/utils/api/topics'
 import { redis } from '@/app/utils/redis'
 import { enforceRateLimit } from '@/app/utils/ratelimit'
 
+export const dynamic = 'force-dynamic'
+
 async function getTopics(): Promise<Topic[]> {
   const cachedTopics = await redis.get<Topic[]>('topics')
   if (cachedTopics) {

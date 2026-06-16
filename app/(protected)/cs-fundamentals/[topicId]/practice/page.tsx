@@ -7,6 +7,8 @@ import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import PracticeClient from './PracticeClient'
 import { enforceRateLimit } from '@/app/utils/ratelimit'
 
+export const dynamic = 'force-dynamic'
+
 type PageProps = {
   params: Promise<{ topicId: string }>
   searchParams: Promise<{ page?: string; filter?: string; q?: string }>
