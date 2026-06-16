@@ -19,24 +19,24 @@ export default withAuth(
             return NextResponse.next();
         }
 
-        const ip =
-            req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-            req.headers.get('x-real-ip') ??
-            'unknown'
+        // const ip =
+        //     req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+        //     req.headers.get('x-real-ip') ??
+        //     'unknown'
 
-        const { success, limit, remaining, reset } = await ratelimit.limit(ip)
+        // const { success, limit, remaining, reset } = await ratelimit.limit(ip)
 
-        if (!success) {
-            return new NextResponse('Too many requests. Please slow down.', {
-                status: 429,
-                headers: {
-                    'X-RateLimit-Limit': String(limit),
-                    'X-RateLimit-Remaining': String(remaining),
-                    'X-RateLimit-Reset': String(reset),
-                    'Retry-After': String(Math.ceil((reset - Date.now()) / 1000)),
-                },
-            })
-        }
+        // if (!success) {
+        //     return new NextResponse('Too many requests. Please slow down.', {
+        //         status: 429,
+        //         headers: {
+        //             'X-RateLimit-Limit': String(limit),
+        //             'X-RateLimit-Remaining': String(remaining),
+        //             'X-RateLimit-Reset': String(reset),
+        //             'Retry-After': String(Math.ceil((reset - Date.now()) / 1000)),
+        //         },
+        //     })
+        // }
 
         return NextResponse.next();
     },
