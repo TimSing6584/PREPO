@@ -328,14 +328,14 @@ export default function PracticeClient({
 
       <div className="flex-1 flex min-h-0 -mx-4 sm:-mx-6 md:-mx-12 -mb-6 md:-mb-12">
         {/* Desktop sidebar */}
-        <div className="hidden md:block w-80 h-full flex-shrink-0 border-r border-neutral-100 bg-white/50">
+        <div className="hidden lg:block w-80 h-full flex-shrink-0 border-r border-neutral-100 bg-white/50">
           <QuestionSidebar {...sidebarProps} />
         </div>
 
         {/* Mobile sidebar drawer — only mounted while open so focus can't linger hidden */}
         {sidebarOpen ? (
           <div
-            className="fixed inset-0 z-50 md:hidden"
+            className="fixed inset-0 z-50 lg:hidden"
             role="dialog"
             aria-modal="true"
             aria-label="Question list"
@@ -362,7 +362,7 @@ export default function PracticeClient({
         {/* Main content */}
         <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 bg-neutral-50/30">
           <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 pb-20">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between px-1 sm:px-2">
+            <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between px-1 sm:px-2">
               <div className="flex items-center justify-between gap-2">
                 <Link
                   href={`/cs-fundamentals/${topicId}?page=${pagination.page}&filter=${filter}`}
@@ -375,7 +375,7 @@ export default function PracticeClient({
                   ref={sidebarOpenButtonRef}
                   type="button"
                   onClick={openSidebar}
-                  className="md:hidden inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 transition-colors"
+                  className="lg:hidden inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 transition-colors"
                 >
                   <Menu className="h-3.5 w-3.5" />
                   Questions
