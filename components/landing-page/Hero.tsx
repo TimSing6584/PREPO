@@ -6,11 +6,11 @@ import Link from 'next/link'
 export default function Hero() {
   return (
     <section className="relative pt-32 sm:pt-36 lg:pt-40 pb-16 sm:pb-20 px-4 sm:px-6 lg:px-12 overflow-visible">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-12 lg:gap-12 items-center">
+      <div className="max-w-7xl 2xl:max-w-[100rem] mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-12 lg:gap-12 2xl:gap-20 items-center">
           <div className="w-full space-y-8 sm:space-y-12">
             <div className="w-full space-y-6">
-              <h1 className="w-full text-[clamp(3rem,16.5vw,4.75rem)] sm:text-[clamp(3.25rem,13vw,4.5rem)] md:text-[clamp(5.5rem,12vw,8rem)] lg:text-8xl font-bold tracking-[-0.01em] md:tracking-tight text-[#101010] leading-[1.02] sm:leading-[1.05] md:leading-[1.1] animate-fade-in-up">
+              <h1 className="w-full text-[clamp(3rem,16.5vw,4.75rem)] sm:text-[clamp(3.25rem,13vw,4.5rem)] md:text-[clamp(5.5rem,12vw,8rem)] lg:text-8xl 2xl:text-9xl font-bold tracking-[-0.01em] md:tracking-tight text-[#101010] leading-[1.02] sm:leading-[1.05] md:leading-[1.1] animate-fade-in-up">
                 Master the <br />
                 <span className="text-primary-500 underline decoration-gray-200 underline-offset-4 sm:underline-offset-6 md:underline-offset-8">Technical</span> <br />
                 Interview.
@@ -32,13 +32,13 @@ export default function Hero() {
 
               <div className="w-full h-px bg-gray-200"></div>
 
-              <p className="text-gray-500 text-xl leading-relaxed">
+              <p className="text-gray-500 text-xl 2xl:text-2xl leading-relaxed">
                 The all-in-one platform for you to practice CS fundamentals. Your journey to Big Tech starts here.
               </p>
             </div>
           </div>
 
-          <div className="relative w-full max-w-[22rem] sm:max-w-[26rem] md:max-w-[30rem] lg:max-w-none mx-auto lg:mx-0 animate-scale-in overflow-visible">
+          <div className="relative w-full max-w-[22rem] sm:max-w-[26rem] md:max-w-[30rem] lg:max-w-none 2xl:max-w-[42rem] mx-auto lg:mx-0 animate-scale-in overflow-visible">
             <div className="relative w-full aspect-square min-h-[16rem] sm:min-h-[18rem] md:min-h-[20rem] lg:min-h-0 flex items-center justify-center overflow-visible">
               <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-primary-200/30 rounded-full blur-[80px] sm:blur-[100px] opacity-50" />
 
