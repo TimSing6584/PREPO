@@ -57,7 +57,7 @@ export default function Hero() {
                     <Code className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
                   </div>
                   <p className="font-bold text-[#101010] text-xs sm:text-sm lg:text-base leading-tight">
-                    Data Structure & Algorithms
+                    Data Structures & Algorithms
                   </p>
                 </div>
                 <div className="space-y-2 sm:space-y-3">

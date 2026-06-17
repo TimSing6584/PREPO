@@ -12,7 +12,7 @@ const SlideChooseTopic = () => (
         { label: 'Operating Systems', color: 'bg-rose-500' },
         { label: 'Computer Networks', color: 'bg-sky-500' },
         { label: 'Databases', color: 'bg-cyan-500' },
-        { label: 'Data Structure & Algorithms', color: 'bg-purple-500'}
+        { label: 'Data Structures & Algorithms', color: 'bg-purple-500'}
       ].map((topic, i) => (
         <div
           key={i}
