@@ -6,6 +6,17 @@ import { prisma } from "@/app/utils/db";
 import { getQuestions } from "@/app/utils/server/questions";
 import type { QuestionRecord } from "@/app/utils/server/questions";
 import type { PracticeQuestion } from "@/components/cs-fundamentals/practice/types";
+import { nameToSlug } from "@/app/utils/topicSlug";
+
+export async function getTopicByName(topicName: string): Promise<{ id: string; name: string }> {
+  const topics = await prisma.topic.findMany({
+    where: { deleted: false },
+    select: { id: true, name: true },
+  });
+  const topic = topics.find((t) => nameToSlug(t.name) === topicName);
+  if (!topic) notFound();
+  return topic;
+}
 
 // Constants
 

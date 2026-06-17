@@ -2,6 +2,7 @@ import {
   getPracticeQuestionById,
   getPracticeQuestionIds,
   getTopicPracticeData,
+  getTopicByName,
 } from '@/app/utils/server/csFundamentals'
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import PracticeClient from './PracticeClient'
@@ -10,14 +11,14 @@ import { enforceRateLimit } from '@/app/utils/ratelimit'
 export const dynamic = 'force-dynamic'
 
 type PageProps = {
-  params: Promise<{ topicId: string }>
+  params: Promise<{ topicName: string }>
   searchParams: Promise<{ page?: string; filter?: string; q?: string }>
 }
 
 export default async function PracticePage({ params, searchParams }: PageProps) {
   await enforceRateLimit('read')
 
-  const { topicId } = await params
+  const { topicName } = await params
   const { page: pageParam, filter: filterParam, q } = await searchParams
 
   const page = Math.max(1, parseInt(pageParam ?? '1', 10) || 1)
@@ -26,7 +27,9 @@ export default async function PracticePage({ params, searchParams }: PageProps) 
   const { getUser } = getKindeServerSession()
   const user = await getUser()
 
-  const [{ topicName, questions, pagination }, orderedQuestionIds, allQuestionIdsForIndex] = await Promise.all([
+  const { id: topicId } = await getTopicByName(topicName)
+
+  const [{ topicName: topicTitle, questions, pagination }, orderedQuestionIds, allQuestionIdsForIndex] = await Promise.all([
     getTopicPracticeData({
       topicId,
       page,
@@ -66,8 +69,9 @@ export default async function PracticePage({ params, searchParams }: PageProps) 
   return (
     <PracticeClient
       userId={user?.id ?? 'anon'}
-      topicId={topicId}
       topicName={topicName}
+      topicId={topicId}
+      topicTitle={topicTitle}
       questions={questions}
       orderedQuestionIds={orderedQuestionIds}
       globalOrderedQuestionIds={globalOrderedQuestionIds}
