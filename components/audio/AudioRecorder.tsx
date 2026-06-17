@@ -78,10 +78,17 @@ export default function AudioRecorder({
       setRecordingStream(stream);
       chunksRef.current = [];
 
-      const mimeType = MediaRecorder.isTypeSupported("audio/webm")
-        ? "audio/webm"
-        : "audio/mp4";
-      const mediaRecorder = new MediaRecorder(stream, { mimeType });
+      const PREFERRED_TYPES = [
+        "audio/webm",
+        "audio/mp4",
+        "audio/ogg",
+        "audio/wav",
+        "audio/mpeg",
+        "audio/flac",
+      ];
+      const mimeType =
+        PREFERRED_TYPES.find((t) => MediaRecorder.isTypeSupported(t)) ?? "";
+      const mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
 
       mediaRecorder.ondataavailable = (event: BlobEvent) => {
         if (event.data.size > 0) {

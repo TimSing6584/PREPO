@@ -5,12 +5,18 @@ import { generateServiceToken } from "@/app/utils/speech_assessment_service";
 
 const MAX_AUDIO_BYTES = 15 * 1024 * 1024;
 const ALLOWED_AUDIO_TYPES = new Set([
-  "audio/webm",
-  "audio/ogg",
-  "audio/mp4",
-  "audio/mpeg",
   "audio/wav",
   "audio/x-wav",
+  "audio/wave",
+  "audio/mpeg",
+  "audio/mp3",
+  "audio/mp4",
+  "audio/x-m4a",
+  "audio/m4a",
+  "audio/webm",
+  "audio/ogg",
+  "audio/flac",
+  "audio/x-flac",
 ]);
 
 export async function POST(request: NextRequest) {
