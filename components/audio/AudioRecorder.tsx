@@ -78,7 +78,17 @@ export default function AudioRecorder({
       setRecordingStream(stream);
       chunksRef.current = [];
 
-      const mediaRecorder = new MediaRecorder(stream);
+      const PREFERRED_TYPES = [
+        "audio/webm",
+        "audio/mp4",
+        "audio/ogg",
+        "audio/wav",
+        "audio/mpeg",
+        "audio/flac",
+      ];
+      const mimeType =
+        PREFERRED_TYPES.find((t) => MediaRecorder.isTypeSupported(t)) ?? "";
+      const mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
 
       mediaRecorder.ondataavailable = (event: BlobEvent) => {
         if (event.data.size > 0) {
@@ -105,7 +115,7 @@ export default function AudioRecorder({
         streamRef.current = null;
         setRecordingStream(null);
 
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        const blob = new Blob(chunksRef.current, { type: mimeType });
         chunksRef.current = [];
 
         if (blob.size === 0) {

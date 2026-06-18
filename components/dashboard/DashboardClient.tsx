@@ -17,6 +17,7 @@ import {
   Monitor,
 } from 'lucide-react'
 import type { Topic } from '@/app/utils/api/topics'
+import { nameToSlug } from '@/app/utils/topicSlug'
 
 const TopicIllustration = ({ id }: { id: string }) => {
   switch (id) {
@@ -258,7 +259,7 @@ export default function DashboardClient({ topics }: { topics: Topic[] }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {topics.map((topic) => (
               <Link
-                href={`/cs-fundamentals/${topic.id}`}
+                href={`/cs-fundamentals/${nameToSlug(topic.name)}`}
                 key={topic.id}
                 className="group bg-white rounded-3xl border border-neutral-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col"
               >

@@ -1,26 +1,28 @@
 import Navbar from '@/components/main/Navbar'
 import { ArrowLeft, ChevronLeft, ChevronRight, Star } from 'lucide-react'
 import Link from 'next/link'
-import { getPracticeQuestionIds, getTopicPracticeData } from '@/app/utils/server/csFundamentals'
+import { getPracticeQuestionIds, getTopicPracticeData, getTopicByName } from '@/app/utils/server/csFundamentals'
 import type { QuestionFilter } from '@/app/utils/server/csFundamentals'
 import { enforceRateLimit } from '@/app/utils/ratelimit'
 
 export const dynamic = 'force-dynamic'
 
 type PageProps = {
-  params: Promise<{ topicId: string }>
+  params: Promise<{ topicName: string }>
   searchParams: Promise<{ page?: string; filter?: string }>
 }
 
 export default async function TopicPage({ params, searchParams }: PageProps) {
   await enforceRateLimit('read')
 
-  const { topicId } = await params
+  const { topicName } = await params
   const { page: pageParam, filter: filterParam } = await searchParams
   const page = Math.max(1, parseInt(pageParam ?? '1', 10) || 1)
   const filter: QuestionFilter = filterParam === 'starred' ? 'starred' : 'all'
 
-  const [{ topicName, questions, pagination }, allQuestionIdsForIndex] = await Promise.all([
+  const { id: topicId } = await getTopicByName(topicName)
+
+  const [{ topicName: topicTitle, questions, pagination }, allQuestionIdsForIndex] = await Promise.all([
     getTopicPracticeData({ topicId, page, filter }),
     filter === 'all'
       ? Promise.resolve<string[] | null>(null)
@@ -36,7 +38,7 @@ export default async function TopicPage({ params, searchParams }: PageProps) {
 
   const { totalCount, totalPages } = pagination
   const nextFilter: QuestionFilter = filter === 'all' ? 'starred' : 'all'
-  const filterToggleHref = `/cs-fundamentals/${topicId}?page=1&filter=${nextFilter}`
+  const filterToggleHref = `/cs-fundamentals/${topicName}?page=1&filter=${nextFilter}`
 
   return (
     <div className="main-frame px-4 sm:px-6 md:px-12 pb-6 md:pb-12 pt-4 md:pt-6 relative overflow-hidden flex flex-col gap-3 sm:gap-4 md:gap-6 font-geist-sans">
@@ -58,7 +60,7 @@ export default async function TopicPage({ params, searchParams }: PageProps) {
               <div className="text-xs font-medium text-neutral-400 flex items-center gap-2 min-w-0">
                 <span className="shrink-0">Topic:</span>
                 <span className="text-neutral-900 uppercase tracking-wider font-bold truncate">
-                  {topicName}
+                  {topicTitle}
                 </span>
               </div>
             </div>
@@ -113,7 +115,7 @@ export default async function TopicPage({ params, searchParams }: PageProps) {
                     return (
                       <Link
                         key={q.id}
-                        href={`/cs-fundamentals/${topicId}/practice?page=${pagination.page}&filter=${filter}&q=${encodeURIComponent(q.id)}`}
+                        href={`/cs-fundamentals/${topicName}/practice?page=${pagination.page}&filter=${filter}&q=${encodeURIComponent(q.id)}`}
                         className="w-full text-left px-3 py-3 sm:px-4 sm:py-4 rounded-xl sm:rounded-2xl transition-all duration-200 flex items-center justify-between gap-2 sm:gap-4 group border bg-white border-neutral-100 hover:border-neutral-200 hover:bg-neutral-50 min-h-[4.5rem] sm:min-h-[72px]"
                       >
                         <div className="flex items-center gap-2.5 sm:gap-4 flex-1 min-w-0 overflow-hidden">
@@ -148,7 +150,7 @@ export default async function TopicPage({ params, searchParams }: PageProps) {
             {totalPages > 1 && (
               <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 px-1">
                 <Link
-                  href={`/cs-fundamentals/${topicId}?page=${pagination.page - 1}&filter=${filter}`}
+                  href={`/cs-fundamentals/${topicName}?page=${pagination.page - 1}&filter=${filter}`}
                   aria-disabled={pagination.page <= 1}
                   className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 sm:px-4 text-sm font-semibold transition-colors ${
                     pagination.page <= 1
@@ -165,7 +167,7 @@ export default async function TopicPage({ params, searchParams }: PageProps) {
                 </span>
 
                 <Link
-                  href={`/cs-fundamentals/${topicId}?page=${pagination.page + 1}&filter=${filter}`}
+                  href={`/cs-fundamentals/${topicName}?page=${pagination.page + 1}&filter=${filter}`}
                   aria-disabled={pagination.page >= totalPages}
                   className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 sm:px-4 text-sm font-semibold transition-colors ${
                     pagination.page >= totalPages

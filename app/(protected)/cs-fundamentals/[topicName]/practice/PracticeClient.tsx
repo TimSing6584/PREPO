@@ -21,8 +21,9 @@ import Link from "next/link";
 
 type PracticeClientProps = {
   userId: string;
-  topicId: string;
   topicName: string;
+  topicId: string;
+  topicTitle: string;
   questions: PracticeQuestion[];
   orderedQuestionIds: string[];
   globalOrderedQuestionIds: string[];
@@ -44,8 +45,9 @@ const mobileSidebarOpenKeyForTopic = (topicId: string) =>
 
 export default function PracticeClient({
   userId,
-  topicId,
   topicName,
+  topicId,
+  topicTitle,
   questions,
   orderedQuestionIds,
   globalOrderedQuestionIds,
@@ -222,7 +224,7 @@ export default function PracticeClient({
   // Page navigation (URL-based)
   function buildUrl(page: number, f: QuestionFilter, questionId: string) {
     const qParam = questionId ? `&q=${encodeURIComponent(questionId)}` : "";
-    return `/cs-fundamentals/${topicId}/practice?page=${page}&filter=${f}${qParam}`;
+    return `/cs-fundamentals/${topicName}/practice?page=${page}&filter=${f}${qParam}`;
   }
 
   function goToPage(page: number) {
@@ -365,7 +367,7 @@ export default function PracticeClient({
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between px-1 sm:px-2">
               <div className="flex items-center justify-between gap-2">
                 <Link
-                  href={`/cs-fundamentals/${topicId}?page=${pagination.page}&filter=${filter}`}
+                  href={`/cs-fundamentals/${topicName}?page=${pagination.page}&filter=${filter}`}
                   className="inline-flex items-center gap-2 text-xs font-semibold text-neutral-400 hover:text-neutral-900 transition-colors group"
                 >
                   <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
@@ -384,7 +386,7 @@ export default function PracticeClient({
               <div className="text-xs font-medium text-neutral-400 flex items-center gap-2 min-w-0">
                 <span className="shrink-0">Topic:</span>
                 <span className="text-neutral-900 uppercase tracking-wider font-bold truncate">
-                  {topicName}
+                  {topicTitle}
                 </span>
               </div>
             </div>
