@@ -102,10 +102,8 @@ export default function AudioRecorder({
       warmService();
 
       if (typeof MediaRecorder === "undefined") {
-        setStatus({
-          kind: "error",
-          message: "Audio recording is not supported in this browser.",
-        });
+        toast.error("Audio recording is not supported in this browser.");
+        setStatus({ kind: "idle" });
         return;
       }
 
@@ -115,7 +113,8 @@ export default function AudioRecorder({
       try {
         stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       } catch (err) {
-        setStatus({ kind: "error", message: getErrorMessage(err) });
+        toast.error(getErrorMessage(err));
+        setStatus({ kind: "idle" });
         return;
       }
 
@@ -164,10 +163,8 @@ export default function AudioRecorder({
         chunksRef.current = [];
 
         if (blob.size === 0) {
-          setStatus({
-            kind: "error",
-            message: "Recording was empty. Please try again.",
-          });
+          toast.error("Recording was empty. Please try again.");
+          setStatus({ kind: "idle" });
           return;
         }
 
@@ -185,10 +182,10 @@ export default function AudioRecorder({
           try {
             data = (await res.json()) as PipelineResponse;
           } catch {
-            setStatus({
-              kind: "error",
-              message: `Speech assessment failed (HTTP ${res.status}). The server returned an unexpected response.`,
-            });
+            toast.error(
+              `Speech assessment failed (HTTP ${res.status}). The server returned an unexpected response.`,
+            );
+            setStatus({ kind: "idle" });
             return;
           }
 
@@ -196,17 +193,14 @@ export default function AudioRecorder({
             onAssessment?.(data);
             setStatus({ kind: "idle" });
           } else {
-            setStatus({
-              kind: "error",
-              message: data.detail ?? "Speech assessment failed.",
-            });
+            toast.error(data.detail ?? "Speech assessment failed.");
+            setStatus({ kind: "idle" });
           }
         } catch {
-          setStatus({
-            kind: "error",
-            message:
-              "Could not reach the speech assessment service. Please check your connection and try again.",
-          });
+          toast.error(
+            "Could not reach the speech assessment service. Please check your connection and try again.",
+          );
+          setStatus({ kind: "idle" });
         }
       };
 
@@ -310,21 +304,6 @@ export default function AudioRecorder({
         </span>
       ) : (
         button
-      )}
-
-      {status.kind === "error" && (
-        <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">
-          <span aria-hidden="true">⚠</span>
-          <span className="flex-1">{status.message}</span>
-          <button
-            type="button"
-            onClick={() => setStatus({ kind: "idle" })}
-            className="ml-auto shrink-0"
-            aria-label="Dismiss error"
-          >
-            ✕
-          </button>
-        </div>
       )}
 
     </div>

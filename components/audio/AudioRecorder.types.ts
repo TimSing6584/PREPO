@@ -19,8 +19,7 @@ export type AudioRecorderStatus =
     | { kind: 'idle' }
     | { kind: 'requesting-permission' }
     | { kind: 'recording' }
-    | { kind: 'loading' }
-    | { kind: 'error'; message: string };
+    | { kind: 'loading' };
 
 /**
  * Props accepted by the AudioRecorder component.
