@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import TipTapEditor from "@/components/TipTap/TipTapEditor";
 import AudioRecorder from "@/components/audio/AudioRecorder";
+import { triggerWarmSpeech } from "@/components/audio/warmSpeechClient";
 import SpeechAssessmentLoading from "@/components/audio/SpeechAssessmentLoading";
 import SpeechAssessmentResult from "@/components/audio/SpeechAssessmentResult";
 import type { SpeechAssessment } from "@/components/audio/speechAssessment.types";
@@ -78,6 +79,15 @@ export default function WrittenView({
       return null;
     }
   }, [correctAnswer]);
+
+  // The written view is the only place audio is recorded, so its presence is the
+  // earliest reliable signal the user will hit the (serverless) assessment
+  // service. Warm it whenever this view shows a question — covers switching to
+  // "Written", resuming a question already in written mode (persisted), and
+  // navigating between questions. Globally deduped, so repeat fires are cheap.
+  useEffect(() => {
+    triggerWarmSpeech();
+  }, [statement]);
 
   useEffect(() => {
     setAnswer(initialDraft);
