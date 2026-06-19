@@ -16,15 +16,7 @@ import {
   isPipelineSuccess,
   type PipelineResponse,
 } from "./speechAssessment.types";
-import { warmSpeechService } from "@/app/actions/warmSpeechService";
-
-// Keep the microservice warm for this long after a ping before bothering to
-// ping again. Render spins instances down after ~15min idle, so staying well
-// under that means a returning user re-warms automatically without spamming.
-const WARM_TTL_MS = 10 * 60 * 1000;
-const WARM_STORAGE_KEY = "speechServiceWarmedAt";
-// Short in-memory guard against bursts (double-clicks, rapid toggles).
-const WARM_COOLDOWN_MS = 60 * 1000;
+import { triggerWarmSpeech } from "./warmSpeechClient";
 
 export default function AudioRecorder({
   statement,
@@ -44,38 +36,6 @@ export default function AudioRecorder({
   const limitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tickIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const hitLimitRef = useRef(false);
-  const lastWarmRef = useRef(0);
-
-  const warmService = useCallback(() => {
-    if (typeof window === "undefined") return;
-    // Only warm for an active user looking at the page, not background tabs.
-    if (document.visibilityState !== "visible") return;
-
-    const now = Date.now();
-
-    // Burst guard: ignore rapid repeat clicks within this tab session.
-    if (now - lastWarmRef.current < WARM_COOLDOWN_MS) return;
-
-    // Warm-window guard: skip if we (probably) warmed it recently, surviving
-    // reloads and shared across tabs.
-    let warmedAt = 0;
-    try {
-      warmedAt = Number(localStorage.getItem(WARM_STORAGE_KEY) ?? 0);
-    } catch {
-      // localStorage unavailable (private mode / blocked) — fall back to the
-      // in-memory guard alone.
-    }
-    if (now - warmedAt < WARM_TTL_MS) return;
-
-    lastWarmRef.current = now;
-    try {
-      localStorage.setItem(WARM_STORAGE_KEY, String(now));
-    } catch {
-      // ignore
-    }
-    // Fire-and-forget: never block the recorder on the warm-up.
-    void warmSpeechService();
-  }, []);
 
   const clearRecordingTimers = useCallback(() => {
     if (limitTimerRef.current) clearTimeout(limitTimerRef.current);
@@ -99,7 +59,7 @@ export default function AudioRecorder({
     if (status.kind === "idle") {
       // User intends to record → warm the (serverless) assessment service now
       // so it's likely hot by the time they submit. Guarded + fire-and-forget.
-      warmService();
+      triggerWarmSpeech();
 
       if (typeof MediaRecorder === "undefined") {
         toast.error("Audio recording is not supported in this browser.");
