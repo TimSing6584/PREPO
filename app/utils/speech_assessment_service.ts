@@ -10,6 +10,6 @@ export function generateServiceToken(userId: string): string {
     return jwt.sign(
         { service: "nextjs", sub: userId },
         secret,
-        { expiresIn: "30s" }
+        { expiresIn: "90s" }
     )
 }
