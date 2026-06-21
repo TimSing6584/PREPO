@@ -5,10 +5,10 @@ import Image from 'next/image'
 
 const founders = [
   {
-    name: 'Claude Pham',
+    name: 'T Pham',
     image: '/avatar/claude-pham.jpeg',
     education: 'Computer Science, NTU',
-    bio: 'Meta? Google? Gotta Catch \'Em All!',
+    bio: 'Google? Apple? Gotta Catch \'Em All!',
     linkedin: 'https://www.linkedin.com/in/pham-tran-minh-tuan/',
     github: 'https://github.com/minhtuan-ne',
     email: 'phamtranminhtuan2006@gmail.com'
@@ -17,7 +17,7 @@ const founders = [
     name: 'Andrich Hoang',
     image: '/avatar/andrich-hoang.jpeg',
     education: 'Computer Science, NTU',
-    bio: 'Most problems aren’t hard - the fundamentals are just weak',
+    bio: 'Less memorizing. More understanding',
     linkedin: 'https://www.linkedin.com/in/thinhhoang268/',
     github: 'https://github.com/TimSing6584',
     email: 'andrich916@gmail.com'
