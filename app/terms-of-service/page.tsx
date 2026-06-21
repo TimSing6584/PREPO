@@ -68,7 +68,7 @@ export default function TermsOfServicePage() {
                         <h2 className="text-xl font-semibold text-[#101010] mb-4">Description of the Service</h2>
                         <p>
                             Prepo provides curated and user-generated practice questions for
-                            computer science topics, including multiple-choice and written
+                            computer science topics, including multiple-choice and open-ended
                             response formats. The Service may include a feature that allows you
                             to submit spoken answers, which are transcribed using third-party
                             speech-to-text technology and evaluated using third-party AI

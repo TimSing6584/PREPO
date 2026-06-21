@@ -36,12 +36,12 @@ export default function QuestionCard({
   onProgressChange,
   currentGlobalIndex,
 }: QuestionCardProps) {
-  const [mode, setMode] = useState<"mcq" | "written">(progress?.mode ?? "mcq");
+  const [mode, setMode] = useState<"mcq" | "written">(progress?.mode ?? "written");
 
   const [showStarReminder, setShowStarReminder] = useState(false);
 
   useEffect(() => {
-    setMode(progress?.mode ?? "mcq");
+    setMode(progress?.mode ?? "written");
   }, [progress?.mode, question.id]);
 
   return (
@@ -52,6 +52,20 @@ export default function QuestionCard({
           <div className="flex flex-wrap items-center gap-2 sm:gap-4">
             {/* Mode Switcher */}
             <div className="bg-neutral-100 rounded-lg p-1 flex items-center gap-1 max-w-full">
+              <button
+                onClick={() => {
+                  setMode("written");
+                  onProgressChange?.({ mode: "written" });
+                }}
+                className={cn(
+                  "px-2.5 sm:px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-all",
+                  mode === "written"
+                    ? "bg-white text-black shadow-sm"
+                    : "text-neutral-500 hover:text-neutral-900",
+                )}
+              >
+                Open-ended
+              </button>
               <button
                 onClick={() => {
                   setMode("mcq");
@@ -66,20 +80,6 @@ export default function QuestionCard({
               >
                 <span className="sm:hidden">MCQ</span>
                 <span className="hidden sm:inline">Multiple choice</span>
-              </button>
-              <button
-                onClick={() => {
-                  setMode("written");
-                  onProgressChange?.({ mode: "written" });
-                }}
-                className={cn(
-                  "px-2.5 sm:px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-all",
-                  mode === "written"
-                    ? "bg-white text-black shadow-sm"
-                    : "text-neutral-500 hover:text-neutral-900",
-                )}
-              >
-                Written
               </button>
             </div>
 

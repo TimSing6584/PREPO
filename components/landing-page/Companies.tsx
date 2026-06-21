@@ -12,6 +12,11 @@ const companies = [
   { name: 'Bytedance', logo: '/logos/bytedance.svg' },
   { name: 'NVIDIA', logo: '/logos/nvidia.svg' },
   { name: 'Grab', logo: '/logos/grab.svg' },
+  {name: 'SAP', logo: '/logos/sap.svg'},
+  {name: 'Tiktok', logo: '/logos/tiktok.svg'},
+  {name: 'Open AI', logo: '/logos/openai.svg'},
+  {name: 'Anthropic', logo: '/logos/anthropic.svg'},
+  {name: 'Shopee', logo: '/logos/shopee.svg'},
 ]
 
 
