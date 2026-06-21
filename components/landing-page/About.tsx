@@ -14,13 +14,13 @@ const founders = [
     email: 'phamtranminhtuan2006@gmail.com'
   },
   {
-    name: 'Andrich Hoang',
+    name: 'Thinh Hoang',
     image: '/avatar/andrich-hoang.jpeg',
     education: 'Computer Science, NTU',
     bio: 'Less memorizing. More understanding',
     linkedin: 'https://www.linkedin.com/in/thinhhoang268/',
     github: 'https://github.com/TimSing6584',
-    email: 'andrich916@gmail.com'
+    email: 'thinhhoanglssl123@gmail.com'
   }
 ]
 
