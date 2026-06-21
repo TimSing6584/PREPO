@@ -13,7 +13,7 @@ const faqs: { question: string; answer: string }[] = [
     {
         question: 'What question formats are available?',
         answer:
-            'Each question can be answered in two formats: Multiple Choice Question (best for fast practice before an interview) and Written Quiz (best for practicing memory and explanation). Written answers can also be submitted by speaking your response, which is transcribed and scored by AI.',
+            'Each question can be answered in two formats: Multiple Choice Question (best for fast practice before an interview) and Open-ended Quiz (best for practicing memory and explanation). Open-ended answers can also be submitted by speaking your response, which is transcribed and scored by AI.',
     },
     {
         question: 'How does the speech-based answer evaluation work?',
@@ -33,7 +33,7 @@ const faqs: { question: string; answer: string }[] = [
     {
         question: 'Do I need an account to use Prepo?',
         answer:
-            'Yes, an account is required to save your progress, written answers, and practice history. Authentication is handled securely through our sign-in provider.',
+            'Yes, an account is required to save your progress, open-ended answers, and practice history. Authentication is handled securely through our sign-in provider.',
     },
     {
         question: 'Is my voice recording stored or used to train AI models?',

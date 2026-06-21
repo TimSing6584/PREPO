@@ -79,7 +79,7 @@ export default function QuestionCard({
                     : "text-neutral-500 hover:text-neutral-900",
                 )}
               >
-                Written
+                Open-ended
               </button>
             </div>
 

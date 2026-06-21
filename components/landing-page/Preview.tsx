@@ -133,8 +133,8 @@ const demoSteps = [
     tag: 'Practice',
     tagColor: 'bg-blue-500',
     icon: Zap,
-    title: 'MCQ. Written. Both.',
-    description: 'Rapid-fire multiple choice or open-ended written answers. Get instant feedback and star the questions that trip you up.',
+    title: 'MCQ. Open-ended. Both.',
+    description: 'Rapid-fire multiple choice or open-ended answers. Get instant feedback and star the questions that trip you up.',
     visual: SlidePractice,
   },
   {

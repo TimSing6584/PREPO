@@ -243,7 +243,7 @@ export default function DashboardClient({ topics }: { topics: Topic[] }) {
               </div>
               <div className="relative z-10 flex flex-col h-full justify-between gap-6">
                 <div className="space-y-3">
-                  <h2 className="text-2xl font-bold text-[#101010]">Written Quiz</h2>
+                  <h2 className="text-2xl font-bold text-[#101010]">Open-ended Quiz</h2>
                   <p className="text-neutral-500 text-base leading-relaxed max-w-xs">Best for practice memory</p>
                 </div>
                 <div className="self-end p-3 rounded-full bg-primary-50 group-hover:bg-primary-100 transition-colors">

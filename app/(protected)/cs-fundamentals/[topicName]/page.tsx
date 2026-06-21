@@ -127,7 +127,7 @@ export default async function TopicPage({ params, searchParams }: PageProps) {
                               {q.text}
                             </span>
                             <span className="text-[11px] sm:text-xs text-neutral-400 truncate">
-                              Multiple choice + Written
+                              Multiple choice + Open-ended
                             </span>
                           </div>
                         </div>
