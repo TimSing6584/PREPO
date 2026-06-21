@@ -51,7 +51,7 @@ const SlidePractice = () => (
       </div>
       <div className="flex items-center gap-2 mt-1">
         <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-        <span className="text-xs 2xl:text-sm text-emerald-400 font-semibold">Correct!</span>
+        <span className="text-xs 2xl:text-sm text-emerald-400 font-semibold">Done!</span>
         <span className="ml-auto text-xs 2xl:text-sm text-white/30 flex items-center gap-1">
           <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> Starred
         </span>
