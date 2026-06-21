@@ -5,7 +5,7 @@ import Image from 'next/image'
 
 const founders = [
   {
-    name: 'T Pham',
+    name: 'Tuan Pham',
     image: '/avatar/claude-pham.jpeg',
     education: 'Computer Science, NTU',
     bio: 'Google? Apple? Gotta Catch \'Em All!',
