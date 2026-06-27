@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/main/Navbar";
 import QuestionSidebar from "@/components/cs-fundamentals/practice/QuestionSidebar";
 import QuestionCard from "@/components/cs-fundamentals/practice/QuestionCard";
+import PracticeTutorialModal from "@/components/cs-fundamentals/practice/PracticeTutorialModal";
 import type { PracticeQuestion } from "@/components/cs-fundamentals/practice/types";
 import {
   mergeQuestionProgress,
@@ -15,8 +16,12 @@ import type {
   PaginationMeta,
   QuestionFilter,
 } from "@/app/utils/server/csFundamentals";
-import { ArrowLeft, Menu } from "lucide-react";
+import { ArrowLeft, HelpCircle, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  hasSeenPracticeTutorial,
+  markPracticeTutorialSeen,
+} from "@/lib/onboarding";
 import Link from "next/link";
 
 type PracticeClientProps = {
@@ -73,8 +78,10 @@ export default function PracticeClient({
   );
   const [hasHydratedProgress, setHasHydratedProgress] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
   const sidebarOpenButtonRef = useRef<HTMLButtonElement>(null);
   const sidebarPanelRef = useRef<HTMLDivElement>(null);
+  const hasCheckedTutorialRef = useRef(false);
 
   useEffect(() => {
     try {
@@ -164,6 +171,15 @@ export default function PracticeClient({
     );
   }, [hasHydratedProgress, progressByQuestion, topicId, userId]);
 
+  const closeTutorial = useCallback(() => {
+    markPracticeTutorialSeen(userId);
+    setShowTutorial(false);
+  }, [userId]);
+
+  const openTutorial = useCallback(() => {
+    setShowTutorial(true);
+  }, []);
+
   // Sync starred when topic/questions change
   useEffect(() => {
     setStarredIds(initialStarredIds);
@@ -220,6 +236,15 @@ export default function PracticeClient({
   const currentGlobalIndex = currentQuestion
     ? globalOrderedQuestionIds.findIndex((id) => id === currentQuestion.id)
     : -1;
+
+  // Show once for new users when they open their first question
+  useEffect(() => {
+    if (!currentQuestion || hasCheckedTutorialRef.current) return;
+    hasCheckedTutorialRef.current = true;
+    if (!hasSeenPracticeTutorial(userId)) {
+      setShowTutorial(true);
+    }
+  }, [currentQuestion, userId]);
 
   // Page navigation (URL-based)
   function buildUrl(page: number, f: QuestionFilter, questionId: string) {
@@ -326,6 +351,7 @@ export default function PracticeClient({
 
   return (
     <div className="main-frame px-4 sm:px-6 md:px-12 pb-6 md:pb-12 pt-4 md:pt-6 relative overflow-hidden flex flex-col gap-3 sm:gap-4 md:gap-6 font-geist-sans">
+      <PracticeTutorialModal open={showTutorial} onClose={closeTutorial} />
       <Navbar />
 
       <div className="flex-1 flex min-h-0 -mx-4 sm:-mx-6 md:-mx-12 -mb-6 md:-mb-12">
@@ -383,11 +409,22 @@ export default function PracticeClient({
                   Questions
                 </button>
               </div>
-              <div className="text-xs font-medium text-neutral-400 flex items-center gap-2 min-w-0">
-                <span className="shrink-0">Topic:</span>
-                <span className="text-neutral-900 uppercase tracking-wider font-bold truncate">
-                  {topicTitle}
-                </span>
+              <div className="flex items-center gap-2 min-w-0">
+                <button
+                  type="button"
+                  onClick={openTutorial}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 transition-colors shrink-0"
+                  aria-label="How practice works"
+                >
+                  <HelpCircle className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">How it works</span>
+                </button>
+                <div className="text-xs font-medium text-neutral-400 flex items-center gap-2 min-w-0">
+                  <span className="shrink-0">Topic:</span>
+                  <span className="text-neutral-900 uppercase tracking-wider font-bold truncate">
+                    {topicTitle}
+                  </span>
+                </div>
               </div>
             </div>
 
