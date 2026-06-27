@@ -35,13 +35,12 @@ const STEPS = [
       "Switch between Open-ended and Multiple choice at the top of each question. Pick the style that matches how you want to drill the topic.",
     visual: (
       <div className={VISUAL_ROOT_CLASS}>
-        <div className="bg-neutral-100 rounded-lg p-1 flex items-center gap-1 w-full">
-          <div className="flex-1 px-2.5 py-1.5 rounded-md bg-white text-xs font-semibold text-black shadow-sm text-center">
+        <div className="bg-neutral-100 rounded-lg p-1 flex items-center gap-1 w-fit">
+          <div className="px-3 py-1.5 rounded-md bg-white text-xs font-semibold text-black shadow-sm">
             Open-ended
           </div>
-          <div className="flex-1 px-2.5 py-1.5 rounded-md text-xs font-semibold text-neutral-500 text-center">
-            <span className="sm:hidden">MCQ</span>
-            <span className="hidden sm:inline">Multiple choice</span>
+          <div className="px-3 py-1.5 rounded-md text-xs font-semibold text-neutral-500">
+            Multiple choice
           </div>
         </div>
       </div>
