@@ -1,5 +1,4 @@
 'use client'
-import Image from 'next/image'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, ChevronDown, Paperclip, X } from 'lucide-react'
@@ -137,7 +136,7 @@ export default function FeedbackForm() {
             </label>
             {imagePreview ? (
               <div className="relative w-fit">
-                <Image src={imagePreview} alt="Preview" className="max-h-48 rounded-lg border border-gray-200 object-contain" />
+                <img src={imagePreview} alt="Preview" className="max-h-48 rounded-lg border border-gray-200 object-contain" />
                 <button
                   type="button"
                   onClick={removeImage}
