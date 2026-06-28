@@ -390,11 +390,11 @@ export default function PracticeClient({
         {/* Main content */}
         <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 bg-neutral-50/30">
           <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 pb-20">
-            <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between px-1 sm:px-2">
-              <div className="flex items-center justify-between gap-2">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between px-1 sm:px-2">
+              <div className="lg:hidden grid grid-cols-[1fr_auto] gap-x-4 gap-y-3 items-center w-full">
                 <Link
                   href={`/cs-fundamentals/${topicName}?page=${pagination.page}&filter=${filter}`}
-                  className="inline-flex items-center gap-2 text-xs font-semibold text-neutral-400 hover:text-neutral-900 transition-colors group"
+                  className="inline-flex items-center gap-2 text-xs font-semibold text-neutral-400 hover:text-neutral-900 transition-colors group justify-self-start"
                 >
                   <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
                   Back to Questions
@@ -403,13 +403,35 @@ export default function PracticeClient({
                   ref={sidebarOpenButtonRef}
                   type="button"
                   onClick={openSidebar}
-                  className="lg:hidden inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 transition-colors"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 transition-colors justify-self-end"
                 >
                   <Menu className="h-3.5 w-3.5" />
                   Questions
                 </button>
+                <div className="text-xs font-medium text-neutral-400 flex items-center gap-2 min-w-0 justify-self-start">
+                  <span className="shrink-0">Topic:</span>
+                  <span className="text-neutral-900 uppercase tracking-wider font-bold truncate">
+                    {topicTitle}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={openTutorial}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 transition-colors shrink-0 justify-self-end"
+                  aria-label="How practice works"
+                >
+                  <HelpCircle className="h-3.5 w-3.5" />
+                  How it works
+                </button>
               </div>
-              <div className="flex items-center gap-2 min-w-0">
+              <Link
+                href={`/cs-fundamentals/${topicName}?page=${pagination.page}&filter=${filter}`}
+                className="hidden lg:inline-flex items-center gap-2 text-xs font-semibold text-neutral-400 hover:text-neutral-900 transition-colors group shrink-0"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
+                Back to Questions
+              </Link>
+              <div className="hidden lg:flex items-center gap-2 min-w-0">
                 <button
                   type="button"
                   onClick={openTutorial}
@@ -417,7 +439,7 @@ export default function PracticeClient({
                   aria-label="How practice works"
                 >
                   <HelpCircle className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">How it works</span>
+                  How it works
                 </button>
                 <div className="text-xs font-medium text-neutral-400 flex items-center gap-2 min-w-0">
                   <span className="shrink-0">Topic:</span>
