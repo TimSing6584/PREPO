@@ -1,6 +1,6 @@
 'use client'
 
-import { User as UserIcon, Linkedin, Mail } from 'lucide-react'
+import { User as UserIcon, Linkedin } from 'lucide-react'
 import Image from 'next/image'
 
 const founders = [
@@ -65,24 +65,16 @@ export default function About() {
               </div>
 
               {/* Social Links */}
-              <div className="flex justify-center gap-4 pt-8 2xl:pt-10 border-t border-white/10">
+              <div className="flex justify-center pt-8 2xl:pt-10 border-t border-white/10">
                 <a
                   href={founder.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-3 2xl:p-4 bg-white/5 hover:bg-primary-500 rounded-2xl transition-all"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-primary-500 rounded-full border border-white/10 transition-all"
                   aria-label="LinkedIn"
                 >
-                  <Linkedin className="w-6 h-6 2xl:w-7 2xl:h-7 text-white" />
-                </a>
-                <a
-                  href={`mailto:${founder.email}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-3 2xl:p-4 bg-white/5 hover:bg-primary-500 rounded-2xl transition-all"
-                  aria-label="Email"
-                >
-                  <Mail className="w-6 h-6 2xl:w-7 2xl:h-7 text-white" />
+                  <Linkedin className="w-4 h-4 2xl:w-5 2xl:h-5 text-white" />
+                  <span className="text-sm font-medium text-white">LinkedIn</span>
                 </a>
               </div>
             </div>
