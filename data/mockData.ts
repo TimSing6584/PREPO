@@ -7,7 +7,7 @@ export type Question = {
     explanation?: string
     imageUrl?: string // Optional image associated with the question
 }
-
+// mock data:
 export const mockQuestions: Question[] = [
     {
         id: '1',
