@@ -1,7 +1,13 @@
 import Navbar from '@/components/main/Navbar'
 import FeedbackForm from './FeedbackForm'
+import { enforceRateLimit } from '@/app/utils/ratelimit';
 
-export default function FeedbackPage() {
+export const dynamic = 'force-dynamic';
+
+export default async function FeedbackPage() {
+
+  await enforceRateLimit('read');
+
   return (
     <div className="main-frame px-4 sm:px-6 md:px-12 pb-6 md:pb-12 pt-4 md:pt-6 relative overflow-hidden flex flex-col gap-3 sm:gap-4 md:gap-6 font-geist-sans">
       <Navbar />
