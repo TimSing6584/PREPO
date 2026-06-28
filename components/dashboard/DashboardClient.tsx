@@ -15,6 +15,7 @@ import {
   Search,
   Settings,
   Monitor,
+  MessageCircleMore
 } from 'lucide-react'
 import type { Topic } from '@/app/utils/api/topics'
 import { nameToSlug } from '@/app/utils/topicSlug'
@@ -289,6 +290,16 @@ export default function DashboardClient({ topics }: { topics: Topic[] }) {
               <div className="col-span-full text-center text-sm text-neutral-400 py-10">No topics found.</div>
             ) : null}
           </div>
+        </div>
+
+        <div className="flex justify-center pt-4 pb-2">
+          <Link
+            href="/feedback"
+            className="inline-flex items-center gap-2 rounded-full bg-purple-600 px-8 py-3 text-base font-medium text-white transition-all duration-200 hover:bg-purple-700 hover:scale-105"
+          >
+            <MessageCircleMore className="w-5 h-5" />
+            Give Feedback →
+          </Link>
         </div>
       </div>
 
