@@ -105,7 +105,7 @@ export default function FeedbackForm() {
                 value={category}
                 onChange={(e) => { setCategory(e.target.value as Category); if (errors.category) setErrors(p => ({ ...p, category: undefined })) }}
                 disabled={isSubmitting}
-                className={`w-full appearance-none pl-4 pr-10 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${errors.category ? 'border-red-400' : 'border-gray-300'}`}
+                className={`w-full appearance-none pl-4 pr-10 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent ${errors.category ? 'border-red-400' : 'border-gray-300'}`}
               >
                 <option value="">Select a category...</option>
                 {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -125,7 +125,7 @@ export default function FeedbackForm() {
               disabled={isSubmitting}
               rows={5}
               placeholder="Tell us what's on your mind..."
-              className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none ${errors.message ? 'border-red-400' : 'border-gray-300'}`}
+              className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent resize-none ${errors.message ? 'border-red-400' : 'border-gray-300'}`}
             />
             {errors.message && <p className="mt-1 text-xs text-red-500">{errors.message}</p>}
           </div>
