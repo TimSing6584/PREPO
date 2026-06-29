@@ -164,7 +164,7 @@ export default function FeedbackForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`px-6 py-2.5 rounded-full text-white font-medium transition-all duration-200 ${isSubmitting ? 'bg-purple-300 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700 hover:scale-105'}`}
+              className={`px-6 py-2.5 rounded-full font-medium transition-all duration-200 ${isSubmitting ? 'bg-amber-200 text-amber-400 cursor-not-allowed' : 'bg-amber-400 text-amber-900 hover:bg-amber-500 hover:scale-105'}`}
             >
               {isSubmitting ? 'Sending...' : 'Send Feedback'}
             </button>
