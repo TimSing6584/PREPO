@@ -295,7 +295,7 @@ export default function DashboardClient({ topics }: { topics: Topic[] }) {
         <div className="flex justify-center pt-4 pb-2">
           <Link
             href="/feedback"
-            className="inline-flex items-center gap-2 rounded-full bg-purple-600 px-8 py-3 text-base font-medium text-white transition-all duration-200 hover:bg-purple-700 hover:scale-105"
+            className="inline-flex items-center gap-2 rounded-full bg-amber-400 px-8 py-3 text-base font-medium text-amber-900 transition-all duration-200 hover:bg-amber-500 hover:scale-105"
           >
             <MessageCircleMore className="w-5 h-5" />
             Give Feedback →
