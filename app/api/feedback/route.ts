@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
 
-    const rateLimitError = await checkRateLimit('write')
+    const rateLimitError = await checkRateLimit('upload')
     if (rateLimitError) return rateLimitError
 
     const formData = await request.formData()
