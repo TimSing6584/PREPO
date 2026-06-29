@@ -146,7 +146,7 @@ export default function FeedbackForm() {
                 </button>
               </div>
             ) : (
-              <label className={`flex items-center gap-2 w-fit cursor-pointer px-4 py-2.5 border border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-purple-400 hover:text-purple-600 transition-colors ${isSubmitting ? 'pointer-events-none opacity-50' : ''}`}>
+              <label className={`flex items-center gap-2 w-fit cursor-pointer px-4 py-2.5 border border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-amber-400 hover:text-amber-600 transition-colors ${isSubmitting ? 'pointer-events-none opacity-50' : ''}`}>
                 <Paperclip className="w-4 h-4 shrink-0" />
                 Attach an image
                 <input
