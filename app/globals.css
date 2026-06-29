@@ -35,35 +35,35 @@ body {
 
 @media (min-width: 640px) {
   body {
-    padding: 0.75rem;
+    padding: 0.6rem;
   }
 }
 
 @media (min-width: 1024px) {
   body {
-    padding: 1rem;
+    padding: 0.75rem;
   }
 }
 
 .main-frame {
   background-color: var(--color-card-bg);
-  border-radius: 1.25rem;
-  min-height: calc(100vh - 1rem);
+  border-radius: 0.5rem;
+  min-height: calc(100vh - 0.5rem);
   position: relative;
   overflow: hidden;
 }
 
 @media (min-width: 640px) {
   .main-frame {
-    border-radius: 2rem;
-    min-height: calc(100vh - 1.5rem);
+    border-radius: 1rem;
+    min-height: calc(100vh - 0.7rem);
   }
 }
 
 @media (min-width: 1024px) {
   .main-frame {
-    border-radius: 3.5rem;
-    min-height: calc(100vh - 2rem);
+    border-radius: 1.25rem;
+    min-height: calc(100vh - 0.8rem);
   }
 }
 
