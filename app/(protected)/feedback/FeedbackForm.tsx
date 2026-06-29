@@ -12,33 +12,45 @@ type FormErrors = {
   message?: string
 }
 
+const MAX_IMAGE_SIZE = 4 * 1024 * 1024 // 4 MB per file
+const MAX_IMAGE_COUNT = 5
+
 export default function FeedbackForm() {
   const router = useRouter()
   const [category, setCategory] = useState<Category>('')
   const [message, setMessage] = useState('')
-  const [image, setImage] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [images, setImages] = useState<File[]>([])
+  const [previews, setPreviews] = useState<string[]>([])
   const [errors, setErrors] = useState<FormErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const MAX_IMAGE_SIZE = 5 * 1024 * 1024 // 5 MB
-
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] ?? null
-    if (!file) return
-    if (file.size > MAX_IMAGE_SIZE) {
-      toast.error('Image must be under 5 MB.')
-      e.target.value = ''
+    const incoming = Array.from(e.target.files ?? [])
+    e.target.value = ''
+
+    const remaining = MAX_IMAGE_COUNT - images.length
+    if (remaining <= 0) {
+      toast.error(`Max ${MAX_IMAGE_COUNT} images allowed.`)
       return
     }
-    setImage(file)
-    setImagePreview(URL.createObjectURL(file))
+
+    const toAdd = incoming.slice(0, remaining)
+    const oversized = toAdd.filter(f => f.size > MAX_IMAGE_SIZE)
+    if (oversized.length > 0) {
+      toast.error(`Each image must be under 4 MB. ${oversized.length} file(s) skipped.`)
+    }
+
+    const valid = toAdd.filter(f => f.size <= MAX_IMAGE_SIZE)
+    if (valid.length === 0) return
+
+    setImages(prev => [...prev, ...valid])
+    setPreviews(prev => [...prev, ...valid.map(f => URL.createObjectURL(f))])
   }
 
-  const removeImage = () => {
-    setImage(null)
-    if (imagePreview) URL.revokeObjectURL(imagePreview)
-    setImagePreview(null)
+  const removeImage = (index: number) => {
+    URL.revokeObjectURL(previews[index])
+    setImages(prev => prev.filter((_, i) => i !== index))
+    setPreviews(prev => prev.filter((_, i) => i !== index))
   }
 
   const validate = (): boolean => {
@@ -58,7 +70,7 @@ export default function FeedbackForm() {
       const formData = new FormData()
       formData.append('category', category)
       formData.append('message', message.trim())
-      if (image) formData.append('image', image)
+      images.forEach(img => formData.append('images', img))
 
       const res = await fetch('/api/feedback', {
         method: 'POST',
@@ -71,7 +83,9 @@ export default function FeedbackForm() {
       toast.success('Feedback sent! Thank you.')
       setMessage('')
       setCategory('')
-      removeImage()
+      previews.forEach(p => URL.revokeObjectURL(p))
+      setImages([])
+      setPreviews([])
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Something went wrong.')
     } finally {
@@ -132,26 +146,35 @@ export default function FeedbackForm() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Attachment <span className="text-neutral-400 text-xs">(optional · max 5 MB)</span>
+              Attachments <span className="text-neutral-400 text-xs">(optional · max 5 images · 4 MB each)</span>
             </label>
-            {imagePreview ? (
-              <div className="relative w-fit">
-                <img src={imagePreview} alt="Preview" className="max-h-48 rounded-lg border border-gray-200 object-contain" />
-                <button
-                  type="button"
-                  onClick={removeImage}
-                  className="absolute -top-2 -right-2 bg-white border border-gray-200 rounded-full p-0.5 shadow hover:bg-red-50 transition-colors"
-                >
-                  <X className="w-3.5 h-3.5 text-gray-500" />
-                </button>
+
+            {previews.length > 0 && (
+              <div className="flex flex-wrap gap-3 mb-3">
+                {previews.map((src, i) => (
+                  <div key={i} className="relative">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={src} alt={`Preview ${i + 1}`} className="h-24 w-24 rounded-lg border border-gray-200 object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(i)}
+                      className="absolute -top-2 -right-2 bg-white border border-gray-200 rounded-full p-0.5 shadow hover:bg-red-50 transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5 text-gray-500" />
+                    </button>
+                  </div>
+                ))}
               </div>
-            ) : (
+            )}
+
+            {images.length < MAX_IMAGE_COUNT && (
               <label className={`flex items-center gap-2 w-fit cursor-pointer px-4 py-2.5 border border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-amber-400 hover:text-amber-600 transition-colors ${isSubmitting ? 'pointer-events-none opacity-50' : ''}`}>
                 <Paperclip className="w-4 h-4 shrink-0" />
-                Attach an image
+                {images.length === 0 ? 'Attach images' : `Add more (${images.length}/${MAX_IMAGE_COUNT})`}
                 <input
                   type="file"
                   accept="image/*"
+                  multiple
                   className="hidden"
                   disabled={isSubmitting}
                   onChange={handleImageChange}

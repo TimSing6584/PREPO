@@ -5,7 +5,7 @@ import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024 // 5 MB
+const MAX_IMAGE_SIZE = 4 * 1024 * 1024 // 4 MB per file
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData()
     const category = formData.get('category')
     const message = formData.get('message')
-    const imageFile = formData.get('image')
+    const imageFiles = formData.getAll('images')
 
     if (!category || typeof category !== 'string' || !category.trim()) {
       return NextResponse.json({ error: 'Category is required.' }, { status: 400 })
@@ -41,12 +41,13 @@ export async function POST(request: NextRequest) {
 
     const attachments: { filename: string; content: Buffer }[] = []
 
-    if (imageFile && imageFile instanceof File) {
-      if (imageFile.size > MAX_IMAGE_SIZE) {
-        return NextResponse.json({ error: 'Image must be under 5 MB.' }, { status: 400 })
+    for (const entry of imageFiles) {
+      if (!(entry instanceof File)) continue
+      if (entry.size > MAX_IMAGE_SIZE) {
+        return NextResponse.json({ error: 'Each image must be under 4 MB.' }, { status: 400 })
       }
-      const buffer = Buffer.from(await imageFile.arrayBuffer())
-      attachments.push({ filename: imageFile.name, content: buffer })
+      const buffer = Buffer.from(await entry.arrayBuffer())
+      attachments.push({ filename: entry.name, content: buffer })
     }
 
     await resend.emails.send({
