@@ -98,6 +98,7 @@ export async function POST(request: NextRequest) {
             options: q.options,
             correctOption: q.correctOption,
             imageUrl: q.imageUrl ?? null,
+            createdAt: q.createdAt ? new Date(q.createdAt) : new Date(),
             type: isAdmin ? QuestionType.DEFAULT : QuestionType.PERSONALIZED,
             createdById: userKindeId,
         }));
