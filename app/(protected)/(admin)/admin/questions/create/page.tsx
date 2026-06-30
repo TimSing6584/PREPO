@@ -15,6 +15,7 @@ type JsonQuestion = {
   options: string[];
   correctOption: number;
   imageUrl?: string | null;
+  createdAt?: string | null;
 };
 
 export default function CreateQuestionPage() {
