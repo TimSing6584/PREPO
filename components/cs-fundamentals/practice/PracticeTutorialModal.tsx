@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
-  Eye,
   LayoutList,
   ListChecks,
   Mic,
@@ -50,19 +49,24 @@ const STEPS = [
     tag: "Open-ended",
     tagColor: "bg-blue-500",
     icon: PenLine,
-    title: "Write and compare",
+    title: "Write to get AI evaluation",
     description:
-      "Type your answer in the text box. When you are ready, tap Show Answer to reveal the model answer.",
+      "Type your answer in the text box, then submit it to get instant AI feedback on how well you explained the concept.",
     visual: (
       <div className={VISUAL_ROOT_CLASS}>
         <div className="h-10 rounded-xl border-2 border-neutral-200 bg-white px-3 py-2 text-xs text-neutral-400">
           Type your answer here...
         </div>
-        <div className="flex items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2">
-          <Eye className="h-3.5 w-3.5 text-emerald-700 shrink-0" />
-          <span className="text-xs font-semibold text-emerald-800">
-            Show Answer to compare
-          </span>
+        <div className="flex items-center gap-2">
+          <div className="inline-flex items-center rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white">
+            Submit
+          </div>
+          <div className="flex items-center gap-2 rounded-xl border border-fuchsia-200 bg-fuchsia-50 px-3 py-1.5">
+            <Sparkles className="h-3.5 w-3.5 text-fuchsia-600 shrink-0" />
+            <span className="text-xs font-semibold text-fuchsia-700">
+              AI evaluation
+            </span>
+          </div>
         </div>
       </div>
     ),
