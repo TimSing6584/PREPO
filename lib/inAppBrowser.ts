@@ -28,8 +28,8 @@ export function detectInAppBrowser(userAgent: string): InAppBrowserInfo {
 
 export function getInAppBrowserMessage(appName: string | null): string {
   if (appName) {
-    return `Prepo can't sign in with Google from the ${appName} app. Please open this page in Safari or Chrome to continue.`
+    return `Prepo temporarily can't sign in with Google from the ${appName} app. Please open this page in Safari or Chrome to continue.`
   }
 
-  return "Prepo can't sign in with Google from this in-app browser. Please open this page in Safari or Chrome to continue."
+  return "Prepo temporarily can't sign in with Google from this in-app browser. Please open this page in Safari or Chrome to continue."
 }
