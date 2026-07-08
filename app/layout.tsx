@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { Toaster } from 'react-hot-toast'
+import InAppBrowserModal from '@/components/InAppBrowserModal'
 import './globals.css'
 
 const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
@@ -31,6 +32,7 @@ export default function RootLayout({
           }}
         />
         {children}
+        <InAppBrowserModal />
         {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
       </body>
     </html>
