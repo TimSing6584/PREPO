@@ -1,5 +1,4 @@
 import "server-only";
-
 import type { Prisma } from "@/lib/generated/prisma/client";
 import { QuestionType } from "@/lib/generated/prisma/client";
 import { prisma } from "@/app/utils/db";
